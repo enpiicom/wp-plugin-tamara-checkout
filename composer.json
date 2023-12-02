@@ -1,0 +1,51 @@
+{
+    "name": "tamara/tamara-checkout",
+    "type": "wordpress-plugin",
+    "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
+    "license": "MIT",
+    "keywords": [
+      "wordpress",
+      "tamara",
+      "payment gateway",
+      "bnpl",
+      "mena",
+      "enpii",
+      "enpii-base",
+      "laravel",
+      "wordpress laravel"
+    ],
+    "authors": [
+      {
+        "name": "Tamara Team",
+        "email": "dev@tamara.co",
+        "homepage": "https://tamara.co"
+      },
+      {
+        "name": "Trac Nguyen",
+        "email": "npbtrac@yahoo.com",
+        "homepage": "https://github.com/npbtrac"
+      }
+    ],
+    "require": {
+        "enpii/enpii-base": "dev-wp-release",
+        "php": "^7.2.5|^8.0"
+    },
+    "require-dev": {
+        "automattic/vipwpcs": "^2.3",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+        "phpcompatibility/php-compatibility": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+      "psr-4": {
+        "Tamara_Checkout\\": "src",
+        "Tamara_Checkout\\Tests\\": "tests"
+      }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
