@@ -31,9 +31,13 @@
         "php": "^7.2.5|^8.0"
     },
     "require-dev": {
-        "automattic/vipwpcs": "^2.3",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
-        "phpcompatibility/php-compatibility": "*"
+      "10up/wp_mock": "^1.0.0",
+      "automattic/vipwpcs": "^3.0.0",
+      "codeception/codeception": "^5.0.0",
+      "codeception/module-asserts": "^3.0.0",
+      "codeception/module-phpbrowser": "^3.0.0",
+      "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+      "phpcompatibility/php-compatibility": "^9.3.5"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
