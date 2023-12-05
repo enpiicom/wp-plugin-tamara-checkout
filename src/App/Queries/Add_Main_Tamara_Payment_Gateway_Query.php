@@ -13,8 +13,7 @@ class Add_Main_Tamara_Payment_Gateway_Query extends Base_Query {
 
 	protected $gateways;
 
-	public function __construct($gateways)
-	{
+	public function __construct( $gateways ) {
 		$this->gateways = $gateways;
 	}
 
