@@ -6,7 +6,7 @@ namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Bus\Dispatchable_Trait;
 use Enpii_Base\Foundation\Shared\Base_Query;
-use Tamara_Checkout\App\WooCommerce\Payment_Gateways\Tamara_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {

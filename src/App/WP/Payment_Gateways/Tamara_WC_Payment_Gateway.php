@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Tamara_Checkout\App\WooCommerce\Payment_Gateways;
+namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
+use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Get_Payment_Gateway_Admin_Form_Fields_Query;
-use Tamara_Checkout\App\WooCommerce\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
+use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use WC_Payment_Gateway;
 
@@ -53,6 +56,8 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS';
 
 	public function __construct() {
+		$this->plugin_id = 'woo_tamara_';
+
 		$this->title = $this->_t( 'Tamara - Buy Now Pay Later' );
 		$this->description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
 		$this->method_title = $this->_t( 'Tamara Payment Method' );
@@ -99,6 +104,8 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * @return void
 	 */
 	public function process_admin_options(): void {
+		Validate_Admin_Settings_Job::dispatchSync($this);
+
 		$saved = parent::process_admin_options();
 	}
 

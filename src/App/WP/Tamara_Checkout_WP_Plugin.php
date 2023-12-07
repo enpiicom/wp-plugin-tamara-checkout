@@ -8,8 +8,6 @@ use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tamara_Checkout\App\Queries\Add_Main_Tamara_Payment_Gateway_Query;
-use Tamara_Checkout\App\WooCommerce\Payment_Gateways\Pay_In_3_WC_Payment_Gateway;
-use Tamara_Checkout\App\WooCommerce\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
 /**
  * @inheritDoc

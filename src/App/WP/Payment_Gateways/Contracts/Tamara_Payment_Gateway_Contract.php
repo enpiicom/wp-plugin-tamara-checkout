@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tamara_Checkout\App\WooCommerce\Payment_Gateways\Contracts;
+namespace Tamara_Checkout\App\WP\Payment_Gateways\Contracts;
 
 /**
  * Base payment gateway method for Tamara
- * @package Tamara_Checkout\App\WooCommerce
+ * @package Tamara_Checkout\App\WP
  */
 interface Tamara_Payment_Gateway_Contract {
 	/**
