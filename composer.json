@@ -28,6 +28,8 @@
     ],
     "require": {
         "enpii/enpii-base": "dev-wp-release",
+        "tamara-solution/php-sdk": "^2.0.0",
+        "guzzlehttp/guzzle": "7.8.1",
         "php": "^7.2.5|^8.0"
     },
     "require-dev": {
@@ -44,6 +46,7 @@
     "autoload": {
       "psr-4": {
         "Tamara_Checkout\\": "src",
+        "Tamara_Checkout\\Deps\\": "src-deps",
         "Tamara_Checkout\\Tests\\": "tests"
       }
     },
@@ -51,5 +54,17 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
+    },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "Tamara_Checkout\\Deps\\",
+      "dep_directory": "/src-deps/",
+      "classmap_directory": "/src-classes/deps/",
+      "classmap_prefix": "TCO_",
+      "packages": [
+        "guzzlehttp/guzzle", "tamara-solution/php-sdk"
+      ],
+      "delete_vendor_directories": true
     }
+  }
 }

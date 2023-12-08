@@ -22,7 +22,7 @@ use WC_Payment_Gateway;
  *  https://www.php.net/manual/en/function.is-callable.php#refsect1-function.is-callable-notes
  *
  * @package Tamara_Checkout\App\WooCommerce\Payment_Gateways
- * static @method instance() Tamara_WC_Payment_Gateway
+ * @method static instance() Tamara_WC_Payment_Gateway
  */
 class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Payment_Gateway_Contract {
 	use Static_Instance_Trait;
@@ -56,8 +56,6 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS';
 
 	public function __construct() {
-		$this->plugin_id = 'woo_tamara_';
-
 		$this->title = $this->_t( 'Tamara - Buy Now Pay Later' );
 		$this->description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
 		$this->method_title = $this->_t( 'Tamara Payment Method' );
@@ -65,8 +63,6 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 
 		$this->init_form_fields();
 		$this->init_settings();
-
-		$this->manipulate_hooks();
 	}
 
 	/**
@@ -76,11 +72,6 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	// phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
 	public function get_payment_type(): string {
 		return static::PAYMENT_TYPE_PAY_BY_INSTALMENTS;
-	}
-
-	public function manipulate_hooks() {
-		// We use this hook to process Admin options
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ], 10, 1 );
 	}
 
 	/**
