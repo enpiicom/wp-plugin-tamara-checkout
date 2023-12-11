@@ -8,7 +8,6 @@ use Enpii_Base\Foundation\Bus\Dispatchable_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-use Tamara_Checkout\App\Support\Tamara_Client;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use WC_Payment_Gateway;
@@ -44,16 +43,23 @@ class Validate_Admin_Settings_Job extends Base_Job {
 			[
 				'sandbox_api_token' => [
 					'required',
-					function ($attribute, $value, $fail_callback) use ($processed_post_data, $this_plugin) {
+					function ($attribute, $value, $fail_callback) use ($processed_post_data) {
+						$this->validate_api_token_attribute($processed_post_data, $attribute, $value, $fail_callback);
+					},
+				],
+				'live_api_token' => [
+					'required',
+					function ($attribute, $value, $fail_callback) use ($processed_post_data) {
 						$this->validate_api_token_attribute($processed_post_data, $attribute, $value, $fail_callback);
 					},
 				],
 			],
 			[
-				'required' => $this_plugin->_t(':attribute is a required value.'),
+				'required' => sprintf($this_plugin->_t('%s: required.'), ':attribute'),
 			],
 			[
 				'sandbox_api_token' => $this_plugin->_t('Sandbox API Token'),
+				'live_api_token' => $this_plugin->_t('Live API Token'),
 			]
 		);
 
@@ -91,21 +97,35 @@ class Validate_Admin_Settings_Job extends Base_Job {
 	/**
 	 * @throws \Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException
 	 */
-	public function validate_api_token_attribute(array $processed_post_data, string $attribute, string $value, \Closure $fail_callback) {
-		if ($processed_post_data['environment'] === 'sandbox_mode') {
-			$api_url = $processed_post_data['sandbox_api_url'];
-		} else {
-			$api_url = $processed_post_data['live_api_url'];
+	protected function validate_api_token_attribute(array $processed_post_data, string $attribute, string $value, \Closure $fail_callback) {
+		if ($attribute === 'sandbox_api_token') {
+			if ($processed_post_data['environment'] === 'sandbox_mode') {
+				$api_url = $processed_post_data['sandbox_api_url'];
+			}
+
+			// We simply don't do validation it the environment is not `sand_mode`
+			//	if we are validatating 'sandbox_api_token'
+			return true;
 		}
+
+		$api_url = $processed_post_data['live_api_url'];
+		if ($attribute === 'live_api_token' && $processed_post_data['environment'] !== 'live_mode') {
+			// We simply don't do validation it the environment is not `live_mode`
+			//	if we are validatating 'live_api_token'
+			return true;
+		}
+
+		// We validate the attribute `sandbox_api_token` and `live_api_token`
 		$api_token = $value;
-		Tamara_Client::init_wp_app_instance($api_token, $api_url);
-		/** @var Tamara_Checkout_WP_Plugin $tamara_checkout_plugin */
-		$tamara_checkout_plugin = wp_app(Tamara_Checkout_WP_Plugin::class);
+
+		$tamara_checkout_plugin = Tamara_Checkout_WP_Plugin::wp_app_instance();
+		$tamara_checkout_plugin->get_tamara_client_service()->reinit_tamara_client($api_token, $api_url);
+
 		$get_merchant_public_configs_request = new GetPublicConfigsRequest();
 		$get_merchant_public_configs_response = $tamara_checkout_plugin
-			->get_tamara_client_service()->getMerchantPublicConfigs($get_merchant_public_configs_request);
+			->get_tamara_client_service()->get_api_client()->getMerchantPublicConfigs($get_merchant_public_configs_request);
 		if ( ! $get_merchant_public_configs_response->isSuccess()) {
-			return $fail_callback(sprintf($this->plugin->_t('%s is incorrect.'), ':attribute'));
+			return $fail_callback(sprintf($tamara_checkout_plugin->_t('%s is incorrect.'), ':attribute'));
 		}
 
 		return true;

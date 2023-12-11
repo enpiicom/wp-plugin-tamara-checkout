@@ -22,7 +22,7 @@ use WC_Payment_Gateway;
  *  https://www.php.net/manual/en/function.is-callable.php#refsect1-function.is-callable-notes
  *
  * @package Tamara_Checkout\App\WooCommerce\Payment_Gateways
- * @method static instance() Tamara_WC_Payment_Gateway
+ * static @method instance() Tamara_WC_Payment_Gateway
  */
 class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Payment_Gateway_Contract {
 	use Static_Instance_Trait;
@@ -78,7 +78,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * Init admin form fields
 	 */
 	public function init_form_fields(): void {
-		$form_fields = Get_Payment_Gateway_Admin_Form_Fields_Query::dispatchSync();
+		$form_fields = Get_Payment_Gateway_Admin_Form_Fields_Query::execute_now();
 
 		$this->form_fields = $form_fields;
 	}
