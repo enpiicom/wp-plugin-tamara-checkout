@@ -119,18 +119,33 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	/**
 	 * We want to register all services with this plugin here
+	 *
 	 * @return void
+	 *
 	 */
 	protected function register_services(): void {
-		$api_token = 'api_token';
+		$setting_configs = [
+			'api_token' => '',
+			'notification_key' => '',
+			'public_key' => '',
+		];
+
+		$this->set_up_tamara_client_service($setting_configs['api_token']);
+		$this->set_up_tamara_notification_service($setting_configs['notification_key']);
+		$this->set_up_tamara_widget_service($setting_configs['public_key']);
+	}
+
+	protected function set_up_tamara_client_service($api_token) {
 		Tamara_Client::init_wp_app_instance($api_token);
 		wp_app()->instance(Tamara_Checkout_WP_Plugin::SERVICE_TAMARA_CLIENT, Tamara_Client::instance());
+	}
 
-		$notification_key = 'notification_key';
+	protected function set_up_tamara_notification_service($notification_key) {
 		Tamara_Notification::init_wp_app_instance($notification_key);
 		wp_app()->instance(Tamara_Checkout_WP_Plugin::SERVICE_TAMARA_NOTIFICATION, Tamara_Notification::instance());
+	}
 
-		$public_key = 'public_key';
+	protected function set_up_tamara_widget_service($public_key) {
 		Tamara_Widget::init_wp_app_instance($public_key, Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_working_mode());
 		wp_app()->instance(Tamara_Checkout_WP_Plugin::SERVICE_TAMARA_WIDGET, Tamara_Widget::instance());
 	}
