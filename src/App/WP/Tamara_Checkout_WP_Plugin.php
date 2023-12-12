@@ -7,6 +7,7 @@ namespace Tamara_Checkout\App\WP;
 use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Tamara_Checkout\App\DTOs\Tamara_WC_Payment_Gateway_Settings_DTO;
 use Tamara_Checkout\App\Queries\Add_Main_Tamara_Payment_Gateway_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
@@ -35,17 +36,22 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function manipulate_hooks(): void {
 		// We want to use the check prerequisites within the plugins_loaded action
 		//  because we need to detect if WooCommerce is loaded or not
-		add_action( 'plugins_loaded', [ $this, 'check_prerequisites' ] );
+		add_action( 'init', [ $this, 'check_prerequisites' ], -100 );
 
 		/** For WooCommerce */
 		// Add more payment gateways
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'add_payment_gateways' ] );
 
-		add_action('woocommerce_init', [$this, 'init_woocommerce'] );
+		add_action( 'woocommerce_init', [$this, 'init_woocommerce'] );
 
 		add_action(
 			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
 			[ $this, 'tamara_gateway_process_admin_options' ]
+		);
+
+		add_action(
+			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
+			[ $this, 'tamara_gateway_register_webhook' ]
 		);
 	}
 
@@ -102,6 +108,14 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function tamara_gateway_process_admin_options() {
 		$this->get_tamara_gateway_service()->process_admin_options();
+	}
+
+	public function tamara_gateway_register_webhook() {
+		// We need to re-pull settings from db after `process_admin_options` done
+		$this->get_tamara_gateway_service()->init_settings();
+		$gateway_settings = new Tamara_WC_Payment_Gateway_Settings_DTO($this->get_tamara_gateway_service()->settings);
+		dev_error_log('tamara_gateway_register_webhook', $gateway_settings);
+		// dump($gateway_settings);
 	}
 
 	/**
