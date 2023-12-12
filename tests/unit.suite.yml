@@ -1,0 +1,13 @@
+actor: Unit_Tester
+modules:
+  enabled:
+    - Asserts
+    - Tamara_Checkout\Tests\Support\Helpers\Unit
+coverage:
+  enabled: true
+  include:
+    - src/*
+  format: html
+  lower_limit: 50
+  upper_limit: 90
+  processUncoveredFiles: false
