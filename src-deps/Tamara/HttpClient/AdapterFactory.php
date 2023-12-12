@@ -2,7 +2,7 @@
 
 namespace Tamara_Checkout\Deps\Tamara\HttpClient;
 
-use GuzzleHttp\Psr7\Request;
+use Tamara_Checkout\Deps\GuzzleHttp\Psr7\Request;
 use Psr\Log\LoggerInterface;
 
 class AdapterFactory

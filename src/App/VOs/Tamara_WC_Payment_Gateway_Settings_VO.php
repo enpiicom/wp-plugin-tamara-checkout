@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tamara_Checkout\App\DTOs;
+namespace Tamara_Checkout\App\VOs;
 
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 
