@@ -43,7 +43,7 @@ class Tamara_Client {
 		}
 	}
 
-	public function get_working_mode() {
+	public function get_working_mode(): string {
 		return $this->working_mode;
 	}
 
@@ -52,6 +52,9 @@ class Tamara_Client {
 	}
 
 	public function reinit_tamara_client($api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30): void {
+		$this->api_token = $api_token;
+		$this->api_url = $api_url;
+		$this->api_request_timeout = $api_request_timeout;
 		$client = $this->build_tamara_client($api_token, $api_url, $api_request_timeout);
 		static::$instance->api_client = $client;
 	}

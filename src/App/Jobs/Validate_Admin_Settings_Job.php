@@ -98,21 +98,24 @@ class Validate_Admin_Settings_Job extends Base_Job {
 	 * @throws \Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException
 	 */
 	protected function validate_api_token_attribute(array $processed_post_data, string $attribute, string $value, \Closure $fail_callback) {
+		if ($attribute === 'live_api_token' ) {
+			if ($processed_post_data['environment'] === 'live_mode') {
+				$api_url = $processed_post_data['live_api_url'];
+			} else {
+				// We simply don't do validation it the environment is not `sand_mode`
+				//	if we are validatating 'sandbox_api_token'
+				return true;
+			}
+		}
+
 		if ($attribute === 'sandbox_api_token') {
 			if ($processed_post_data['environment'] === 'sandbox_mode') {
 				$api_url = $processed_post_data['sandbox_api_url'];
+			} else {
+				// We simply don't do validation it the environment is not `sand_mode`
+				//	if we are validatating 'sandbox_api_token'
+				return true;
 			}
-
-			// We simply don't do validation it the environment is not `sand_mode`
-			//	if we are validatating 'sandbox_api_token'
-			return true;
-		}
-
-		$api_url = $processed_post_data['live_api_url'];
-		if ($attribute === 'live_api_token' && $processed_post_data['environment'] !== 'live_mode') {
-			// We simply don't do validation it the environment is not `live_mode`
-			//	if we are validatating 'live_api_token'
-			return true;
 		}
 
 		// We validate the attribute `sandbox_api_token` and `live_api_token`
@@ -124,6 +127,7 @@ class Validate_Admin_Settings_Job extends Base_Job {
 		$get_merchant_public_configs_request = new GetPublicConfigsRequest();
 		$get_merchant_public_configs_response = $tamara_checkout_plugin
 			->get_tamara_client_service()->get_api_client()->getMerchantPublicConfigs($get_merchant_public_configs_request);
+
 		if ( ! $get_merchant_public_configs_response->isSuccess()) {
 			return $fail_callback(sprintf($tamara_checkout_plugin->_t('%s is incorrect.'), ':attribute'));
 		}
