@@ -29,6 +29,9 @@
     "require": {
       "enpii/enpii-base": "dev-wp-release",
       "tamara-solution/php-sdk": "^2.0.0",
+      "php": "^7.2.5|^8.0"
+    },
+    "replace": {
       "symfony/http-foundation": "^5.0.0",
       "symfony/console": "^5.4.0",
       "symfony/deprecation-contracts": "^2.5.0",
@@ -38,11 +41,9 @@
       "symfony/yaml": "^5.4.0",
       "psr/log": "^1.1.4",
       "guzzlehttp/guzzle": "7.8.1",
-      "firebase/php-jwt": "5.5.1 as 6.1.0",
       "psr/cache": "^1.0.1",
       "psr/container": "1.1.0",
-      "symfony/string": "^5.4",
-      "php": "^7.2.5|^8.0"
+      "symfony/string": "^5.4"
     },
     "require-dev": {
       "10up/wp_mock": "~0.4.2|^1.0.0",
@@ -74,7 +75,9 @@
       "classmap_directory": "/src-classes/deps/",
       "classmap_prefix": "TCO_",
       "packages": [
-        "guzzlehttp/guzzle", "tamara-solution/php-sdk"
+        "guzzlehttp/guzzle",
+        "firebase/php-jwt",
+        "tamara-solution/php-sdk"
       ],
       "delete_vendor_directories": true
     }

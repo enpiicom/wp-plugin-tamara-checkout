@@ -2,14 +2,14 @@
 
 namespace Tamara_Checkout\Deps\Tamara\HttpClient;
 
-use Tamara_Checkout\Deps\GuzzleHttp\Client;
-use Tamara_Checkout\Deps\GuzzleHttp\ClientInterface as GuzzleHttpClient;
-use Tamara_Checkout\Deps\GuzzleHttp\Exception\GuzzleException;
-use Tamara_Checkout\Deps\GuzzleHttp\Exception\RequestException as GuzzleRequestException;
-use Tamara_Checkout\Deps\GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface as GuzzleHttpClient;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
+use GuzzleHttp\Psr7\Request;
 use Tamara_Checkout\Deps\Psr\Http\Message\RequestInterface;
 use Tamara_Checkout\Deps\Psr\Http\Message\ResponseInterface;
-use Tamara_Checkout\Deps\Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestException;
 use Throwable;
 
