@@ -8,6 +8,7 @@ use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
@@ -109,11 +110,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function tamara_gateway_register_webhook() {
-		// We need to re-pull settings from db after `process_admin_options` done
-		$this->get_tamara_gateway_service()->init_settings();
-		$gateway_settings = new Tamara_WC_Payment_Gateway_Settings_VO($this->get_tamara_gateway_service()->settings);
-		dev_error_log('tamara_gateway_register_webhook', $gateway_settings->enabled);
-		// dump($gateway_settings);
+		Register_Tamara_Webhook_Job::dispatch()->onConnection('database')->onQueue('low');
 	}
 
 	/**
