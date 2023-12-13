@@ -17,10 +17,6 @@ use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
 class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable_Trait, InteractsWithQueue, Queueable, SerializesModels;
 
-	public function __construct()
-	{
-	}
-
 	public function handle(Tamara_WC_Payment_Gateway $tamara_gateway_service, Tamara_Client $tamara_client_service) {
 		// We need to get a refreshed settings from the Payment Gateway
 		$gateway_settings = $tamara_gateway_service->get_settings( true );
@@ -41,6 +37,6 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 		);
 		$tamara_api_response = $tamara_client_service->get_api_client()->registerWebhook($tamara_api_request);
 
-		dev_error_log('tamara_api_response', $tamara_api_response, $tamara_api_request);
+		dev_error_log($tamara_api_response->getErrors());
 	}
 }

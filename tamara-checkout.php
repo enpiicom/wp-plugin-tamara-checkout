@@ -8,7 +8,7 @@
  * Version:     2.0.0
  * Text Domain: tamara
  */
-return;
+
 // We want to split all the bootstrapping code to a separate file
 // 	for putting into composer autoload and
 // 	for easier including on other section e.g. unit test
