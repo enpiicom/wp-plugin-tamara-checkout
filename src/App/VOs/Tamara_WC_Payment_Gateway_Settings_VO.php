@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\VOs;
 
+use Enpii_Base\Foundation\Shared\Base_VO;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
+use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
 
 /**
  * Value Object for Tamara_WC_Payment_Gateway object setting
@@ -15,8 +17,9 @@ use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
  * @property string $live_api_url
  * @property string $excluded_products
  */
-class Tamara_WC_Payment_Gateway_Settings_VO {
+class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	use Config_Trait;
+	use Getter_Trait;
 
 	protected $enabled;
 	protected $environment;

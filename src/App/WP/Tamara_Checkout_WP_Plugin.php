@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP;
 
 use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
+use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Tamara_Checkout\App\DTOs\Tamara_WC_Payment_Gateway_Settings_DTO;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
@@ -21,9 +21,6 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public const TEXT_DOMAIN = 'tamara';
-	public const SERVICE_TAMARA_CLIENT = 'tamara-client-service';
-	public const SERVICE_TAMARA_NOTIFICATION = 'tamara-notification-service';
-	public const SERVICE_TAMARA_WIDGET = 'tamara-widget-service';
 
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
 
@@ -57,8 +54,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function init_woocommerce() {
 		// Init default Tamara payment gateway
-		Tamara_WC_Payment_Gateway::init_instance( new Tamara_WC_Payment_Gateway() );
-		wp_app()->instance(static::DEFAULT_TAMARA_GATEWAY_ID, Tamara_WC_Payment_Gateway::instance());
+		wp_app()->singleton(Tamara_WC_Payment_Gateway::class, function (WP_Application $app) {
+			return Tamara_WC_Payment_Gateway::instance();
+		});
 	}
 
 	public function get_name(): string {
@@ -74,19 +72,19 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_tamara_client_service() : Tamara_Client {
-		return wp_app(static::SERVICE_TAMARA_CLIENT);
+		return wp_app(Tamara_Client::class);
 	}
 
 	public function get_tamara_notification_service() : Tamara_Notification {
-		return wp_app(static::SERVICE_TAMARA_NOTIFICATION);
+		return wp_app(Tamara_Notification::class);
 	}
 
 	public function get_tamara_widget_service() : Tamara_Widget {
-		return wp_app(static::SERVICE_TAMARA_WIDGET);
+		return wp_app(Tamara_Widget::class);
 	}
 
 	public function get_tamara_gateway_service() : Tamara_WC_Payment_Gateway {
-		return wp_app(static::DEFAULT_TAMARA_GATEWAY_ID);
+		return wp_app(Tamara_WC_Payment_Gateway::class);
 	}
 
 	/**
@@ -114,7 +112,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		// We need to re-pull settings from db after `process_admin_options` done
 		$this->get_tamara_gateway_service()->init_settings();
 		$gateway_settings = new Tamara_WC_Payment_Gateway_Settings_VO($this->get_tamara_gateway_service()->settings);
-		dev_error_log('tamara_gateway_register_webhook', $gateway_settings);
+		dev_error_log('tamara_gateway_register_webhook', $gateway_settings->enabled);
 		// dump($gateway_settings);
 	}
 
@@ -138,29 +136,20 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 */
 	protected function register_services(): void {
-		$setting_configs = [
+		$settings = [
 			'api_token' => '',
 			'notification_key' => '',
 			'public_key' => '',
 		];
 
-		$this->set_up_tamara_client_service($setting_configs['api_token']);
-		$this->set_up_tamara_notification_service($setting_configs['notification_key']);
-		$this->set_up_tamara_widget_service($setting_configs['public_key']);
-	}
-
-	protected function set_up_tamara_client_service($api_token) {
-		Tamara_Client::init_wp_app_instance($api_token);
-		wp_app()->instance(Tamara_Checkout_WP_Plugin::SERVICE_TAMARA_CLIENT, Tamara_Client::instance());
-	}
-
-	protected function set_up_tamara_notification_service($notification_key) {
-		Tamara_Notification::init_wp_app_instance($notification_key);
-		wp_app()->instance(Tamara_Checkout_WP_Plugin::SERVICE_TAMARA_NOTIFICATION, Tamara_Notification::instance());
-	}
-
-	protected function set_up_tamara_widget_service($public_key) {
-		Tamara_Widget::init_wp_app_instance($public_key, Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_working_mode());
-		wp_app()->instance(Tamara_Checkout_WP_Plugin::SERVICE_TAMARA_WIDGET, Tamara_Widget::instance());
+		wp_app()->singleton(Tamara_Client::class, function (WP_Application $app) use ($settings) {
+			return Tamara_Client::instance($settings['api_token']);
+		});
+		wp_app()->singleton(Tamara_Notification::class, function (WP_Application $app) use ($settings) {
+			return Tamara_Notification::instance($settings['notification_key']);
+		});
+		wp_app()->singleton(Tamara_Widget::class, function (WP_Application $app) use ($settings) {
+			return Tamara_Widget::instance($settings['public_key']);
+		});
 	}
 }

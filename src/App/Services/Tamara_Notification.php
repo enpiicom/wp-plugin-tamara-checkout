@@ -14,14 +14,9 @@ class Tamara_Notification {
 
 	protected $notification_service;
 
-	public static function init_wp_app_instance($notification_key, $working_mode = 'live') {
-		if (empty(static::$instance)) {
-			$this_instance = new static();
-			$this_instance->notification_key = $notification_key;
-			$this_instance->notification_service = $this_instance->build_notification_service($notification_key);
-
-			static::init_instance($this_instance);
-		}
+	protected function __construct( $notification_key, $working_mode = 'live' ) {
+		$this->notification_key = $notification_key;
+		$this->notification_service = $this->build_notification_service($notification_key);
 	}
 
 	protected function reinit_notification_service($notification_key): void {
