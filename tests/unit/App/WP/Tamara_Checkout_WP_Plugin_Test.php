@@ -61,6 +61,10 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 		WP_Mock::assertHooksAdded();
 	}
 
+	public function test_init_woocommerce(): void {
+		// Todo: We need to mock global function wp_app() and have it called within a mock class
+	}
+
 	public function test_get_name(): void {
 		$plugin_name = 'Tamara Checkout';
 		$tamara_checkout_wp_plugin_mock = $this->getMockBuilder( Tamara_Checkout_WP_Plugin::class )
