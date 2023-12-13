@@ -79,15 +79,15 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		return static::PAYMENT_TYPE_PAY_BY_INSTALMENTS;
 	}
 
-	public function get_settings($refresh = false): Tamara_WC_Payment_Gateway_Settings_VO {
+	public function get_settings( $refresh = false ): Tamara_WC_Payment_Gateway_Settings_VO {
 		// We need to re-pull settings from db if $refesh enabled
-		if ($refresh) {
+		if ( $refresh ) {
 			$this->init_settings();
-			$this->settings_vo = new Tamara_WC_Payment_Gateway_Settings_VO($this->settings);
+			$this->settings_vo = new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings );
 		}
 
 		// We want to init the Settings Value Object if value not set
-		$this->settings_vo = empty($this->settings_vo) ? new Tamara_WC_Payment_Gateway_Settings_VO($this->settings) : $this->settings_vo;
+		$this->settings_vo = empty( $this->settings_vo ) ? new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings ) : $this->settings_vo;
 
 		return $this->settings_vo;
 	}
@@ -113,7 +113,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * @return void
 	 */
 	public function process_admin_options(): void {
-		Validate_Admin_Settings_Job::dispatchSync($this);
+		Validate_Admin_Settings_Job::dispatchSync( $this );
 
 		$saved = parent::process_admin_options();
 	}

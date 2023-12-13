@@ -27,9 +27,9 @@ class Tamara_Client {
 
 	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
 		$logger = null;
-		$transport = new GuzzleHttpAdapter($api_request_timeout, $logger);
-		$configuration = Configuration::create($api_url, $api_token, $api_request_timeout, $logger, $transport);
-		$client = Client::create($configuration);
+		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
+		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
+		$client = Client::create( $configuration );
 
 		$this->api_token = $api_token;
 		$this->api_url = $api_url;
@@ -46,23 +46,23 @@ class Tamara_Client {
 		return $this->api_client;
 	}
 
-	public function reinit_tamara_client($api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30): void {
+	public function reinit_tamara_client( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ): void {
 		$this->api_token = $api_token;
 		$this->api_url = $api_url;
 		$this->api_request_timeout = $api_request_timeout;
-		$client = $this->build_tamara_client($api_token, $api_url, $api_request_timeout);
+		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
 		static::$instance->api_client = $client;
 	}
 
-	protected function build_tamara_client($api_token, $api_url, $api_request_timeout): Client {
+	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
 		$logger = null;
-		$transport = new GuzzleHttpAdapter($api_request_timeout, $logger);
-		$configuration = Configuration::create($api_url, $api_token, $api_request_timeout, $logger, $transport);
-		return Client::create($configuration);
+		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
+		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
+		return Client::create( $configuration );
 	}
 
 	protected function define_working_mode(): void {
-		if (strpos($this->api_url, '-sandbox')) {
+		if ( strpos( $this->api_url, '-sandbox' ) ) {
 			$this->working_mode = 'sandbox';
 		}
 	}
