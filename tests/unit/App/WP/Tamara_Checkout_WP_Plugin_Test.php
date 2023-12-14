@@ -11,19 +11,6 @@ use WP_Mock;
 
 class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 
-	public function setUp(): void {
-		parent::setUp();
-
-		// Mock the global function _t
-		\WP_Mock::userFunction(
-			'_t',
-			[
-				'args' => '*',
-				'return_arg' => 0,
-			]
-		);
-	}
-
 	public function test_register(): void {
 		$tamara_checkout_wp_plugin_mock = Mockery::mock( Tamara_Checkout_WP_Plugin::class )
 												->shouldAllowMockingMethod( 'register' )
@@ -185,12 +172,14 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 	public function test_tamara_gateway_process_admin_options(): void {
 		// Mock the Tamara WC payment gateway service
 		$tamara_gateway_service_mock = Mockery::mock( 'Tamara_WC_Payment_Gateway' );
+		class_alias(
+			'Tamara_WC_Payment_Gateway',
+			'Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway'
+		);
+
 		$tamara_gateway_service_mock->shouldReceive( 'process_admin_options' )
 								->once()
 								->andReturnTrue();
-
-		// Set mock class alias to return correct namespace
-		class_alias( 'Tamara_WC_Payment_Gateway', 'Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway' );
 
 		// Mock the Tamara_Checkout_WP_Plugin class
 		$tamara_checkout_wp_plugin_mock = $this->getMockBuilder( Tamara_Checkout_WP_Plugin::class )
@@ -207,5 +196,36 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 
 		// Check that the result is what we expect
 		$this->assertTrue( $result, 'The process_admin_options method did not return true as expected.' );
+	}
+
+	/**
+	 * @throws \Illuminate\Contracts\Container\BindingResolutionException
+	 */
+	public function test_add_payment_gateways(): void {
+		// Mock the Tamara WC payment gateway service
+		$tamara_gateway_service_mock = Mockery::mock( 'Tamara_WC_Payment_Gateway' );
+
+		// Mock the Tamara_Checkout_WP_Plugin class
+		$tamara_checkout_wp_plugin_mock = Mockery::mock( Tamara_Checkout_WP_Plugin::class );
+		$existingGateways = [ 'existing_gateway_1', 'existing_gateway_2' ];
+		$tamara_checkout_wp_plugin_mock->shouldReceive( 'get_tamara_gateway_service' )
+										->andReturn( $tamara_gateway_service_mock );
+		$expectedResult = $tamara_checkout_wp_plugin_mock->get_tamara_gateway_service();
+		$tamara_checkout_wp_plugin_mock->shouldReceive( 'add_payment_gateways' )
+										->with( $existingGateways )
+										->andReturn(
+											[
+												'existing_gateway_1',
+												'existing_gateway_2',
+												$expectedResult,
+											]
+										);
+
+		// Call the method under test
+		$updatedGateways = $tamara_checkout_wp_plugin_mock->add_payment_gateways( $existingGateways );
+
+		// Assuming we started with two, we should now have three
+		$this->assertContains( $tamara_gateway_service_mock, $updatedGateways );
+		$this->assertCount( 3, $updatedGateways );
 	}
 }
