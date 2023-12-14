@@ -25,22 +25,17 @@ class Tamara_Client {
 
 	protected $api_client;
 
-	public static function init_wp_app_instance($api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30) {
-		if (empty(static::$instance)) {
-			$logger = null;
-			$transport = new GuzzleHttpAdapter($api_request_timeout, $logger);
-			$configuration = Configuration::create($api_url, $api_token, $api_request_timeout, $logger, $transport);
-			$client = Client::create($configuration);
+	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
+		$logger = null;
+		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
+		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
+		$client = Client::create( $configuration );
 
-			$this_instance = new static();
-			$this_instance->api_token = $api_token;
-			$this_instance->api_url = $api_url;
-			$this_instance->api_request_timeout = $api_request_timeout;
-			$this_instance->api_client = $client;
-			$this_instance->define_working_mode();
-
-			static::init_instance($this_instance);
-		}
+		$this->api_token = $api_token;
+		$this->api_url = $api_url;
+		$this->api_request_timeout = $api_request_timeout;
+		$this->api_client = $client;
+		$this->define_working_mode();
 	}
 
 	public function get_working_mode(): string {
@@ -51,23 +46,23 @@ class Tamara_Client {
 		return $this->api_client;
 	}
 
-	public function reinit_tamara_client($api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30): void {
+	public function reinit_tamara_client( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ): void {
 		$this->api_token = $api_token;
 		$this->api_url = $api_url;
 		$this->api_request_timeout = $api_request_timeout;
-		$client = $this->build_tamara_client($api_token, $api_url, $api_request_timeout);
+		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
 		static::$instance->api_client = $client;
 	}
 
-	protected function build_tamara_client($api_token, $api_url, $api_request_timeout): Client {
+	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
 		$logger = null;
-		$transport = new GuzzleHttpAdapter($api_request_timeout, $logger);
-		$configuration = Configuration::create($api_url, $api_token, $api_request_timeout, $logger, $transport);
-		return Client::create($configuration);
+		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
+		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
+		return Client::create( $configuration );
 	}
 
 	protected function define_working_mode(): void {
-		if (strpos($this->api_url, '-sandbox')) {
+		if ( strpos( $this->api_url, '-sandbox' ) ) {
 			$this->working_mode = 'sandbox';
 		}
 	}

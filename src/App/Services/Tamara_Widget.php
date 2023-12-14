@@ -12,13 +12,8 @@ class Tamara_Widget {
 	protected $working_mode;
 	protected $public_key;
 
-	public static function init_wp_app_instance($public_key, $working_mode) {
-		if (empty(static::$instance)) {
-			$this_instance = new static();
-			$this_instance->working_mode = $working_mode;
-			$this_instance->public_key = $public_key;
-
-			static::init_instance($this_instance);
-		}
+	protected function __construct( $public_key, $working_mode ) {
+		$this->working_mode = $working_mode;
+		$this->public_key = $public_key;
 	}
 }

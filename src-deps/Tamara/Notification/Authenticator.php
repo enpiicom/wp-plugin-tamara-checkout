@@ -6,7 +6,7 @@ namespace Tamara_Checkout\Deps\Tamara\Notification;
 
 use Tamara_Checkout\Deps\Firebase\JWT\JWT;
 use Tamara_Checkout\Deps\Firebase\JWT\Key;
-use Tamara_Checkout\Deps\Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Tamara_Checkout\Deps\Tamara\Notification\Exception\ForbiddenException;
 use Throwable;
 

@@ -6,10 +6,9 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Get_Payment_Gateway_Admin_Form_Fields_Query;
+use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use WC_Payment_Gateway;
@@ -55,6 +54,12 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 
 	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS';
 
+	/**
+	 * Settings Value Object for this plugin
+	 * @var Tamara_WC_Payment_Gateway_Settings_VO
+	 */
+	protected $settings_vo;
+
 	public function __construct() {
 		$this->title = $this->_t( 'Tamara - Buy Now Pay Later' );
 		$this->description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
@@ -72,6 +77,19 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	// phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
 	public function get_payment_type(): string {
 		return static::PAYMENT_TYPE_PAY_BY_INSTALMENTS;
+	}
+
+	public function get_settings( $refresh = false ): Tamara_WC_Payment_Gateway_Settings_VO {
+		// We need to re-pull settings from db if $refesh enabled
+		if ( $refresh ) {
+			$this->init_settings();
+			$this->settings_vo = new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings );
+		}
+
+		// We want to init the Settings Value Object if value not set
+		$this->settings_vo = empty( $this->settings_vo ) ? new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings ) : $this->settings_vo;
+
+		return $this->settings_vo;
 	}
 
 	/**
@@ -95,7 +113,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * @return void
 	 */
 	public function process_admin_options(): void {
-		Validate_Admin_Settings_Job::dispatchSync($this);
+		Validate_Admin_Settings_Job::dispatchSync( $this );
 
 		$saved = parent::process_admin_options();
 	}

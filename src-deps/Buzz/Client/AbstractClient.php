@@ -8,7 +8,7 @@ use Tamara_Checkout\Deps\Buzz\Configuration\ParameterBag;
 use Tamara_Checkout\Deps\Buzz\Exception\InvalidArgumentException;
 use Http\Message\ResponseFactory;
 use Tamara_Checkout\Deps\Psr\Http\Message\ResponseFactoryInterface;
-use Tamara_Checkout\Deps\Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 abstract class AbstractClient
 {

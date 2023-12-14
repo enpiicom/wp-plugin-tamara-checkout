@@ -9,7 +9,7 @@ use Tamara_Checkout\Deps\Buzz\Exception\ClientException;
 use Tamara_Checkout\Deps\Buzz\Message\ResponseBuilder;
 use Tamara_Checkout\Deps\Psr\Http\Message\RequestInterface;
 use Tamara_Checkout\Deps\Psr\Http\Message\ResponseInterface;
-use Tamara_Checkout\Deps\Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class MultiCurl extends AbstractCurl implements BatchClientInterface, BuzzClientInterface
 {
