@@ -7,7 +7,7 @@ namespace Tamara_Checkout\Deps\Buzz\Middleware;
 use Tamara_Checkout\Deps\Psr\Http\Message\RequestInterface;
 use Tamara_Checkout\Deps\Psr\Http\Message\ResponseInterface;
 use Tamara_Checkout\Deps\Psr\Http\Message\StreamInterface;
-use Tamara_Checkout\Deps\Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContentTypeMiddleware implements MiddlewareInterface
 {

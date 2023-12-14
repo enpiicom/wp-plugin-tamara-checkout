@@ -3,7 +3,7 @@
 namespace Tamara_Checkout\Deps\Tamara;
 
 use Tamara_Checkout\Deps\Psr\Http\Client\ClientInterface;
-use Tamara_Checkout\Deps\Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 use Tamara_Checkout\Deps\Tamara\HttpClient\AdapterFactory;
 use Tamara_Checkout\Deps\Tamara\HttpClient\HttpClient;
 

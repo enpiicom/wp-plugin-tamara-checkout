@@ -9,7 +9,7 @@ use Tamara_Checkout\Deps\GuzzleHttp\Exception\RequestException as GuzzleRequestE
 use Tamara_Checkout\Deps\GuzzleHttp\Psr7\Request;
 use Tamara_Checkout\Deps\Psr\Http\Message\RequestInterface;
 use Tamara_Checkout\Deps\Psr\Http\Message\ResponseInterface;
-use Tamara_Checkout\Deps\Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestException;
 use Throwable;
 

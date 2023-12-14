@@ -12,7 +12,7 @@ use Tamara_Checkout\Deps\Buzz\Exception\RequestException;
 use Tamara_Checkout\Deps\Buzz\Message\HeaderConverter;
 use Tamara_Checkout\Deps\Buzz\Message\ResponseBuilder;
 use Tamara_Checkout\Deps\Psr\Http\Message\RequestInterface;
-use Tamara_Checkout\Deps\Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Base client class with helpers for working with cURL.

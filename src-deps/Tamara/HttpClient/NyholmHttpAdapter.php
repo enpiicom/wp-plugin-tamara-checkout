@@ -6,7 +6,7 @@ use Tamara_Checkout\Deps\Buzz\Client\Curl;
 use Tamara_Checkout\Deps\Nyholm\Psr7\Factory\Psr17Factory;
 use Tamara_Checkout\Deps\Psr\Http\Message\RequestInterface;
 use Tamara_Checkout\Deps\Psr\Http\Message\ResponseInterface;
-use Tamara_Checkout\Deps\Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestException;
 
 class NyholmHttpAdapter implements ClientInterface

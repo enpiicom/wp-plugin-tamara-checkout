@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
-use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
-
 /**
  * Pay in 3 using Tamara Payment Gateway
  * @package Tamara_Checkout\App\WP
