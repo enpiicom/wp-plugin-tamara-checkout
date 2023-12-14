@@ -11,12 +11,17 @@ use WP_Mock;
 
 class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 
-	protected function setUp(): void {
-		WP_Mock::setUp();
-	}
+	public function setUp(): void {
+		parent::setUp();
 
-	protected function tearDown(): void {
-		WP_Mock::tearDown();
+		// Mock the global function _t
+		\WP_Mock::userFunction(
+			'_t',
+			[
+				'args' => '*',
+				'return_arg' => 0,
+			]
+		);
 	}
 
 	public function test_register(): void {
@@ -135,5 +140,72 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 
 	public function test_get_tamara_widget_service(): void {
 		// Todo: We need to mock global function wp_app() and have it called within a mock class
+	}
+
+	public function test_tamara_gateway_service(): void {
+		// Todo: We need to mock global function wp_app() and have it called within a mock class
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function test_check_prerequisites_without_woocommerce(): void {
+		// Pretend that WooCommerce class doesn't exist
+		if ( class_exists( \WooCommerce::class, false ) ) {
+			$this->markTestSkipped( 'WooCommerce class already loaded.' );
+		}
+		$expectedMessage = esc_html(
+			'Plugin <strong>Tamara Checkout 1.0.0</strong> needs WooCommerce to work,
+							please install and activate WooCommerce as well.'
+		);
+		$plugin = $this->getMockBuilder( Tamara_Checkout_WP_Plugin::class )
+						->disableOriginalConstructor()
+						->onlyMethods( [ 'get_name', 'get_version', '_t' ] )
+						->getMock();
+
+		$plugin->method( 'get_name' )->willReturn( 'Tamara Checkout' );
+		$plugin->method( 'get_version' )->willReturn( '1.0.0' );
+
+		$plugin->expects( $this->any() )
+				->method( '_t' )
+				->willReturn( 'Plugin <strong>%s</strong> needs WooCommerce to work, please install and activate WooCommerce as well.' );
+
+		$plugin->expects( $this->any() )
+				->method( 'get_name' )
+				->willReturn( 'Tamara Checkout' );
+
+		$plugin->expects( $this->any() )
+				->method( 'get_version' )
+				->willReturn( '1.0.0' );
+
+		// Todo: We need to global function wp_app() and have it called within a mock class Show_Admin_Notice_And_Disable_Plugin
+		// $plugin->check_prerequisites();
+	}
+
+	public function test_tamara_gateway_process_admin_options(): void {
+		// Mock the Tamara WC payment gateway service
+		$tamara_gateway_service_mock = Mockery::mock( 'Tamara_WC_Payment_Gateway' );
+		$tamara_gateway_service_mock->shouldReceive( 'process_admin_options' )
+								->once()
+								->andReturnTrue();
+
+		// Set mock class alias to return correct namespace
+		class_alias( 'Tamara_WC_Payment_Gateway', 'Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway' );
+
+		// Mock the Tamara_Checkout_WP_Plugin class
+		$tamara_checkout_wp_plugin_mock = $this->getMockBuilder( Tamara_Checkout_WP_Plugin::class )
+							->disableOriginalConstructor()
+							->onlyMethods( [ 'get_tamara_gateway_service' ] )
+							->getMock();
+
+		$tamara_checkout_wp_plugin_mock->expects( $this->once() )
+					->method( 'get_tamara_gateway_service' )
+					->willReturn( $tamara_gateway_service_mock );
+
+		// Call the method under test
+		$result = $tamara_checkout_wp_plugin_mock->get_tamara_gateway_service()->process_admin_options();
+
+		// Check that the result is what we expect
+		$this->assertTrue( $result, 'The process_admin_options method did not return true as expected.' );
 	}
 }
