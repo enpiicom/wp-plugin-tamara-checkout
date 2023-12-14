@@ -39,7 +39,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property bool $popup_widget_disabled
  * @property string $popup_widget_position
  * @property bool $cart_popup_widget_disabled
- * @property string $cart_popup_widget_disabled
+ * @property string $cart_popup_widget_position
  * @property bool $webhook_enabled
  * @property string $tamara_webhook_id
  * @property string $cancel_url

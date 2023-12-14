@@ -129,4 +129,18 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public function _t( $untranslated_text ) {
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
+
+	/**
+	 * We need to update settings to db options (table options)
+	 */
+	public function update_settings_to_options(): void {
+		update_option(
+			$this->get_option_key(),
+			apply_filters(
+				'woocommerce_settings_api_sanitized_fields_'.$this->id,
+				$this->settings
+			),
+			'yes'
+		);
+	}
 }
