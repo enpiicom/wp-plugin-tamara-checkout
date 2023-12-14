@@ -33,17 +33,22 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 														'add_payment_gateways',
 														'init_woocommerce',
 														'tamara_gateway_process_admin_options',
+														'tamara_gateway_register_webhook',
 													]
 												)
 												->getMock();
 
 		// Expectations for actions and filters to be added
-		WP_Mock::expectActionAdded( 'plugins_loaded', [ $tamara_checkout_wp_plugin_mock, 'check_prerequisites' ] );
+		WP_Mock::expectActionAdded( 'init', [ $tamara_checkout_wp_plugin_mock, 'check_prerequisites' ], -100 );
 		WP_Mock::expectFilterAdded( 'woocommerce_payment_gateways', [ $tamara_checkout_wp_plugin_mock, 'add_payment_gateways' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_init', [ $tamara_checkout_wp_plugin_mock, 'init_woocommerce' ] );
 		WP_Mock::expectActionAdded(
 			'woocommerce_update_options_payment_gateways_' . Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID,
 			[ $tamara_checkout_wp_plugin_mock, 'tamara_gateway_process_admin_options' ]
+		);
+		WP_Mock::expectActionAdded(
+			'woocommerce_update_options_payment_gateways_' . Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID,
+			[ $tamara_checkout_wp_plugin_mock, 'tamara_gateway_register_webhook' ]
 		);
 
 		// Call the method to be tested
