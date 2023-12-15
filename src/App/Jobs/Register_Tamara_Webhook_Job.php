@@ -16,6 +16,7 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
 
 class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
+
 	use Dispatchable_Trait;
 	use InteractsWithQueue;
 	use Queueable;
@@ -65,7 +66,8 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 			} catch ( Exception $RegisterWebhookException ) {
 				throw new Exception(
 					sprintf(
-						"Tamara Service timeout or disconnected.\nError message: ' %s'.\nTrace: %s",
+						// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+						$tamara_gateway_service->_t( 'Tamara Service timeout or disconnected.\nError message: " %s".\nTrace: %s' ),
 						esc_html( $RegisterWebhookException->getMessage() ),
 						esc_html( $RegisterWebhookException->getTraceAsString() )
 					)
