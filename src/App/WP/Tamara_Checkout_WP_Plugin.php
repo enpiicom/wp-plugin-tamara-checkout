@@ -10,7 +10,7 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
+use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
@@ -54,7 +54,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			[ $this, 'tamara_gateway_register_webhook' ]
 		);
 
-		add_action( App_Const::ACTION_WP_APP_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_app_routes' ] );
+		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes'] );
 	}
 
 	public function init_woocommerce() {
@@ -120,8 +120,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( 'low' );
 	}
 
-	public function tamara_gateway_register_wp_app_routes() {
-		Register_Tamara_WP_App_Routes_Job::dispatchSync();
+	public function tamara_gateway_register_wp_api_routes() {
+		Register_Tamara_WP_Api_Routes_Job::execute_now();
 	}
 
 	/**

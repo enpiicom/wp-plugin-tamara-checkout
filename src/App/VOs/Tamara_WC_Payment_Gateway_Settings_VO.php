@@ -163,6 +163,10 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		return ( $this->environment === 'live_mode' );
 	}
 
+	public function get_webhook_id(): string {
+		return $this->tamara_webhook_id ?? '';
+	}
+
 	public function get_excluded_product_categories(): array {
 		/** @var string $excluded_product_categories */
 		$excluded_product_categories = $this->excluded_product_categories;

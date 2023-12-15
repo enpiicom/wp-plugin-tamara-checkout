@@ -6,8 +6,10 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use InvalidArgumentException;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Get_Payment_Gateway_Admin_Form_Fields_Query;
+use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -132,7 +134,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	}
 
 	/**
-	 * We need to update settings to db options (table options)
+	 * Update settings to db options (table options)
 	 *
 	 * @return void
 	 */
@@ -140,7 +142,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		update_option(
 			$this->get_option_key(),
 			apply_filters(
-				'woocommerce_settings_api_sanitized_fields_'.$this->id,
+				'woocommerce_settings_api_sanitized_fields_' . $this->id,
 				$this->settings
 			),
 			'yes'
