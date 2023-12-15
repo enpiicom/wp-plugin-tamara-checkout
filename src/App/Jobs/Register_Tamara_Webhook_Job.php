@@ -14,7 +14,6 @@ use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
-use Tamara_Checkout\Deps\Tamara\Request\Webhook\RemoveWebhookRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse;
 
 class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
@@ -34,22 +33,19 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 		// We need to get a refreshed settings from the Payment Gateway
 		$gateway_settings = $tamara_gateway_service->get_settings( true );
 		$tamara_client_service->reinit_tamara_client( $gateway_settings->api_token, $gateway_settings->api_url );
-		$webhook_id = $gateway_settings->get_webhook_id();
 
-		if ( empty( $webhook_id ) ) {
-			$tamara_register_webhook_api_request = new RegisterWebhookRequest(
-				wp_app_route_wp_url( 'tamara-webhook' ),
-				$this->get_tamara_webhook_events()
-			);
+		$tamara_register_webhook_api_request = new RegisterWebhookRequest(
+			wp_app_route_wp_url( 'tamara-webhook' ),
+			$this->get_tamara_webhook_events()
+		);
 
-			try {
-				$tamara_register_webhook_api_response = $tamara_client_service->get_api_client()->registerWebhook( $tamara_register_webhook_api_request );
-				if ( $tamara_register_webhook_api_response ) {
-					$this->handle_tamara_register_webhook_response( $tamara_register_webhook_api_response, $tamara_gateway_service );
-				}
-			} catch ( Exception $tamara_register_webhook_exception ) {
-				$this->throw_tamara_register_webhook_exception( $tamara_gateway_service, $tamara_register_webhook_exception );
+		try {
+			$tamara_register_webhook_api_response = $tamara_client_service->get_api_client()->registerWebhook( $tamara_register_webhook_api_request );
+			if ( $tamara_register_webhook_api_response ) {
+				$this->handle_tamara_register_webhook_response( $tamara_register_webhook_api_response, $tamara_gateway_service );
 			}
+		} catch ( Exception $tamara_register_webhook_exception ) {
+			$this->throw_tamara_register_webhook_exception( $tamara_gateway_service, $tamara_register_webhook_exception );
 		}
 	}
 
