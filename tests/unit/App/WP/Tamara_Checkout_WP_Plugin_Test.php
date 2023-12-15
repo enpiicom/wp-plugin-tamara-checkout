@@ -177,10 +177,6 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 	public function test_tamara_gateway_process_admin_options(): void {
 		// Mock the Tamara WC payment gateway service
 		$tamara_gateway_service_mock = Mockery::mock( 'Tamara_WC_Payment_Gateway' );
-		class_alias(
-			'Tamara_WC_Payment_Gateway',
-			'Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway'
-		);
 
 		$tamara_gateway_service_mock->shouldReceive( 'process_admin_options' )
 								->once()
