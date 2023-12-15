@@ -32,4 +32,28 @@ class Register_Tamara_Webhook_Job_Test extends Unit_Test_Case {
 		// Assert: Verify the tamara_webhook_id setting is updated
 		$this->assertEquals( $webhook_id, $tamara_gateway_service_mock->settings['tamara_webhook_id'] );
 	}
+
+	/**
+	 * @throws \ReflectionException
+	 */
+	public function test_get_tamara_webhook_events(): void {
+		$expected_events = [
+			'order_approved',
+			'order_declined',
+			'order_authorised',
+			'order_canceled',
+			'order_captured',
+			'order_refunded',
+			'order_expired',
+		];
+
+		$register_tamara_webhook_job = new Register_Tamara_Webhook_Job();
+		$tamara_webhook_events = $this->invoke_protected_method(
+			$register_tamara_webhook_job,
+			'get_tamara_webhook_events',
+			[]
+		);
+		// Assert: Verify the expected events are returned correctly
+		$this->assertEquals( $expected_events, $tamara_webhook_events );
+	}
 }
