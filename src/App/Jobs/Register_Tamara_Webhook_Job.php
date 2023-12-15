@@ -17,7 +17,6 @@ use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse;
 
 class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
-
 	use Dispatchable_Trait;
 	use InteractsWithQueue;
 	use Queueable;
