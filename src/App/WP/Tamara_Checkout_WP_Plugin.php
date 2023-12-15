@@ -54,7 +54,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			[ $this, 'tamara_gateway_register_webhook' ]
 		);
 
-		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes'] );
+		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes' ] );
 	}
 
 	public function init_woocommerce() {

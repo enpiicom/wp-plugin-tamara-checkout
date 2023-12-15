@@ -86,12 +86,14 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 		RegisterWebhookResponse $tamara_register_webhook_api_response,
 		Tamara_WC_Payment_Gateway $tamara_gateway_service
 	): void {
+		$tamara_register_webhook_api_response_error_code =
+			$tamara_register_webhook_api_response->getErrors()[0]['error_code'] ?? null;
 		if ( $tamara_register_webhook_api_response->isSuccess() ) {
 			$this->update_webhook_id_to_options(
 				$tamara_gateway_service,
 				$tamara_register_webhook_api_response->getWebhookId()
 			);
-		} elseif ( $tamara_register_webhook_api_response->getErrors()[0]['error_code'] === 'webhook_already_registered' ) {
+		} elseif ( $tamara_register_webhook_api_response_error_code === 'webhook_already_registered' ) {
 			$this->update_webhook_id_to_options(
 				$tamara_gateway_service,
 				$tamara_register_webhook_api_response->getErrors()[0]['data']['webhook_id']
