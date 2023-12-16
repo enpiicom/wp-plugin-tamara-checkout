@@ -122,11 +122,28 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * Translate a text using the plugin's text domain
 	 *
 	 * @param mixed $untranslated_text Text to be translated
+	 *
 	 * @return string Translated tet
-	 * @throws BindingResolutionException
+	 * @throws BindingResolutionException|\Exception
 	 */
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t( $untranslated_text ) {
+	public function _t( $untranslated_text ): string {
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
+	}
+
+	/**
+	 * Update settings to db options (table options)
+	 *
+	 * @return void
+	 */
+	public function update_settings_to_options(): void {
+		update_option(
+			$this->get_option_key(),
+			apply_filters(
+				'woocommerce_settings_api_sanitized_fields_' . $this->id,
+				$this->settings
+			),
+			'yes'
+		);
 	}
 }

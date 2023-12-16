@@ -39,7 +39,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property bool $popup_widget_disabled
  * @property string $popup_widget_position
  * @property bool $cart_popup_widget_disabled
- * @property string $cart_popup_widget_disabled
+ * @property string $cart_popup_widget_position
  * @property bool $webhook_enabled
  * @property string $tamara_webhook_id
  * @property string $cancel_url
@@ -161,6 +161,10 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 
 	public function get_is_live_mode(): bool {
 		return ( $this->environment === 'live_mode' );
+	}
+
+	public function get_webhook_id(): string {
+		return $this->tamara_webhook_id ?? '';
 	}
 
 	public function get_excluded_product_categories(): array {
