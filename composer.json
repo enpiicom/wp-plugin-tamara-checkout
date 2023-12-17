@@ -28,9 +28,6 @@
     ],
     "require": {
       "enpii/enpii-base": "dev-wp-release",
-      "tamara-solution/php-sdk": "^2.0.0",
-      "guzzlehttp/guzzle": "7.8.1",
-      "firebase/php-jwt": "5.5.1 as 6.1.0",
       "php": "^7.2.5|^8.0"
     },
     "replace": {
@@ -53,7 +50,8 @@
       "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
       "symfony/console": "^5.4.0|^6.4.1",
       "symfony/yaml": "^5.4.0",
-      "phpcompatibility/php-compatibility": "^9.3.5"
+      "phpcompatibility/php-compatibility": "^9.3.5",
+        "phpstan/phpstan": "^1.10"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -65,9 +63,9 @@
       }
     },
     "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+      "allow-plugins": {
+          "dealerdirect/phpcodesniffer-composer-installer": true
+      }
     },
   "extra": {
     "mozart": {

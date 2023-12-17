@@ -100,7 +100,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 		} else {
 			throw new Exception(
 				esc_html( $tamara_gateway_service->_t( $tamara_register_webhook_api_response->getMessage() ) ),
-				esc_html( $tamara_register_webhook_api_response->getStatusCode() )
+				$tamara_register_webhook_api_response->getStatusCode()
 			);
 		}
 	}

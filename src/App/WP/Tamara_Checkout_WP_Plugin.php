@@ -14,7 +14,6 @@ use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
-use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
 /**
@@ -106,7 +105,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					$this->get_name() . ' ' . $this->get_version()
 				),
 			];
-			Show_Admin_Notice_And_Disable_Plugin_Job::dispatchSync( $this, $messages );
+			Show_Admin_Notice_And_Disable_Plugin_Job::execute_now( $this, $messages );
 
 			return;
 		}
