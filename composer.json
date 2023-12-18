@@ -50,8 +50,7 @@
       "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
       "symfony/console": "^5.4.0|^6.4.1",
       "symfony/yaml": "^5.4.0",
-      "phpcompatibility/php-compatibility": "^9.3.5",
-      "phpstan/phpstan": "^1.10"
+      "phpcompatibility/php-compatibility": "^9.3.5"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
