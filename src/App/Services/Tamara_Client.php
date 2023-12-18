@@ -21,6 +21,8 @@ use Tamara_Checkout\Deps\Tamara\Model\Order\Order;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItem;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection;
 use Tamara_Checkout\Deps\Tamara\Model\Order\RiskAssessment;
+use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use WC_Order;
 use WC_Product;
 
@@ -72,6 +74,113 @@ class Tamara_Client {
 	}
 
 	/**
+	 * Create Tamara Checkout session, if failed, put errors to `wc_notices`
+	 *
+	 * @param $wc_order_id
+	 *
+	 * @return array|bool
+	 * @throws \Exception
+	 */
+	public function tamara_checkout_session( $wc_order_id ) {
+		$wc_order = wc_get_order( $wc_order_id );
+		$instalment_period = 3;
+		$checkout_payment_type = 'PAY_BY_INSTALMENTS';
+		try {
+			$checkout_response = $this->create_tamara_checkout_session(
+				$wc_order,
+				$checkout_payment_type,
+				$instalment_period
+			);
+		} catch ( Exception $tamaraCheckoutException ) {
+			$errorMessage = $this->tamara_checkout_wp_plugin->_t( 'Tamara Service unavailable! Please try again later.' );
+			if ( function_exists( 'wc_add_notice' ) ) {
+				wc_add_notice( $errorMessage, 'error' );
+			}
+		}
+
+		if ( isset( $checkout_response ) && $checkout_response->isSuccess() ) {
+			$tamara_checkout_url = $checkout_response->getCheckoutResponse()->getCheckoutUrl();
+			$tamara_checkout_session_id = $checkout_response->getCheckoutResponse()->getCheckoutId();
+
+			update_post_meta( $wc_order_id, 'tamara_checkout_session_id', $tamara_checkout_session_id );
+			update_post_meta( $wc_order_id, '_tamara_checkout_session_id', $tamara_checkout_session_id );
+			update_post_meta( $wc_order_id, 'tamara_checkout_url', $tamara_checkout_url );
+			update_post_meta( $wc_order_id, '_tamara_checkout_url', $tamara_checkout_url );
+			update_post_meta( $wc_order_id, 'tamara_payment_type', $checkout_payment_type );
+			update_post_meta( $wc_order_id, '_tamara_payment_type', $checkout_payment_type );
+			if ( $checkout_payment_type === 'PAY_BY_INSTALMENTS' && ! empty( $instalment_period ) ) {
+				update_post_meta( $wc_order_id, 'tamara_payment_type_instalment', $instalment_period );
+				update_post_meta( $wc_order_id, '_tamara_payment_type_instalment', $instalment_period );
+			}
+
+			return [
+				'result' => 'success',
+				'redirect' => $tamara_checkout_url,
+				'tamara_checkout_url' => $tamara_checkout_url,
+				'tamara_checkout_session_id' => $tamara_checkout_session_id,
+			];
+		}
+
+		if ( isset( $checkout_response ) && ! $checkout_response->isSuccess() ) {
+			$errorMap = $this->get_error_map();
+
+			$tamaraErrors = $checkout_response->getErrors();
+			$errors = [];
+			if ( ! empty( $tamaraErrors ) && is_array( $tamaraErrors ) ) {
+				foreach ( $tamaraErrors as $tmpKey => $tamaraError ) {
+					$errorCode = $tamaraError['error_code'] ?? null;
+					if ( $errorCode && isset( $errorMap[ $errorCode ] ) ) {
+						$errors[] = $errorMap[ $errorCode ];
+					}
+				}
+			}
+			if ( empty( $errors ) ) {
+				$errorCode = $checkout_response->getMessage();
+				if ( $errorCode && isset( $errorMap[ $errorCode ] ) ) {
+					$errors[] = $errorMap[ $errorCode ];
+				}
+
+				if ( ! $checkout_response->isSuccess() && empty( $errors ) ) {
+					$errors[] = $errorMap['tamara_disabled'];
+				}
+			}
+
+			if ( function_exists( 'wc_add_notice' ) ) {
+				foreach ( $errors as $error ) {
+					wc_add_notice( $error, 'error' );
+				}
+			}
+		}
+
+		// If this is the failed process, return false instead of ['result' => 'success']
+		return false;
+	}
+
+	/**
+	 * Create Tamara Checkout Session Request
+	 *
+	 * @param  WC_Order  $wc_order
+	 *
+	 * @param $payment_type
+	 * @param $instalment_period
+	 *
+	 * @return CreateCheckoutResponse
+	 * @throws Exception
+	 */
+	public function create_tamara_checkout_session( WC_Order $wc_order, $payment_type, $instalment_period ): CreateCheckoutResponse {
+		$client = $this->api_client;
+		$checkoutRequest = new CreateCheckoutRequest(
+			$this->populate_tamara_order( $wc_order, $payment_type, $instalment_period )
+		);
+		try {
+			dev_error_log( $client->createCheckout( $checkoutRequest ) );
+			return $client->createCheckout( $checkoutRequest );
+		} catch ( Exception $create_tamara_checkout_session_exception ) {
+			throw new Exception( 'Cannot create Tamara Checkout Session' );
+		}
+	}
+
+	/**
 	 * Filling all needed data for a Tamara Order used for checkout
 	 *
 	 * @param  WC_Order  $wc_order
@@ -106,10 +215,7 @@ class Tamara_Client {
 				$this->tamara_checkout_wp_plugin->get_version()
 			)
 		);
-		$order->setDescription(
-			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain
-			__( 'Use Tamara Gateway with WooCommerce', $this->tamara_checkout_wp_plugin->get_text_domain() )
-		);
+		$order->setDescription( $this->tamara_checkout_wp_plugin->_t( 'Use Tamara Gateway with WooCommerce' ) );
 		$order->setTaxAmount(
 			new Money(
 				MoneyHelper::format_tamara_number( $wc_order->get_total_tax() ),
@@ -140,7 +246,7 @@ class Tamara_Client {
 		$order->setRiskAssessment( $this->populate_tamara_risk_assessment() );
 
 		$order->setItems( $this->populate_tamara_order_items( $wc_order ) );
-
+		dev_error_log( $order );
 		return $order;
 	}
 

@@ -47,5 +47,4 @@ class Main_Controller extends Base_Controller {
 			]
 		);
 	}
-
 }
