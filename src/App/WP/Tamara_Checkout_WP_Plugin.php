@@ -14,8 +14,6 @@ use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
-use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
-use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
 /**
@@ -25,10 +23,8 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
-	use Tamara_Order_Trait;
-
 	public const TEXT_DOMAIN = 'tamara';
-	
+
 	public const TAMARA_CHECKOUT = 'tamara-checkout';
 
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';

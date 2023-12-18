@@ -8,6 +8,7 @@ use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Tamara_Checkout\App\Support\Helpers\MoneyHelper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
+use Tamara_Checkout\App\Support\Traits\Wc_Order_Settings_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
@@ -34,6 +35,7 @@ use WC_Product;
 class Tamara_Client {
 	use Static_Instance_Trait;
 	use Tamara_Order_Trait;
+	use Wc_Order_Settings_Trait;
 
 	protected $tamara_checkout_wp_plugin;
 	protected $working_mode = 'live';
