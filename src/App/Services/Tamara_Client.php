@@ -18,8 +18,11 @@ use Tamara_Checkout\Deps\Tamara\Model\Order\Consumer;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Discount;
 use Tamara_Checkout\Deps\Tamara\Model\Order\MerchantUrl;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Order;
+use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItem;
+use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection;
 use Tamara_Checkout\Deps\Tamara\Model\Order\RiskAssessment;
 use WC_Order;
+use WC_Product;
 
 /**
  * A wrapper of Tamara Client
@@ -69,7 +72,7 @@ class Tamara_Client {
 	}
 
 	/**
-	 * Filling all needed data for a Tamara Order used for Pay By Later
+	 * Filling all needed data for a Tamara Order used for checkout
 	 *
 	 * @param  WC_Order  $wc_order
 	 * @param string $payment_type | null
@@ -78,38 +81,65 @@ class Tamara_Client {
 	 * @return Order
 	 * @throws Exception
 	 */
-	protected function populate_tamara_order(WC_Order $wc_order, $payment_type = null, $instalment_period = null): Order {
-		if (empty($payment_type)) {
-			throw new Exception('Error! No Payment Type specified');
+	protected function populate_tamara_order( WC_Order $wc_order, $payment_type = null, $instalment_period = null ): Order {
+		if ( empty( $payment_type ) ) {
+			throw new Exception( 'Error! No Payment Type specified' );
 		}
-		$usedCouponsStr = !empty($wc_order->get_coupon_codes()) ? implode(",", $wc_order->get_coupon_codes()) : '';
+		$usedCouponsStr = ! empty( $wc_order->get_coupon_codes() ) ? implode( ',', $wc_order->get_coupon_codes() ) : '';
 		$order = new Order();
 
-		$order->setOrderReferenceId((string) $wc_order->get_id());
-		$order->setLocale(get_locale());
-		$order->setCurrency($wc_order->get_currency());
-		$order->setTotalAmount(new Money(MoneyHelper::formatNumber($wc_order->get_total()), $order->getCurrency()));
-		$order->setCountryCode(!empty($wc_order->get_billing_country()) ? $wc_order->get_billing_country()
-			: $this->get_default_billing_country_code());
-		$order->setPaymentType($payment_type);
-		$order->setInstalments($instalment_period);
-		$order->setPlatform(sprintf('WordPress %s, WooCommerce %s, Tamara Checkout %s',
-			$GLOBALS['wp_version'], $GLOBALS['woocommerce']->version,
-			$this->tamara_checkout_wp_plugin->get_version()));
-		$order->setDescription(__('Use Tamara Gateway with WooCommerce',
-			$this->tamara_checkout_wp_plugin->get_text_domain()));
-		$order->setTaxAmount(new Money(MoneyHelper::formatNumber($wc_order->get_total_tax()), $order->getCurrency()));
-		$order->setShippingAmount(new Money(MoneyHelper::formatNumber($wc_order->get_shipping_total()),
-			$order->getCurrency()));
-		$order->setDiscount(new Discount($usedCouponsStr, new Money(MoneyHelper::formatNumber(
-			$wc_order->get_discount_total()), $order->getCurrency())));
-		$order->setMerchantUrl($this->populate_tamara_merchant_url($wc_order));
-		$order->setBillingAddress($this->populate_tamara_billing_address($wc_order));
-		$order->setShippingAddress($this->populate_tamara_shipping_address($wc_order));
-		$order->setConsumer($this->populate_tamara_consumer($wc_order));
-		$order->setRiskAssessment($this->populate_tamara_risk_assessment());
+		$order->setOrderReferenceId( (string) $wc_order->get_id() );
+		$order->setLocale( get_locale() );
+		$order->setCurrency( $wc_order->get_currency() );
+		$order->setTotalAmount( new Money( MoneyHelper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
+		$order->setCountryCode(
+			! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
+			: $this->get_default_billing_country_code()
+		);
+		$order->setPaymentType( $payment_type );
+		$order->setInstalments( $instalment_period );
+		$order->setPlatform(
+			sprintf(
+				'WordPress %s, WooCommerce %s, Tamara Checkout %s',
+				$GLOBALS['wp_version'],
+				$GLOBALS['woocommerce']->version,
+				$this->tamara_checkout_wp_plugin->get_version()
+			)
+		);
+		$order->setDescription(
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain
+			__( 'Use Tamara Gateway with WooCommerce', $this->tamara_checkout_wp_plugin->get_text_domain() )
+		);
+		$order->setTaxAmount(
+			new Money(
+				MoneyHelper::format_tamara_number( $wc_order->get_total_tax() ),
+				$order->getCurrency()
+			)
+		);
+		$order->setShippingAmount(
+			new Money(
+				MoneyHelper::format_tamara_number( $wc_order->get_shipping_total() ),
+				$order->getCurrency()
+			)
+		);
+		$order->setDiscount(
+			new Discount(
+				$usedCouponsStr,
+				new Money(
+					MoneyHelper::format_tamara_number(
+						$wc_order->get_discount_total()
+					),
+					$order->getCurrency()
+				)
+			)
+		);
+		$order->setMerchantUrl( $this->populate_tamara_merchant_url( $wc_order ) );
+		$order->setBillingAddress( $this->populate_tamara_billing_address( $wc_order ) );
+		$order->setShippingAddress( $this->populate_tamara_shipping_address( $wc_order ) );
+		$order->setConsumer( $this->populate_tamara_consumer( $wc_order ) );
+		$order->setRiskAssessment( $this->populate_tamara_risk_assessment() );
 
-		$order->setItems($this->populate_tamara_order_items($wc_order));
+		$order->setItems( $this->populate_tamara_order_items( $wc_order ) );
 
 		return $order;
 	}
@@ -117,26 +147,33 @@ class Tamara_Client {
 	/**
 	 * @throws \Exception
 	 */
-	protected function populate_tamara_merchant_url($wc_order): MerchantUrl {
+	protected function populate_tamara_merchant_url( $wc_order ): MerchantUrl {
 		$merchant_url = new MerchantUrl();
 
 		$wc_order_id = $wc_order->get_id();
 
-		$tamara_success_url = $this->get_tamara_success_url($wc_order, [
-			'wc_order_id' => $wc_order_id,
-			'payment_method' => Tamara_Checkout_WP_Plugin::TAMARA_CHECKOUT,
-		]);
-		$tamara_cancel_url = $this->get_tamara_cancel_url([
-			'wc_order_id' => $wc_order_id,
-		]);
-		$tamara_failure_url = $this->get_tamara_failure_url([
-			'wc_order_id' => $wc_order_id,
-		]);
+		$tamara_success_url = $this->get_tamara_success_url(
+			$wc_order,
+			[
+				'wc_order_id' => $wc_order_id,
+				'payment_method' => Tamara_Checkout_WP_Plugin::TAMARA_CHECKOUT,
+			]
+		);
+		$tamara_cancel_url = $this->get_tamara_cancel_url(
+			[
+				'wc_order_id' => $wc_order_id,
+			]
+		);
+		$tamara_failure_url = $this->get_tamara_failure_url(
+			[
+				'wc_order_id' => $wc_order_id,
+			]
+		);
 
-		$merchant_url->setSuccessUrl($tamara_success_url);
-		$merchant_url->setCancelUrl($tamara_cancel_url);
-		$merchant_url->setFailureUrl($tamara_failure_url);
-		$merchant_url->setNotificationUrl($this->get_tamara_ipn_url());
+		$merchant_url->setSuccessUrl( $tamara_success_url );
+		$merchant_url->setCancelUrl( $tamara_cancel_url );
+		$merchant_url->setFailureUrl( $tamara_failure_url );
+		$merchant_url->setNotificationUrl( $this->get_tamara_ipn_url() );
 
 		return $merchant_url;
 	}
@@ -146,8 +183,8 @@ class Tamara_Client {
 	 *
 	 * @return Consumer
 	 */
-	protected function populate_tamara_consumer($wc_order): Consumer {
-		$wc_billing_address = $wc_order->get_address('billing');
+	protected function populate_tamara_consumer( $wc_order ): Consumer {
+		$wc_billing_address = $wc_order->get_address( 'billing' );
 
 		$first_name = $wc_billing_address['first_name'] ?? 'N/A';
 		$last_name = $wc_billing_address['last_name'] ?? 'N/A';
@@ -155,10 +192,10 @@ class Tamara_Client {
 		$phone = $wc_billing_address['phone'] ?? 'N/A';
 
 		$consumer = new Consumer();
-		$consumer->setFirstName($first_name);
-		$consumer->setLastName($last_name);
-		$consumer->setEmail($email);
-		$consumer->setPhoneNumber($phone);
+		$consumer->setFirstName( $first_name );
+		$consumer->setLastName( $last_name );
+		$consumer->setEmail( $email );
+		$consumer->setPhoneNumber( $phone );
 
 		return $consumer;
 	}
@@ -166,40 +203,133 @@ class Tamara_Client {
 	/**
 	 * @return RiskAssessment
 	 */
-	protected function populate_tamara_risk_assessment() : RiskAssessment{
+	protected function populate_tamara_risk_assessment(): RiskAssessment {
 		$risk_assessment = new RiskAssessment();
-//
-//		$risk_assessment->setAccountCreationDate( TamaraCheckout::getInstance()->getCurrentUserRegisterDate() );
-//		$risk_assessment->setHasDeliveredOrder( TamaraCheckout::getInstance()->currentUserHasDeliveredOrder() );
-//		$risk_assessment->setTotalOrderCount( TamaraCheckout::getInstance()->getCurrentUserTotalOrderCount() );
-//		$risk_assessment->setDateOfFirstTransaction( TamaraCheckout::getInstance()->getCurrentUserDateOfFirstTransaction() );
-//		$risk_assessment->setIsExistingCustomer( is_user_logged_in() );
-//		$risk_assessment->setOrderAmountLast3months( TamaraCheckout::getInstance()->getCurrentUserOrderAmountLast3Months() );
-//		$risk_assessment->setOrderCountLast3months( TamaraCheckout::getInstance()->getCurrentUserOrderCountLast3Months() );
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		//
+		//      $risk_assessment->setAccountCreationDate( TamaraCheckout::getInstance()->getCurrentUserRegisterDate() );
+		//      $risk_assessment->setHasDeliveredOrder( TamaraCheckout::getInstance()->currentUserHasDeliveredOrder() );
+		//      $risk_assessment->setTotalOrderCount( TamaraCheckout::getInstance()->getCurrentUserTotalOrderCount() );
+		//      $risk_assessment->setDateOfFirstTransaction( TamaraCheckout::getInstance()->getCurrentUserDateOfFirstTransaction() );
+		//      $risk_assessment->setIsExistingCustomer( is_user_logged_in() );
+		//      $risk_assessment->setOrderAmountLast3months( TamaraCheckout::getInstance()->getCurrentUserOrderAmountLast3Months() );
+		//      $risk_assessment->setOrderCountLast3months( TamaraCheckout::getInstance()->getCurrentUserOrderCountLast3Months() );
 
 		return $risk_assessment;
 	}
 
-	protected function populate_tamara_order_items($wc_order) {
+	/**
+	 * @param  WC_Order  $wc_order
+	 *
+	 * @return \Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection
+	 */
+	protected function populate_tamara_order_items( WC_Order $wc_order ): OrderItemCollection {
+		$wc_order_items = $wc_order->get_items();
+		$order_item_collection = new OrderItemCollection();
 
+		foreach ( $wc_order_items as $item_id => $wc_order_item ) {
+			$order_item = new OrderItem();
+			/** @var WC_Product $wc_order_item_product */
+			$wc_order_item_product = $wc_order_item->get_product();
+			if ( $wc_order_item_product ) {
+				$wc_order_item_name = wp_strip_all_tags( $wc_order_item->get_name() );
+				$wc_order_item_quantity = $wc_order_item->get_quantity();
+				$wc_order_item_sku = $wc_order_item_product->get_sku() ?? 'N/A';
+				$wc_order_item_total_tax = $wc_order_item->get_total_tax();
+				$wc_order_item_total = $wc_order_item->get_total() + $wc_order_item_total_tax;
+				$wc_order_item_categories = wp_strip_all_tags(
+					wc_get_product_category_list( $wc_order_item_product->get_id() )
+				) ?? 'N/A';
+				$wc_order_item_regular_price = $wc_order_item_product->get_regular_price();
+				$wc_order_item_sale_price = $wc_order_item_product->get_sale_price();
+				$item_price = $wc_order_item_sale_price ?? $wc_order_item_regular_price;
+				$wc_order_item_discount_amount = (int) $item_price * $wc_order_item_quantity
+												- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
+				$order_item->setName( $wc_order_item_name );
+				$order_item->setQuantity( $wc_order_item_quantity );
+				$order_item->setUnitPrice( new Money( MoneyHelper::format_tamara_number( $item_price ), $wc_order->get_currency() ) );
+				$order_item->setType( $wc_order_item_categories );
+				$order_item->setSku( $wc_order_item_sku );
+				$order_item->setTotalAmount(
+					new Money(
+						MoneyHelper::format_tamara_number( $wc_order_item_total ),
+						$wc_order->get_currency()
+					)
+				);
+				$order_item->setTaxAmount(
+					new Money(
+						MoneyHelper::format_tamara_number( $wc_order_item_total_tax ),
+						$wc_order->get_currency()
+					)
+				);
+				$order_item->setDiscountAmount(
+					new Money(
+						MoneyHelper::format_tamara_number( $wc_order_item_discount_amount ),
+						$wc_order->get_currency()
+					)
+				);
+				$order_item->setReferenceId( $item_id );
+				$order_item->setImageUrl( wp_get_attachment_url( $wc_order_item_product->get_image_id() ) );
+			} else {
+				$wc_order_item_product = $wc_order_item->get_data();
+				$wc_order_item_name = wp_strip_all_tags( $wc_order_item_product['name'] ) ?? 'N/A';
+				$wc_order_item_quantity = $wc_order_item_product['quantity'] ?? 1;
+				$wc_order_item_sku = $wc_order_item_product['sku'] ?? 'N/A';
+				$wc_order_item_total_tax = $wc_order_item_product['total_tax'] ?? 0;
+				$wc_order_item_total = $wc_order_item_product['total'] ?? 0;
+				$wc_order_item_categories = $wc_order_item_product['category'] ?? 'N/A';
+				$item_price = $wc_order_item_product['subtotal'] ?? 0;
+				$wc_order_item_discount_amount = (int) $item_price * $wc_order_item_quantity
+												- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
+				$order_item->setName( $wc_order_item_name );
+				$order_item->setQuantity( $wc_order_item_quantity );
+				$order_item->setUnitPrice( new Money( MoneyHelper::format_tamara_number( $item_price ), $wc_order->get_currency() ) );
+				$order_item->setType( $wc_order_item_categories );
+				$order_item->setSku( $wc_order_item_sku );
+				$order_item->setTotalAmount(
+					new Money(
+						MoneyHelper::format_tamara_number( $wc_order_item_total ),
+						$wc_order->get_currency()
+					)
+				);
+				$order_item->setTaxAmount(
+					new Money(
+						MoneyHelper::format_tamara_number( $wc_order_item_total_tax ),
+						$wc_order->get_currency()
+					)
+				);
+				$order_item->setDiscountAmount(
+					new Money(
+						MoneyHelper::format_tamara_number( $wc_order_item_discount_amount ),
+						$wc_order->get_currency()
+					)
+				);
+				$order_item->setReferenceId( $item_id );
+				$order_item->setImageUrl( 'N/A' );
+			}
+
+			$order_item_collection->append( $order_item );
+		}
+
+		return $order_item_collection;
 	}
 
 	/**
 	 * Get Merchant Success Url
 	 *
-	 * @param $wc_order
+	 * @param  WC_Order  $wc_order
 	 * @param  array  $params
 	 *
 	 * @return string
 	 * @throws \Exception
 	 */
-	protected function get_tamara_success_url($wc_order, $params = []): string {
-		$tamara_success_url = !empty($wc_order)
-			? esc_url_raw($wc_order->get_checkout_order_received_url())
-			: wp_app_route_wp_url('tamara-success');
-		$tamara_success_url = add_query_arg($params, $tamara_success_url);
+	protected function get_tamara_success_url( WC_Order $wc_order, $params = [] ): string {
+		$tamara_success_url = ! empty( $wc_order )
+			? esc_url_raw( $wc_order->get_checkout_order_received_url() )
+			: wp_app_route_wp_url( 'tamara-success' );
+		$tamara_success_url = add_query_arg( $params, $tamara_success_url );
 
-		return $this->remove_trailing_slashes($tamara_success_url);
+		return $this->remove_trailing_slashes( $tamara_success_url );
 	}
 
 	/**
@@ -209,14 +339,14 @@ class Tamara_Client {
 	 *
 	 * @return string
 	 */
-	protected function get_tamara_cancel_url($params = []): string {
-		$tamara_cancel_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option('cancel_url')
-			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option('cancel_url')
-			: wp_app_route_wp_url('tamara-cancel');
+	protected function get_tamara_cancel_url( $params = [] ): string {
+		$tamara_cancel_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'cancel_url' )
+			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'cancel_url' )
+			: wp_app_route_wp_url( 'tamara-cancel' );
 
-		$tamara_cancel_url = add_query_arg($params, $tamara_cancel_url);
+		$tamara_cancel_url = add_query_arg( $params, $tamara_cancel_url );
 
-		return $this->remove_trailing_slashes($tamara_cancel_url);
+		return $this->remove_trailing_slashes( $tamara_cancel_url );
 	}
 
 	/**
@@ -226,21 +356,21 @@ class Tamara_Client {
 	 *
 	 * @return string
 	 */
-	protected function get_tamara_failure_url($params = []): string {
-		$tamara_failure_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option('failure_url')
-			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option('failure_url')
-			: wp_app_route_wp_url('tamara-failure');
+	protected function get_tamara_failure_url( $params = [] ): string {
+		$tamara_failure_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'failure_url' )
+			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'failure_url' )
+			: wp_app_route_wp_url( 'tamara-failure' );
 
-		$tamara_failure_url = add_query_arg($params, $tamara_failure_url);
+		$tamara_failure_url = add_query_arg( $params, $tamara_failure_url );
 
-		return $this->remove_trailing_slashes($tamara_failure_url);
+		return $this->remove_trailing_slashes( $tamara_failure_url );
 	}
 
 	/**
 	 * Get Tamara Ipn Url to handle notification
 	 */
-	public function get_tamara_ipn_url() : string {
-		return wp_app_route_wp_url('tamara-ipn');
+	public function get_tamara_ipn_url(): string {
+		return wp_app_route_wp_url( 'tamara-ipn' );
 	}
 
 	/**
@@ -250,57 +380,57 @@ class Tamara_Client {
 	 *
 	 * @return Address
 	 */
-	public function populate_tamara_billing_address(WC_Order $wc_order): Address {
-		$wcBillingAddress = $wc_order->get_address('billing');
+	public function populate_tamara_billing_address( WC_Order $wc_order ): Address {
+		$wcBillingAddress = $wc_order->get_address( 'billing' );
 
-		return $this->populate_tamara_address($wcBillingAddress);
+		return $this->populate_tamara_address( $wcBillingAddress );
 	}
 
 	/**
 	 * Set Tamara Order Shipping Addresses
 	 *
-	 * @param WC_Order $wcOrder
+	 * @param  WC_Order  $wc_order
 	 *
 	 * @return Address
 	 */
-	public function populate_tamara_shipping_address($wcOrder): Address {
-		$wc_shipping_address = $wcOrder->get_address('shipping');
-		$wc_billing_address = $wcOrder->get_address('billing');
+	public function populate_tamara_shipping_address( WC_Order $wc_order ): Address {
+		$wc_shipping_address = $wc_order->get_address( 'shipping' );
+		$wc_billing_address = $wc_order->get_address( 'billing' );
 
-		$wc_shipping_address['first_name'] = !empty($wc_shipping_address['first_name'])
+		$wc_shipping_address['first_name'] = ! empty( $wc_shipping_address['first_name'] )
 			? $wc_shipping_address['first_name']
-			: (!empty($wc_billing_address['first_name']) ? $wc_billing_address['first_name'] : null);
+			: ( ! empty( $wc_billing_address['first_name'] ) ? $wc_billing_address['first_name'] : null );
 
-		$wc_shipping_address['last_name'] = !empty($wc_shipping_address['last_name'])
+		$wc_shipping_address['last_name'] = ! empty( $wc_shipping_address['last_name'] )
 			? $wc_shipping_address['last_name']
-			: (!empty($wc_billing_address['last_name']) ? $wc_billing_address['last_name'] : null);
+			: ( ! empty( $wc_billing_address['last_name'] ) ? $wc_billing_address['last_name'] : null );
 
-		$wc_shipping_address['address_1'] = !empty($wc_shipping_address['address_1'])
+		$wc_shipping_address['address_1'] = ! empty( $wc_shipping_address['address_1'] )
 			? $wc_shipping_address['address_1']
-			: (!empty($wc_billing_address['address_1']) ? $wc_billing_address['address_1'] : null);
+			: ( ! empty( $wc_billing_address['address_1'] ) ? $wc_billing_address['address_1'] : null );
 
-		$wc_shipping_address['address_2'] = !empty($wc_shipping_address['address_2'])
+		$wc_shipping_address['address_2'] = ! empty( $wc_shipping_address['address_2'] )
 			? $wc_shipping_address['address_2']
-			: (!empty($wc_billing_address['address_2']) ? $wc_billing_address['address_2'] : null);
+			: ( ! empty( $wc_billing_address['address_2'] ) ? $wc_billing_address['address_2'] : null );
 
-		$wc_shipping_address['city'] = !empty($wc_shipping_address['city'])
+		$wc_shipping_address['city'] = ! empty( $wc_shipping_address['city'] )
 			? $wc_shipping_address['city']
-			: (!empty($wc_billing_address['city']) ? $wc_billing_address['city'] : null);
+			: ( ! empty( $wc_billing_address['city'] ) ? $wc_billing_address['city'] : null );
 
-		$wc_shipping_address['state'] = !empty($wc_shipping_address['state'])
+		$wc_shipping_address['state'] = ! empty( $wc_shipping_address['state'] )
 			? $wc_shipping_address['state']
-			: (!empty($wc_billing_address['state']) ? $wc_billing_address['state'] : null);
+			: ( ! empty( $wc_billing_address['state'] ) ? $wc_billing_address['state'] : null );
 
-		$wc_shipping_address['country'] = !empty($wc_shipping_address['country'])
+		$wc_shipping_address['country'] = ! empty( $wc_shipping_address['country'] )
 			? $wc_shipping_address['country']
-			: (!empty($wc_billing_address['country']) ? $wc_billing_address['country']
-				: $this->get_default_billing_country_code());
+			: ( ! empty( $wc_billing_address['country'] ) ? $wc_billing_address['country']
+				: $this->get_default_billing_country_code() );
 
-		$wc_shipping_address['phone'] = !empty($wc_shipping_address['phone'])
+		$wc_shipping_address['phone'] = ! empty( $wc_shipping_address['phone'] )
 			? $wc_shipping_address['phone']
-			: (!empty($wc_billing_address['phone']) ? $wc_billing_address['phone'] : null);
+			: ( ! empty( $wc_billing_address['phone'] ) ? $wc_billing_address['phone'] : null );
 
-		return $this->populate_tamara_address($wc_shipping_address);
+		return $this->populate_tamara_address( $wc_shipping_address );
 	}
 
 	/**
@@ -308,25 +438,25 @@ class Tamara_Client {
 	 *
 	 * @return \Tamara_Checkout\Deps\Tamara\Model\Order\Address
 	 */
-	public function populate_tamara_address($wc_address) : Address {
-		$first_name = !empty($wc_address['first_name']) ? $wc_address['first_name'] : 'N/A';
-		$last_name = !empty($wc_address['last_name']) ? $wc_address['first_name'] : 'N/A';
-		$address1 = !empty($wc_address['address_1']) ? $wc_address['first_name'] : 'N/A';
-		$address2 = !empty($wc_address['address_2']) ? $wc_address['first_name'] : 'N/A';
-		$city = !empty($wc_address['city']) ? $wc_address['first_name'] : 'N/A';
-		$state = !empty($wc_address['state']) ? $wc_address['first_name'] : 'N/A';
-		$phone = !empty($wc_address['phone']) ? $wc_address['phone'] : null;
-		$country = !empty($wc_address['country']) ? $wc_address['country'] : $this->get_default_billing_country_code();
+	public function populate_tamara_address( $wc_address ): Address {
+		$first_name = ! empty( $wc_address['first_name'] ) ? $wc_address['first_name'] : 'N/A';
+		$last_name = ! empty( $wc_address['last_name'] ) ? $wc_address['first_name'] : 'N/A';
+		$address1 = ! empty( $wc_address['address_1'] ) ? $wc_address['first_name'] : 'N/A';
+		$address2 = ! empty( $wc_address['address_2'] ) ? $wc_address['first_name'] : 'N/A';
+		$city = ! empty( $wc_address['city'] ) ? $wc_address['first_name'] : 'N/A';
+		$state = ! empty( $wc_address['state'] ) ? $wc_address['first_name'] : 'N/A';
+		$phone = ! empty( $wc_address['phone'] ) ? $wc_address['phone'] : null;
+		$country = ! empty( $wc_address['country'] ) ? $wc_address['country'] : $this->get_default_billing_country_code();
 
 		$tamara_address = new Address();
-		$tamara_address->setFirstName((string)$first_name);
-		$tamara_address->setLastName((string)$last_name);
-		$tamara_address->setLine1((string)$address1);
-		$tamara_address->setLine2((string)$address2);
-		$tamara_address->setCity((string)$city);
-		$tamara_address->setRegion((string)$state);
-		$tamara_address->setPhoneNumber((string)$phone);
-		$tamara_address->setCountryCode((string)$country);
+		$tamara_address->setFirstName( (string) $first_name );
+		$tamara_address->setLastName( (string) $last_name );
+		$tamara_address->setLine1( (string) $address1 );
+		$tamara_address->setLine2( (string) $address2 );
+		$tamara_address->setCity( (string) $city );
+		$tamara_address->setRegion( (string) $state );
+		$tamara_address->setPhoneNumber( (string) $phone );
+		$tamara_address->setCountryCode( (string) $country );
 
 		return $tamara_address;
 	}
