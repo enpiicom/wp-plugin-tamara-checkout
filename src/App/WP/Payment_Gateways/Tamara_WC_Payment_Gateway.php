@@ -31,28 +31,9 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public const LIVE_API_URL = 'https://api.tamara.co';
 	public const SANDBOX_API_URL = 'https://api-sandbox.tamara.co';
 
-	public const REGISTERED_WEBHOOKS = [
-		'order_expired',
-		'order_declined',
-	];
-	public const TAMARA_POPUP_WIDGET_POSITIONS = [
-		'woocommerce_single_product_summary' => 'woocommerce_single_product_summary',
-		'woocommerce_after_single_product_summary' => 'woocommerce_after_single_product_summary',
-		'woocommerce_after_add_to_cart_form' => 'woocommerce_after_add_to_cart_form',
-		'woocommerce_before_add_to_cart_form' => 'woocommerce_before_add_to_cart_form',
-		'woocommerce_product_meta_end' => 'woocommerce_product_meta_end',
-	];
-	public const TAMARA_CART_POPUP_WIDGET_POSITIONS = [
-		'woocommerce_before_cart' => 'woocommerce_before_cart',
-		'woocommerce_after_cart_table' => 'woocommerce_after_cart_table',
-		'woocommerce_cart_totals_before_order_total' => 'woocommerce_cart_totals_before_order_total',
-		'woocommerce_proceed_to_checkout' => 'woocommerce_proceed_to_checkout',
-		'woocommerce_after_cart_totals' => 'woocommerce_after_cart_totals',
-		'woocommerce_after_cart' => 'woocommerce_after_cart',
-	];
-	public $id = 'tamara-gateway';
-
 	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS';
+
+	public $id = 'tamara-gateway';
 
 	/**
 	 * Settings Value Object for this plugin
