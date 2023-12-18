@@ -81,9 +81,11 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 
 	public function get_settings( $refresh = false ): Tamara_WC_Payment_Gateway_Settings_VO {
 		// We need to re-pull settings from db if $refesh enabled
-		if ( $refresh ) {
+		if ( $refresh || empty( $this->settings ) ) {
 			$this->init_settings();
 			$this->settings_vo = new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings );
+
+			return $this->settings_vo;
 		}
 
 		// We want to init the Settings Value Object if value not set

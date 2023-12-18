@@ -23,14 +23,8 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public const TEXT_DOMAIN = 'tamara';
-
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
-
-	public function register() {
-		$this->register_services();
-
-		parent::register();
-	}
+	public const DEFAULT_COUNTRY_CODE = 'SA';
 
 	public function manipulate_hooks(): void {
 		// We want to use the check prerequisites within the plugins_loaded action
@@ -56,14 +50,40 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes' ] );
 	}
 
+	/**
+	 *
+	 * @return void
+	 * @throws BindingResolutionException
+	 */
+	public function manipulate_hooks_after_settings(): void {
+		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
+			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
+				add_action( 'wp_enqueue_scripts', [ $this->get_tamara_widget_service(), 'enqueue_tamara_widget_client_scripts' ], 5 );
+
+				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this->get_tamara_widget_service(), 'show_tamara_pdp_widget' ] );
+				add_shortcode( 'tamara_show_popup', [ $this->get_tamara_widget_service(), 'fetch_tamara_pdp_widget' ] );
+			}
+
+			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
+				add_action( 'wp_enqueue_scripts', [ $this->get_tamara_widget_service(), 'enqueue_tamara_widget_client_scripts' ], 5 );
+
+				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this->get_tamara_widget_service(), 'show_tamara_cart_widget' ] );
+				add_shortcode( 'tamara_show_cart_popup', [ $this->get_tamara_widget_service(), 'fetch_tamara_cart_widget' ] );
+			}
+		}
+	}
+
 	public function init_woocommerce() {
 		// Init default Tamara payment gateway
 		wp_app()->singleton(
 			Tamara_WC_Payment_Gateway::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 			function ( WP_Application $app ) {
 				return Tamara_WC_Payment_Gateway::instance();
 			}
 		);
+
+		$this->register_services();
 	}
 
 	public function get_name(): string {
@@ -143,29 +163,30 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 */
 	protected function register_services(): void {
-		$settings = [
-			'api_token' => '',
-			'notification_key' => '',
-			'public_key' => '',
-		];
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
 
 		wp_app()->singleton(
 			Tamara_Client::class,
-			function ( WP_Application $app ) use ( $settings ) {
-				return Tamara_Client::instance( $settings['api_token'] );
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
 			}
 		);
 		wp_app()->singleton(
 			Tamara_Notification::class,
-			function ( WP_Application $app ) use ( $settings ) {
-				return Tamara_Notification::instance( $settings['notification_key'] );
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Notification::instance( $gateway_settings->notification_key );
 			}
 		);
 		wp_app()->singleton(
 			Tamara_Widget::class,
-			function ( WP_Application $app ) use ( $settings ) {
-				return Tamara_Widget::instance( $settings['public_key'] );
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
 			}
 		);
+
+		$this->manipulate_hooks_after_settings();
 	}
 }
