@@ -120,38 +120,6 @@ class Tamara_Client {
 				'tamara_checkout_session_id' => $tamara_checkout_session_id,
 			];
 		}
-
-		if ( isset( $checkout_response ) && ! $checkout_response->isSuccess() ) {
-			$errorMap = $this->get_error_map();
-
-			$tamaraErrors = $checkout_response->getErrors();
-			$errors = [];
-			if ( ! empty( $tamaraErrors ) && is_array( $tamaraErrors ) ) {
-				foreach ( $tamaraErrors as $tmpKey => $tamaraError ) {
-					$errorCode = $tamaraError['error_code'] ?? null;
-					if ( $errorCode && isset( $errorMap[ $errorCode ] ) ) {
-						$errors[] = $errorMap[ $errorCode ];
-					}
-				}
-			}
-			if ( empty( $errors ) ) {
-				$errorCode = $checkout_response->getMessage();
-				if ( $errorCode && isset( $errorMap[ $errorCode ] ) ) {
-					$errors[] = $errorMap[ $errorCode ];
-				}
-
-				if ( ! $checkout_response->isSuccess() && empty( $errors ) ) {
-					$errors[] = $errorMap['tamara_disabled'];
-				}
-			}
-
-			if ( function_exists( 'wc_add_notice' ) ) {
-				foreach ( $errors as $error ) {
-					wc_add_notice( $error, 'error' );
-				}
-			}
-		}
-
 		// If this is the failed process, return false instead of ['result' => 'success']
 		return false;
 	}
@@ -173,7 +141,6 @@ class Tamara_Client {
 			$this->populate_tamara_order( $wc_order, $payment_type, $instalment_period )
 		);
 		try {
-			dev_error_log( $client->createCheckout( $checkoutRequest ) );
 			return $client->createCheckout( $checkoutRequest );
 		} catch ( Exception $create_tamara_checkout_session_exception ) {
 			throw new Exception( 'Cannot create Tamara Checkout Session' );
@@ -246,7 +213,7 @@ class Tamara_Client {
 		$order->setRiskAssessment( $this->populate_tamara_risk_assessment() );
 
 		$order->setItems( $this->populate_tamara_order_items( $wc_order ) );
-		dev_error_log( $order );
+
 		return $order;
 	}
 

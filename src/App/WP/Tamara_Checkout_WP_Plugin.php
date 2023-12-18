@@ -28,6 +28,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Tamara_Order_Trait;
 
 	public const TEXT_DOMAIN = 'tamara';
+	
 	public const TAMARA_CHECKOUT = 'tamara-checkout';
 
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
