@@ -51,7 +51,7 @@
       "symfony/console": "^5.4.0|^6.4.1",
       "symfony/yaml": "^5.4.0",
       "phpcompatibility/php-compatibility": "^9.3.5",
-        "phpstan/phpstan": "^1.10"
+      "phpstan/phpstan": "^1.10"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -64,7 +64,7 @@
     },
     "config": {
       "allow-plugins": {
-          "dealerdirect/phpcodesniffer-composer-installer": true
+        "dealerdirect/phpcodesniffer-composer-installer": true
       }
     },
   "extra": {
