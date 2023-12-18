@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Support\Traits;
 
 trait Wc_Order_Settings_Trait {
-	
+
 	public function get_default_billing_country_code(): string {
 		return ! empty( $this->get_currency_to_country_mapping()[ get_woocommerce_currency() ] )
 			? $this->get_currency_to_country_mapping()[ get_woocommerce_currency() ]
@@ -26,6 +26,11 @@ trait Wc_Order_Settings_Trait {
 		];
 	}
 
+	/**
+	 * Get store base country code
+	 *
+	 * @return string
+	 */
 	public function get_store_base_country_code(): string {
 		return ! empty( WC()->countries->get_base_country() )
 			? WC()->countries->get_base_country()
@@ -33,11 +38,13 @@ trait Wc_Order_Settings_Trait {
 	}
 
 	/**
-	 * @param string $url
+	 * Remove trailing slashes of an url
+	 *
+	 * @param  string  $url
 	 *
 	 * @return string
 	 */
-	public function remove_trailing_slashes( $url ): string {
+	public function remove_trailing_slashes( string $url ): string {
 		return rtrim( trim( $url ), '/' );
 	}
 }
