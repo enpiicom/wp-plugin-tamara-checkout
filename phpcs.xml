@@ -3,6 +3,7 @@
 	<description>The custom ruleset for the VIP Coding Standards itself.</description>
 
 	<file>src/</file>
+	<file>resources/views/</file>
 	<file>tests/</file>
 
 	<!-- Exclude Composer vendor directory. -->

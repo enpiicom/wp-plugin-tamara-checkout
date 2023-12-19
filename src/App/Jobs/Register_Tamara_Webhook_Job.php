@@ -99,8 +99,8 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 			);
 		} else {
 			throw new Exception(
-				esc_html( $tamara_gateway_service->_t( $tamara_register_webhook_api_response->getMessage() ) ),
-				esc_html( $tamara_register_webhook_api_response->getStatusCode() )
+				esc_textarea( $tamara_gateway_service->_t( $tamara_register_webhook_api_response->getMessage() ) ),
+				(int) $tamara_register_webhook_api_response->getStatusCode()
 			);
 		}
 	}
@@ -114,10 +114,10 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	) {
 		throw new Exception(
 			sprintf(
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				$tamara_gateway_service->_t( 'Tamara Service timeout or disconnected.\nError message: " %s".\nTrace: %s' ),
-				esc_html( $tamara_register_webhook_exception->getMessage() ),
-				esc_html( $tamara_register_webhook_exception->getTraceAsString() )
+				esc_textarea( $tamara_register_webhook_exception->getMessage() ),
+				esc_textarea( $tamara_register_webhook_exception->getTraceAsString() )
 			)
 		);
 	}

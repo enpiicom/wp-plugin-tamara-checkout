@@ -12,8 +12,8 @@ class Unit_Test_Case extends Unit {
 	use Test_Utils_Trait;
 
 	protected function setUp(): void {
-		if ( ! class_exists('Tamara_WC_Payment_Gateway')) {
-			Mockery::mock('Tamara_WC_Payment_Gateway');
+		if ( ! class_exists( 'Tamara_WC_Payment_Gateway' ) ) {
+			Mockery::mock( 'Tamara_WC_Payment_Gateway' );
 			class_alias(
 				'Tamara_WC_Payment_Gateway',
 				'Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway'
