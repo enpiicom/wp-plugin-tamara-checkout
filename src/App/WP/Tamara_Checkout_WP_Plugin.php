@@ -8,13 +8,11 @@ use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
-use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
 /**
@@ -23,8 +21,6 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
  * static @method Tamara_Checkout_WP_Plugin wp_app_instance()
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
-
-	use Tamara_Order_Trait;
 
 	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
@@ -130,9 +126,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 * @param mixed $gateways array of gateways before the filter
 	 * @return array of added payment gateways
-	 * @throws BindingResolutionException
 	 */
-	public function add_payment_gateways( $gateways ) {
+	public function add_payment_gateways( $gateways ): array {
 		$gateways[] = $this->get_tamara_gateway_service();
 
 		return $gateways;
@@ -206,7 +201,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	/**
 	 *
 	 * @return void
-	 * @throws BindingResolutionException
 	 */
 	protected function manipulate_hooks_after_settings(): void {
 		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
