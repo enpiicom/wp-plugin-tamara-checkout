@@ -93,6 +93,7 @@ class Tamara_Client {
 				$checkout_payment_type,
 				$instalment_period
 			);
+			dev_error_log($create_tamara_checkout_session_response);
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$errorMessage = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
 			if ( function_exists( 'wc_add_notice' ) ) {
@@ -273,7 +274,7 @@ class Tamara_Client {
 						$wc_order->get_currency()
 					)
 				);
-				$order_item->setReferenceId( $item_id );
+				$order_item->setReferenceId( (string)$item_id );
 				$order_item->setImageUrl( wp_get_attachment_url( $wc_order_item_product->get_image_id() ) );
 			} else {
 				$wc_order_item_product = $wc_order_item->get_data();

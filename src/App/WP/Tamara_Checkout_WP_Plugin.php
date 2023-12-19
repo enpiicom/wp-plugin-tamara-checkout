@@ -160,7 +160,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function adjust_tamara_payment_types_on_checkout($available_gateways): array {
-		dev_error_log($available_gateways);
+//		dev_error_log($available_gateways);
 		return $available_gateways;
 	}
 

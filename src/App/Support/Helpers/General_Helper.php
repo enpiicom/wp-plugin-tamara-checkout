@@ -8,6 +8,11 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class General_Helper {
 
+	/**
+	 * Get store's country code
+	 *
+	 * @return string
+	 */
 	public function get_current_country_code(): string {
 		$store_base_country = WC()->countries->get_base_country() ?? Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
 		$currency_country_mapping = $this->get_currency_country_mappings();
@@ -15,12 +20,21 @@ class General_Helper {
 		return $currency_country_mapping[ strtoupper( get_woocommerce_currency() ) ] ?? $store_base_country;
 	}
 
+	/**
+	 * Get messages translated
+	 *
+	 * @param $tamara_message
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
 	public static function convert_message( $tamara_message ): string {
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
 	}
 
 	/**
 	 * Common error codes when calling create checkout session API
+	 *
 	 * @throws \Exception
 	 */
 	public static function get_error_map(): array {
@@ -61,6 +75,8 @@ class General_Helper {
 	}
 
 	/**
+	 * Get store's current language code
+	 *
 	 * @return string
 	 */
 	public function get_current_language_code(): string {
@@ -83,7 +99,7 @@ class General_Helper {
 	}
 
 	/**
-	 * Get store base country code
+	 * Get store's base country code
 	 *
 	 * @return string
 	 */
@@ -101,6 +117,8 @@ class General_Helper {
 	}
 
 	/**
+	 *  Get displayed price of a WC product
+	 *
 	 * @return float | false
 	 */
 	public static function get_displayed_product_price() {
@@ -127,7 +145,7 @@ class General_Helper {
 	 * @return float
 	 */
 	public static function format_tamara_number( $amount ): float {
-		return floatval( number_format( $amount, 2, '.', '' ) );
+		return floatval( number_format( floatval($amount), 2, '.', '' ) );
 	}
 
 	/**
@@ -138,6 +156,6 @@ class General_Helper {
 	 * @return string
 	 */
 	public static function format_number_general( $amount ): string {
-		return number_format( $amount, 2, '.', '' );
+		return number_format( floatval($amount), 2, '.', '' );
 	}
 }
