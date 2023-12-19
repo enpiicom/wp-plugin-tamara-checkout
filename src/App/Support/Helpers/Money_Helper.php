@@ -2,7 +2,7 @@
 
 namespace Tamara_Checkout\App\Support\Helpers;
 
-class MoneyHelper {
+class Money_Helper {
 
 	/**
 	 * Format the amount of money for Tamara SDK

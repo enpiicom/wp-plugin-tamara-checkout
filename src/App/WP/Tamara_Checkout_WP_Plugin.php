@@ -15,7 +15,6 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
-use Tamara_Checkout\App\Support\Traits\Wc_Order_Settings_Trait;
 
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
@@ -27,7 +26,6 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	use Tamara_Order_Trait;
-	use Wc_Order_Settings_Trait;
 
 	public const TEXT_DOMAIN = 'tamara';
 
