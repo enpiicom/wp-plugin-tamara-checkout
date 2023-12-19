@@ -7,9 +7,8 @@ namespace Tamara_Checkout\App\Services;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Helpers\MoneyHelper;
+use Tamara_Checkout\App\Support\Helpers\Money_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
-use Tamara_Checkout\App\Support\Traits\Wc_Order_Settings_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
@@ -37,7 +36,6 @@ use WC_Product;
 class Tamara_Client {
 	use Static_Instance_Trait;
 	use Tamara_Order_Trait;
-	use Wc_Order_Settings_Trait;
 
 	protected $tamara_checkout_wp_plugin;
 	protected $working_mode = 'live';
@@ -90,7 +88,7 @@ class Tamara_Client {
 		$instalment_period = 3;
 		$checkout_payment_type = 'PAY_BY_INSTALMENTS';
 		try {
-			$create_tamara_checkout_session_response = $this->create_tamara_checkout_session(
+			$create_tamara_checkout_session_response = $this->build_checkout_session_request(
 				$wc_order,
 				$checkout_payment_type,
 				$instalment_period
@@ -100,8 +98,8 @@ class Tamara_Client {
 			if ( function_exists( 'wc_add_notice' ) ) {
 				wc_add_notice( $errorMessage, 'error' );
 			}
-		} catch ( Exception $tamaraCheckoutException ) {
-			$errorMessage = $this->_t( 'Tamara Service unavailable! Please try again later.' );
+		} catch ( Exception $tamara_checkout_exception ) {
+			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' );
 			if ( function_exists( 'wc_add_notice' ) ) {
 				wc_add_notice( $error_message, 'error' );
 			}
@@ -143,11 +141,11 @@ class Tamara_Client {
 	 */
 	public function build_checkout_session_request( WC_Order $wc_order, $payment_type, $instalment_period ): CreateCheckoutResponse {
 		$client = $this->api_client;
-		$checkoutRequest = new CreateCheckoutRequest(
+		$checkout_request = new CreateCheckoutRequest(
 			$this->build_tamara_order( $wc_order, $payment_type, $instalment_period )
 		);
 
-		return $client->createCheckout( $checkoutRequest );
+		return $client->createCheckout( $checkout_request );
 	}
 
 	/**
@@ -335,7 +333,7 @@ class Tamara_Client {
 			: wp_app_route_wp_url( 'tamara-success' );
 		$tamara_success_url = add_query_arg( $params, $tamara_success_url );
 
-		return $this->remove_trailing_slashes( $tamara_success_url );
+		return remove_trailing_slashes( $tamara_success_url );
 	}
 
 	/**
@@ -352,7 +350,7 @@ class Tamara_Client {
 
 		$tamara_cancel_url = add_query_arg( $params, $tamara_cancel_url );
 
-		return $this->remove_trailing_slashes( $tamara_cancel_url );
+		return remove_trailing_slashes( $tamara_cancel_url );
 	}
 
 	/**
@@ -369,7 +367,7 @@ class Tamara_Client {
 
 		$tamara_failure_url = add_query_arg( $params, $tamara_failure_url );
 
-		return $this->remove_trailing_slashes( $tamara_failure_url );
+		return remove_trailing_slashes( $tamara_failure_url );
 	}
 
 	/**
@@ -514,10 +512,10 @@ class Tamara_Client {
 		$order->setOrderReferenceId( (string) $wc_order->get_id() );
 		$order->setLocale( get_locale() );
 		$order->setCurrency( $wc_order->get_currency() );
-		$order->setTotalAmount( new Money( MoneyHelper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
+		$order->setTotalAmount( new Money( Money_Helper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
 		$order->setCountryCode(
 			! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
-			: $this->get_default_billing_country_code()
+			: get_default_billing_country_code()
 		);
 		$order->setPaymentType( $payment_type );
 		$order->setInstalments( $instalment_period );
@@ -532,13 +530,13 @@ class Tamara_Client {
 		$order->setDescription( $this->tamara_checkout_wp_plugin->_t( 'Use Tamara Gateway with WooCommerce' ) );
 		$order->setTaxAmount(
 			new Money(
-				MoneyHelper::format_tamara_number( $wc_order->get_total_tax() ),
+				Money_Helper::format_tamara_number( $wc_order->get_total_tax() ),
 				$order->getCurrency()
 			)
 		);
 		$order->setShippingAmount(
 			new Money(
-				MoneyHelper::format_tamara_number( $wc_order->get_shipping_total() ),
+				Money_Helper::format_tamara_number( $wc_order->get_shipping_total() ),
 				$order->getCurrency()
 			)
 		);
@@ -546,7 +544,7 @@ class Tamara_Client {
 			new Discount(
 				$usedCouponsStr,
 				new Money(
-					MoneyHelper::format_tamara_number(
+					Money_Helper::format_tamara_number(
 						$wc_order->get_discount_total()
 					),
 					$order->getCurrency()

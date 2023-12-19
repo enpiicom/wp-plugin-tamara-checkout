@@ -15,7 +15,6 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
-use Tamara_Checkout\App\Support\Traits\Wc_Order_Settings_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
 /**
@@ -30,6 +29,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
 	public const DEFAULT_COUNTRY_CODE = 'SA';
+	const TAMARA_CHECKOUT = 'tamara-checkout';
 
 	public function manipulate_hooks(): void {
 		// We want to use the check prerequisites within the plugins_loaded action
