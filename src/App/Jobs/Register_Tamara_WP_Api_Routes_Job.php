@@ -14,5 +14,6 @@ class Register_Tamara_WP_Api_Routes_Job extends Base_Job {
 
 	public function handle(): void {
 		Route::post( 'tamara/webhook', [ Main_Controller::class, 'handle_tamara_webhook' ] )->name( 'tamara-webhook' );
+		Route::get( 'tamara/webhook', [ Main_Controller::class, 'handle_tamara_webhook' ] )->name( 'tamara-webhook-get' );
 	}
 }
