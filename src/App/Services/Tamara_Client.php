@@ -103,15 +103,11 @@ class Tamara_Client {
 		if ( isset( $checkout_response ) && $checkout_response->isSuccess() ) {
 			$tamara_checkout_url = $checkout_response->getCheckoutResponse()->getCheckoutUrl();
 			$tamara_checkout_session_id = $checkout_response->getCheckoutResponse()->getCheckoutId();
-
-			update_post_meta( $wc_order_id, 'tamara_checkout_session_id', $tamara_checkout_session_id );
 			update_post_meta( $wc_order_id, '_tamara_checkout_session_id', $tamara_checkout_session_id );
-			update_post_meta( $wc_order_id, 'tamara_checkout_url', $tamara_checkout_url );
 			update_post_meta( $wc_order_id, '_tamara_checkout_url', $tamara_checkout_url );
-			update_post_meta( $wc_order_id, 'tamara_payment_type', $checkout_payment_type );
 			update_post_meta( $wc_order_id, '_tamara_payment_type', $checkout_payment_type );
+
 			if ( $checkout_payment_type === 'PAY_BY_INSTALMENTS' && ! empty( $instalment_period ) ) {
-				update_post_meta( $wc_order_id, 'tamara_payment_type_instalment', $instalment_period );
 				update_post_meta( $wc_order_id, '_tamara_payment_type_instalment', $instalment_period );
 			}
 

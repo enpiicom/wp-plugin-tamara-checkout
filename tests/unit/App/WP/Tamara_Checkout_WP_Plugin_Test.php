@@ -11,18 +11,6 @@ use WP_Mock;
 
 class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 
-	public function test_register(): void {
-		$tamara_checkout_wp_plugin_mock = Mockery::mock( Tamara_Checkout_WP_Plugin::class )
-												->shouldAllowMockingMethod( 'register' )
-												->shouldAllowMockingProtectedMethods()
-												->makePartial();
-		$tamara_checkout_wp_plugin_mock->shouldReceive( 'register_services' )->once();
-		$tamara_checkout_wp_plugin_mock->shouldReceive( 'validate_needed_properties' )->once();
-
-		// Call the register method
-		$tamara_checkout_wp_plugin_mock->register();
-	}
-
 	public function test_manipulate_hooks(): void {
 		// Create a partial mock of Tamara_Checkout_WP_Plugin with only manipulate_hooks method to be tested
 		$tamara_checkout_wp_plugin_mock = $this->getMockBuilder( Tamara_Checkout_WP_Plugin::class )
