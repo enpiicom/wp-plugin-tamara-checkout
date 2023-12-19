@@ -93,7 +93,7 @@ class Tamara_Client {
 				$checkout_payment_type,
 				$instalment_period
 			);
-			dev_error_log($create_tamara_checkout_session_response);
+			dev_error_log( $create_tamara_checkout_session_response );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$errorMessage = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
 			if ( function_exists( 'wc_add_notice' ) ) {
@@ -274,7 +274,7 @@ class Tamara_Client {
 						$wc_order->get_currency()
 					)
 				);
-				$order_item->setReferenceId( (string)$item_id );
+				$order_item->setReferenceId( (string) $item_id );
 				$order_item->setImageUrl( wp_get_attachment_url( $wc_order_item_product->get_image_id() ) );
 			} else {
 				$wc_order_item_product = $wc_order_item->get_data();
@@ -468,8 +468,8 @@ class Tamara_Client {
 	}
 
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t($text) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t($text);
+	public function _t( $text ) {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $text );
 	}
 
 	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
@@ -485,7 +485,7 @@ class Tamara_Client {
 		}
 	}
 
-	protected function store_meta_data_from_checkout_response(int $wc_order_id, $checkout_session_id, $checkout_url, $checkout_payment_type, $checkout_instalment_period): void {
+	protected function store_meta_data_from_checkout_response( int $wc_order_id, $checkout_session_id, $checkout_url, $checkout_payment_type, $checkout_instalment_period ): void {
 		update_post_meta( $wc_order_id, '_tamara_checkout_session_id', $checkout_session_id );
 		update_post_meta( $wc_order_id, '_tamara_checkout_url', $checkout_url );
 		update_post_meta( $wc_order_id, '_tamara_payment_type', $checkout_payment_type );

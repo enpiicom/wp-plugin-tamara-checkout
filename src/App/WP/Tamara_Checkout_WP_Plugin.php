@@ -159,8 +159,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		echo '<meta name="generator" content="Tamara Checkout ' . esc_attr( $this->get_version() ) . '" />';
 	}
 
-	public function adjust_tamara_payment_types_on_checkout($available_gateways): array {
-//		dev_error_log($available_gateways);
+	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
+		//      dev_error_log($available_gateways);
 		return $available_gateways;
 	}
 
@@ -220,7 +220,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
-			add_filter('woocommerce_available_payment_gateways', [$this, 'adjust_tamara_payment_types_on_checkout'], 9998, 1);
+			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
 		}
 	}
 }

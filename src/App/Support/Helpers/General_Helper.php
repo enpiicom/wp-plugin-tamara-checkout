@@ -58,9 +58,12 @@ class General_Helper {
 		$tamara_checkout_WP_plugin_instance = Tamara_Checkout_WP_Plugin::wp_app_instance();
 
 		// Use array_map to translate all messages.
-		return array_map(function ($message) use ($tamara_checkout_WP_plugin_instance) {
-			return $tamara_checkout_WP_plugin_instance->_t($message);
-		}, $error_messages);
+		return array_map(
+			function ( $message ) use ( $tamara_checkout_WP_plugin_instance ) {
+				return $tamara_checkout_WP_plugin_instance->_t( $message );
+			},
+			$error_messages
+		);
 	}
 
 	/**
@@ -112,7 +115,7 @@ class General_Helper {
 	/**
 	 * @return string
 	 */
-	public static function get_current_currency() : string {
+	public static function get_current_currency(): string {
 		return get_woocommerce_currency() ?? 'SAR';
 	}
 
@@ -145,7 +148,7 @@ class General_Helper {
 	 * @return float
 	 */
 	public static function format_tamara_number( $amount ): float {
-		return floatval( number_format( floatval($amount), 2, '.', '' ) );
+		return floatval( number_format( floatval( $amount ), 2, '.', '' ) );
 	}
 
 	/**
@@ -156,6 +159,6 @@ class General_Helper {
 	 * @return string
 	 */
 	public static function format_number_general( $amount ): string {
-		return number_format( floatval($amount), 2, '.', '' );
+		return number_format( floatval( $amount ), 2, '.', '' );
 	}
 }
