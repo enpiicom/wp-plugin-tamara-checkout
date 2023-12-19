@@ -20,17 +20,7 @@ class Tamara_Widget {
 		$this->is_live_mode = $is_live_mode;
 	}
 
-	public function show_tamara_pdp_widget() {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->fetch_tamara_pdp_widget();
-	}
-
-	public function show_tamara_cart_widget() {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->fetch_tamara_cart_widget();
-	}
-
-	public function enqueue_tamara_widget_client_scripts() {
+	public function enqueue_client_scripts(): void {
 		$js_url_handle_id = 'tamara-widget';
 		$enqueue_script_args = version_compare( $GLOBALS['wp_version'], '6.3.0', '>=' ) ?
 			[

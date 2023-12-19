@@ -58,18 +58,20 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function manipulate_hooks_after_settings(): void {
 		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
 			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
-				add_action( 'wp_enqueue_scripts', [ $this->get_tamara_widget_service(), 'enqueue_tamara_widget_client_scripts' ], 5 );
+				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
 
-				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this->get_tamara_widget_service(), 'show_tamara_pdp_widget' ] );
-				add_shortcode( 'tamara_show_popup', [ $this->get_tamara_widget_service(), 'fetch_tamara_pdp_widget' ] );
+				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
+				add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
 			}
 
 			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
-				add_action( 'wp_enqueue_scripts', [ $this->get_tamara_widget_service(), 'enqueue_tamara_widget_client_scripts' ], 5 );
+				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
 
-				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this->get_tamara_widget_service(), 'show_tamara_cart_widget' ] );
-				add_shortcode( 'tamara_show_cart_popup', [ $this->get_tamara_widget_service(), 'fetch_tamara_cart_widget' ] );
+				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
+				add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
 			}
+
+			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 		}
 	}
 
@@ -135,11 +137,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$this->get_tamara_gateway_service()->process_admin_options();
 	}
 
-	public function tamara_gateway_register_webhook() {
+	public function tamara_gateway_register_webhook(): void {
 		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( 'low' );
 	}
 
-	public function tamara_gateway_register_wp_api_routes() {
+	public function tamara_gateway_register_wp_api_routes(): void {
 		Register_Tamara_WP_Api_Routes_Job::execute_now();
 	}
 
@@ -154,6 +156,32 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$gateways[] = $this->get_tamara_gateway_service();
 
 		return $gateways;
+	}
+
+	public function enqueue_tamara_widget_client_scripts(): void {
+		$this->get_tamara_widget_service()->enqueue_client_scripts();
+	}
+
+	public function show_tamara_pdp_widget(): void {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->fetch_tamara_pdp_widget();
+	}
+
+	public function fetch_tamara_pdp_widget( $data = null ) {
+		return $this->get_tamara_widget_service()->fetch_tamara_pdp_widget( $data );
+	}
+
+	public function show_tamara_cart_widget(): void {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->fetch_tamara_cart_widget();
+	}
+
+	public function fetch_tamara_cart_widget( $data = null ) {
+		return $this->get_tamara_widget_service()->fetch_tamara_cart_widget( $data );
+	}
+
+	public function show_tamara_footprint(): void {
+		echo '<meta name="generator" content="Tamara Checkout ' . esc_attr( $this->get_version() ) . '" />';
 	}
 
 	/**
