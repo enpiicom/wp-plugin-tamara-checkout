@@ -15,7 +15,6 @@ use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
-use Tamara_Checkout\Deps\Tamara\Model\Checkout\CheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Address;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Consumer;
