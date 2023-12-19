@@ -210,6 +210,7 @@ class Tamara_Client {
 	protected function populate_tamara_risk_assessment(): RiskAssessment {
 		$risk_assessment = new RiskAssessment();
 		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		// Todo: Tamara PHP SDK should be updated to perform further actions for Risk Assessment
 		//
 		//      $risk_assessment->setAccountCreationDate( TamaraCheckout::getInstance()->getCurrentUserRegisterDate() );
 		//      $risk_assessment->setHasDeliveredOrder( TamaraCheckout::getInstance()->currentUserHasDeliveredOrder() );
@@ -428,7 +429,7 @@ class Tamara_Client {
 		$wc_shipping_address['country'] = ! empty( $wc_shipping_address['country'] )
 			? $wc_shipping_address['country']
 			: ( ! empty( $wc_billing_address['country'] ) ? $wc_billing_address['country']
-				: $this->general_helper->get_default_billing_country_code() );
+				: $this->general_helper->get_current_country_code() );
 
 		$wc_shipping_address['phone'] = ! empty( $wc_shipping_address['phone'] )
 			? $wc_shipping_address['phone']
@@ -515,7 +516,7 @@ class Tamara_Client {
 		$order->setTotalAmount( new Money( General_Helper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
 		$order->setCountryCode(
 			! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
-			: $this->general_helper->get_default_billing_country_code()
+			: $this->general_helper->get_current_country_code()
 		);
 		$order->setPaymentType( $payment_type );
 		$order->setInstalments( $instalment_period );

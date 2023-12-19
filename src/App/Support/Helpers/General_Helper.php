@@ -8,10 +8,11 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class General_Helper {
 
-	public function get_default_billing_country_code(): string {
-		return ! empty( $this->get_currency_to_country_mapping()[ get_woocommerce_currency() ] )
-			? $this->get_currency_to_country_mapping()[ get_woocommerce_currency() ]
-			: $this->get_store_base_country_code();
+	public function get_current_country_code(): string {
+		$store_base_country = WC()->countries->get_base_country() ?? Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+		$currency_country_mapping = $this->get_currency_country_mappings();
+
+		return $currency_country_mapping[ strtoupper( get_woocommerce_currency() ) ] ?? $store_base_country;
 	}
 
 	public static function convert_message( $tamara_message ): string {
@@ -20,24 +21,32 @@ class General_Helper {
 
 	/**
 	 * Common error codes when calling create checkout session API
+	 * @throws \Exception
 	 */
 	public static function get_error_map(): array {
-		return [
-			'total_amount_invalid_limit_24hrs_gmv' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method.' ),
-			'tamara_disabled' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Tamara is currently unavailable, please try again later.' ),
-			'consumer_invalid_phone_number' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Invalid Consumer Phone Number' ),
-			'invalid_phone_number' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Invalid Phone Number.' ),
-			'total_amount_invalid_currency' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'We do not support cross currencies. Please select the correct currency for your country.' ),
-			'billing_address_invalid_phone_number' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Invalid Billing Address Phone Number.' ),
-			'shipping_address_invalid_phone_number' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Invalid Shipping Address Phone Number.' ),
-			'total_amount_invalid_limit' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'The grand total of order is over/under limit of Tamara.' ),
-			'currency_unsupported' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'We do not support cross currencies. Please select the correct currency for your country.' ),
-			'Your order information is invalid' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Your order information is invalid.' ),
-			'Invalid country code' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Invalid country code.' ),
-			'We do not support your delivery country' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'We do not support your delivery country.' ),
-			'Your phone number is invalid. Please check again' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Your phone number is invalid. Please check again.' ),
-			'We do not support cross currencies. Please select the correct currency for your country' => Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'We do not support cross currencies. Please select the correct currency for your country.' ),
+		$error_messages = [
+			'total_amount_invalid_limit_24hrs_gmv' => 'We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method.',
+			'tamara_disabled' => 'Tamara is currently unavailable, please try again later.',
+			'consumer_invalid_phone_number' => 'Invalid Consumer Phone Number',
+			'invalid_phone_number' => 'Invalid Phone Number.',
+			'total_amount_invalid_currency' => 'We do not support cross currencies. Please select the correct currency for your country.',
+			'billing_address_invalid_phone_number' => 'Invalid Billing Address Phone Number.',
+			'shipping_address_invalid_phone_number' => 'Invalid Shipping Address Phone Number.',
+			'total_amount_invalid_limit' => 'The grand total of order is over/under limit of Tamara.',
+			'currency_unsupported' => 'We do not support cross currencies. Please select the correct currency for your country.',
+			'Your order information is invalid' => 'Your order information is invalid.',
+			'Invalid country code' => 'Invalid country code.',
+			'We do not support your delivery country' => 'We do not support your delivery country.',
+			'Your phone number is invalid. Please check again' => 'Your phone number is invalid. Please check again.',
+			'We do not support cross currencies. Please select the correct currency for your country' => 'We do not support cross currencies. Please select the correct currency for your country.',
 		];
+
+		$tamara_checkout_WP_plugin_instance = Tamara_Checkout_WP_Plugin::wp_app_instance();
+
+		// Use array_map to translate all messages.
+		return array_map(function ($message) use ($tamara_checkout_WP_plugin_instance) {
+			return $tamara_checkout_WP_plugin_instance->_t($message);
+		}, $error_messages);
 	}
 
 	/**
@@ -52,11 +61,19 @@ class General_Helper {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function get_current_language_code(): string {
+		$lang = substr( get_locale(), 0, 2 ) ?? 'en';
+		return strtolower( $lang );
+	}
+
+	/**
 	 * Get country code based on its currency
 	 *
 	 * @return array
 	 */
-	public static function get_currency_to_country_mapping(): array {
+	public static function get_currency_country_mappings(): array {
 		return [
 			'SAR' => 'SA',
 			'AED' => 'AE',
@@ -74,6 +91,32 @@ class General_Helper {
 		return ! empty( WC()->countries->get_base_country() )
 			? WC()->countries->get_base_country()
 			: Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function get_current_currency() : string {
+		return get_woocommerce_currency() ?? 'SAR';
+	}
+
+	/**
+	 * @return float | false
+	 */
+	public static function get_displayed_product_price() {
+		global $product;
+
+		if ( $product ) {
+			if ( $product instanceof \WC_Product ) {
+				if ( $product instanceof \WC_Product_Variable ) {
+					return $product->get_variation_prices( true )['price'];
+				} else {
+					return wc_get_price_to_display( $product );
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
