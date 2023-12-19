@@ -27,16 +27,29 @@
       }
     ],
     "require": {
-        "enpii/enpii-base": "dev-wp-release",
-        "php": "^7.2.5|^8.0"
+      "enpii/enpii-base": "dev-wp-release",
+      "php": "^7.2.5|^8.0"
+    },
+    "replace": {
+      "symfony/http-foundation": "^5.0.0",
+      "symfony/deprecation-contracts": "^2.5.0",
+      "symfony/contracts": "^2.5.0",
+      "symfony/options-resolver": "^5.4.0",
+      "symfony/error-handler": "^4.4.0",
+      "psr/log": "^1.1.4",
+      "psr/cache": "^1.0.1",
+      "psr/container": "1.1.0",
+      "symfony/string": "^5.4"
     },
     "require-dev": {
-      "10up/wp_mock": "^1.0.0",
+      "10up/wp_mock": "~0.4.2|^1.0.0",
       "automattic/vipwpcs": "^3.0.0",
-      "codeception/codeception": "^5.0.0",
-      "codeception/module-asserts": "^3.0.0",
-      "codeception/module-phpbrowser": "^3.0.0",
+      "codeception/codeception": "^4.2.2|^5.0.0",
+      "codeception/module-asserts": "^1.3.1|^3.0.0",
+      "codeception/module-phpbrowser": "^1.3.1|^3.0.0",
       "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+      "symfony/console": "^5.4.0|^6.4.1",
+      "symfony/yaml": "^5.4.0|^6.4.1",
       "phpcompatibility/php-compatibility": "^9.3.5"
     },
     "minimum-stability": "dev",
@@ -44,12 +57,42 @@
     "autoload": {
       "psr-4": {
         "Tamara_Checkout\\": "src",
+        "Tamara_Checkout\\Deps\\": "src-deps",
         "Tamara_Checkout\\Tests\\": "tests"
       }
     },
     "config": {
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+      "allow-plugins": {
+        "dealerdirect/phpcodesniffer-composer-installer": true
+      }
+    },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "Tamara_Checkout\\Deps\\",
+      "dep_directory": "/src-deps/",
+      "classmap_directory": "/src-classes/deps/",
+      "classmap_prefix": "TCO_",
+      "packages": [
+        "guzzlehttp/guzzle",
+        "firebase/php-jwt",
+        "tamara-solution/php-sdk"
+      ],
+      "delete_vendor_directories": true
     }
+  },
+  "scripts": {
+    "phpcs": [
+      "./vendor/bin/phpcs"
+    ],
+    "phpunit": [
+      "./vendor/bin/phpunit"
+    ],
+    "codecept-run": [
+      "./vendor/bin/codecept run"
+    ],
+    "test": [
+      "@phpcs",
+      "@codecept-run unit"
+    ]
+  }
 }

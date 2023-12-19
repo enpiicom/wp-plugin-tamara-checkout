@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
-use Enpii_Base\Foundation\Bus\Dispatchable_Trait;
 use Enpii_Base\Foundation\Shared\Base_Query;
-use Tamara_Checkout\App\WooCommerce\Payment_Gateways\Tamara_WC_Payment_Gateway;
+use Enpii_Base\Foundation\Support\Executable_Trait;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
-	use Dispatchable_Trait;
+	use Executable_Trait;
 
 	public function handle() {
 		$form_fields = [
@@ -35,8 +35,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'type' => 'select',
 				'default' => Tamara_WC_Payment_Gateway::ENVIRONMENT_LIVE_MODE,
 				'options' => [
-					Tamara_WC_Payment_Gateway::ENVIRONMENT_LIVE_MODE => 'Live Mode',
-					Tamara_WC_Payment_Gateway::ENVIRONMENT_SANDBOX_MODE => 'Sandbox Mode',
+					Tamara_WC_Payment_Gateway::ENVIRONMENT_LIVE_MODE => $this->_t( 'Live Mode' ),
+					Tamara_WC_Payment_Gateway::ENVIRONMENT_SANDBOX_MODE => $this->_t( 'Sandbox Mode' ),
 				],
 				'description' => $this->_t( 'This setting specifies whether you will process live transactions, or whether you will process simulated transactions using the Tamara Sandbox.' ),
 			],
@@ -230,7 +230,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'popup_widget_position' => [
 				'title' => $this->_t( 'PDP Widget Position' ),
 				'type' => 'select',
-				'options' => Tamara_WC_Payment_Gateway::TAMARA_POPUP_WIDGET_POSITIONS,
+				'options' => $this->get_pdp_widget_positions(),
 				'description' => $this->_t( 'Choose a position where you want to display the Tamara Payment Popup Widget on single product page (https://www.businessbloomer.com/woocommerce-visual-hook-guide-single-product-page/). Or, you can use shortcode with attributes to show it on custom pages e.g. [tamara_show_popup price="199" currency="SAR" language="en"]' ),
 				'default' => 'woocommerce_before_add_to_cart_form',
 			],
@@ -244,7 +244,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'cart_popup_widget_position' => [
 				'title' => $this->_t( 'Cart Popup Widget Position' ),
 				'type' => 'select',
-				'options' => Tamara_WC_Payment_Gateway::TAMARA_CART_POPUP_WIDGET_POSITIONS,
+				'options' => $this->get_cart_widget_positions(),
 				'description' => $this->_t( 'Choose a position where you want to display the Tamara Payment Popup Widget on cart page.' ),
 				'default' => 'woocommerce_proceed_to_checkout',
 			],
@@ -359,5 +359,26 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 
 	protected function get_tamara_cancel_url() {
 		return 'get_tamara_cancel_url';
+	}
+
+	protected function get_pdp_widget_positions() {
+		return [
+			'woocommerce_single_product_summary' => 'woocommerce_single_product_summary',
+			'woocommerce_after_single_product_summary' => 'woocommerce_after_single_product_summary',
+			'woocommerce_after_add_to_cart_form' => 'woocommerce_after_add_to_cart_form',
+			'woocommerce_before_add_to_cart_form' => 'woocommerce_before_add_to_cart_form',
+			'woocommerce_product_meta_end' => 'woocommerce_product_meta_end',
+		];
+	}
+
+	protected function get_cart_widget_positions() {
+		return [
+			'woocommerce_before_cart' => 'woocommerce_before_cart',
+			'woocommerce_after_cart_table' => 'woocommerce_after_cart_table',
+			'woocommerce_cart_totals_before_order_total' => 'woocommerce_cart_totals_before_order_total',
+			'woocommerce_proceed_to_checkout' => 'woocommerce_proceed_to_checkout',
+			'woocommerce_after_cart_totals' => 'woocommerce_after_cart_totals',
+			'woocommerce_after_cart' => 'woocommerce_after_cart',
+		];
 	}
 }
