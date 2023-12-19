@@ -7,8 +7,6 @@ namespace Tamara_Checkout\App\Services;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Helpers\Money_Helper;
-use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
@@ -35,7 +33,6 @@ use WC_Product;
  */
 class Tamara_Client {
 	use Static_Instance_Trait;
-	use Tamara_Order_Trait;
 
 	protected $tamara_checkout_wp_plugin;
 	protected $working_mode = 'live';
@@ -45,7 +42,10 @@ class Tamara_Client {
 
 	protected $api_client;
 
+	protected $general_helper;
+
 	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
+		$this->general_helper = new General_Helper();
 		$this->tamara_checkout_wp_plugin = Tamara_Checkout_WP_Plugin::wp_app_instance();
 		$logger = null;
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
@@ -251,24 +251,24 @@ class Tamara_Client {
 												- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
 				$order_item->setName( $wc_order_item_name );
 				$order_item->setQuantity( $wc_order_item_quantity );
-				$order_item->setUnitPrice( new Money( Money_Helper::format_tamara_number( $item_price ), $wc_order->get_currency() ) );
+				$order_item->setUnitPrice( new Money( General_Helper::format_tamara_number( $item_price ), $wc_order->get_currency() ) );
 				$order_item->setType( $wc_order_item_categories );
 				$order_item->setSku( $wc_order_item_sku );
 				$order_item->setTotalAmount(
 					new Money(
-						Money_Helper::format_tamara_number( $wc_order_item_total ),
+						General_Helper::format_tamara_number( $wc_order_item_total ),
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setTaxAmount(
 					new Money(
-						Money_Helper::format_tamara_number( $wc_order_item_total_tax ),
+						General_Helper::format_tamara_number( $wc_order_item_total_tax ),
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setDiscountAmount(
 					new Money(
-						Money_Helper::format_tamara_number( $wc_order_item_discount_amount ),
+						General_Helper::format_tamara_number( $wc_order_item_discount_amount ),
 						$wc_order->get_currency()
 					)
 				);
@@ -287,24 +287,24 @@ class Tamara_Client {
 												- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
 				$order_item->setName( $wc_order_item_name );
 				$order_item->setQuantity( $wc_order_item_quantity );
-				$order_item->setUnitPrice( new Money( Money_Helper::format_tamara_number( $item_price ), $wc_order->get_currency() ) );
+				$order_item->setUnitPrice( new Money( General_Helper::format_tamara_number( $item_price ), $wc_order->get_currency() ) );
 				$order_item->setType( $wc_order_item_categories );
 				$order_item->setSku( $wc_order_item_sku );
 				$order_item->setTotalAmount(
 					new Money(
-						Money_Helper::format_tamara_number( $wc_order_item_total ),
+						General_Helper::format_tamara_number( $wc_order_item_total ),
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setTaxAmount(
 					new Money(
-						Money_Helper::format_tamara_number( $wc_order_item_total_tax ),
+						General_Helper::format_tamara_number( $wc_order_item_total_tax ),
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setDiscountAmount(
 					new Money(
-						Money_Helper::format_tamara_number( $wc_order_item_discount_amount ),
+						General_Helper::format_tamara_number( $wc_order_item_discount_amount ),
 						$wc_order->get_currency()
 					)
 				);
@@ -333,7 +333,7 @@ class Tamara_Client {
 			: wp_app_route_wp_url( 'tamara-success' );
 		$tamara_success_url = add_query_arg( $params, $tamara_success_url );
 
-		return remove_trailing_slashes( $tamara_success_url );
+		return $this->general_helper->remove_trailing_slashes( $tamara_success_url );
 	}
 
 	/**
@@ -350,7 +350,7 @@ class Tamara_Client {
 
 		$tamara_cancel_url = add_query_arg( $params, $tamara_cancel_url );
 
-		return remove_trailing_slashes( $tamara_cancel_url );
+		return $this->general_helper->remove_trailing_slashes( $tamara_cancel_url );
 	}
 
 	/**
@@ -367,7 +367,7 @@ class Tamara_Client {
 
 		$tamara_failure_url = add_query_arg( $params, $tamara_failure_url );
 
-		return remove_trailing_slashes( $tamara_failure_url );
+		return $this->general_helper->remove_trailing_slashes( $tamara_failure_url );
 	}
 
 	/**
@@ -428,7 +428,7 @@ class Tamara_Client {
 		$wc_shipping_address['country'] = ! empty( $wc_shipping_address['country'] )
 			? $wc_shipping_address['country']
 			: ( ! empty( $wc_billing_address['country'] ) ? $wc_billing_address['country']
-				: $this->get_default_billing_country_code() );
+				: $this->general_helper->get_default_billing_country_code() );
 
 		$wc_shipping_address['phone'] = ! empty( $wc_shipping_address['phone'] )
 			? $wc_shipping_address['phone']
@@ -512,10 +512,10 @@ class Tamara_Client {
 		$order->setOrderReferenceId( (string) $wc_order->get_id() );
 		$order->setLocale( get_locale() );
 		$order->setCurrency( $wc_order->get_currency() );
-		$order->setTotalAmount( new Money( Money_Helper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
+		$order->setTotalAmount( new Money( General_Helper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
 		$order->setCountryCode(
 			! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
-			: get_default_billing_country_code()
+			: $this->general_helper->get_default_billing_country_code()
 		);
 		$order->setPaymentType( $payment_type );
 		$order->setInstalments( $instalment_period );
@@ -530,13 +530,13 @@ class Tamara_Client {
 		$order->setDescription( $this->tamara_checkout_wp_plugin->_t( 'Use Tamara Gateway with WooCommerce' ) );
 		$order->setTaxAmount(
 			new Money(
-				Money_Helper::format_tamara_number( $wc_order->get_total_tax() ),
+				General_Helper::format_tamara_number( $wc_order->get_total_tax() ),
 				$order->getCurrency()
 			)
 		);
 		$order->setShippingAmount(
 			new Money(
-				Money_Helper::format_tamara_number( $wc_order->get_shipping_total() ),
+				General_Helper::format_tamara_number( $wc_order->get_shipping_total() ),
 				$order->getCurrency()
 			)
 		);
@@ -544,7 +544,7 @@ class Tamara_Client {
 			new Discount(
 				$usedCouponsStr,
 				new Money(
-					Money_Helper::format_tamara_number(
+					General_Helper::format_tamara_number(
 						$wc_order->get_discount_total()
 					),
 					$order->getCurrency()
