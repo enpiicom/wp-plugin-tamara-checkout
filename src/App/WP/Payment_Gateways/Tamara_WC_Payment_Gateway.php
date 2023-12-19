@@ -106,7 +106,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * @throws \Exception
 	 */
 	public function process_payment( $wc_order_id ) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->create_checkout_session( $wc_order_id );
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->process_payment( $wc_order_id );
 	}
 
 	/**

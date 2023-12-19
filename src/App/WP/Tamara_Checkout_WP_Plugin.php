@@ -15,7 +15,7 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Traits\Tamara_Order_Trait;
-
+use Tamara_Checkout\App\Support\Traits\Wc_Order_Settings_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 
 /**
@@ -28,18 +28,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Tamara_Order_Trait;
 
 	public const TEXT_DOMAIN = 'tamara';
-
-	public const TAMARA_CHECKOUT = 'tamara-checkout';
-
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
-
 	public const DEFAULT_COUNTRY_CODE = 'SA';
-
-	public function register() {
-		$this->register_services();
-
-		parent::register();
-	}
 
 	public function manipulate_hooks(): void {
 		// We want to use the check prerequisites within the plugins_loaded action
@@ -63,31 +53,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		);
 
 		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes' ] );
-	}
-
-	/**
-	 *
-	 * @return void
-	 * @throws BindingResolutionException
-	 */
-	public function manipulate_hooks_after_settings(): void {
-		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
-				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
-
-				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
-				add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
-			}
-
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
-				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
-
-				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
-				add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
-			}
-
-			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
-		}
 	}
 
 	public function init_woocommerce() {
@@ -199,6 +164,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		echo '<meta name="generator" content="Tamara Checkout ' . esc_attr( $this->get_version() ) . '" />';
 	}
 
+	public function adjust_tamara_payment_types_on_checkout($available_gateways): array {
+		dev_error_log($available_gateways);
+		return $available_gateways;
+	}
+
 	/**
 	 * We want to register all services with this plugin here
 	 *
@@ -231,5 +201,32 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		);
 
 		$this->manipulate_hooks_after_settings();
+	}
+
+	/**
+	 *
+	 * @return void
+	 * @throws BindingResolutionException
+	 */
+	protected function manipulate_hooks_after_settings(): void {
+		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
+			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
+				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
+
+				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
+				add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
+			}
+
+			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
+				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
+
+				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
+				add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
+			}
+
+			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
+
+			add_filter('woocommerce_available_payment_gateways', [$this, 'adjust_tamara_payment_types_on_checkout'], 9998, 1);
+		}
 	}
 }
