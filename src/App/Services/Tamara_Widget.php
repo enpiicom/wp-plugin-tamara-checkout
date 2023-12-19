@@ -110,10 +110,7 @@ JS_SCRIPT;
 
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 			'blocks/tamara-widget',
-			[
-				'widget_inline_type' => $widget_inline_type,
-				'widget_amount' => $widget_amount,
-			]
+			compact( 'widget_inline_type', 'widget_amount' ),
 		);
 	}
 
