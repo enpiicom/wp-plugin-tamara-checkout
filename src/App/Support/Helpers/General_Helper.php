@@ -55,12 +55,10 @@ class General_Helper {
 			'We do not support cross currencies. Please select the correct currency for your country' => 'We do not support cross currencies. Please select the correct currency for your country.',
 		];
 
-		$tamara_checkout_WP_plugin_instance = Tamara_Checkout_WP_Plugin::wp_app_instance();
-
 		// Use array_map to translate all messages.
 		return array_map(
-			function ( $message ) use ( $tamara_checkout_WP_plugin_instance ) {
-				return $tamara_checkout_WP_plugin_instance->_t( $message );
+			function ( $message ) {
+				return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $message );
 			},
 			$error_messages
 		);

@@ -24,7 +24,6 @@ use Tamara_Checkout\Deps\Tamara\Model\Order\RiskAssessment;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use WC_Order;
-use WC_Product;
 
 /**
  * A wrapper of Tamara Client
@@ -93,37 +92,46 @@ class Tamara_Client {
 				$checkout_payment_type,
 				$instalment_period
 			);
-			dev_error_log( $create_tamara_checkout_session_response );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$errorMessage = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
-			if ( function_exists( 'wc_add_notice' ) ) {
-				wc_add_notice( $errorMessage, 'error' );
-			}
+			$error_message = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
 		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' );
-			if ( function_exists( 'wc_add_notice' ) ) {
-				wc_add_notice( $error_message, 'error' );
+			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' )."<br />\n". $this->_t( $tamara_checkout_exception->getMessage() );
+		}
+
+		if ( isset( $create_tamara_checkout_session_response ) ) {
+			if ( $create_tamara_checkout_session_response->isSuccess() ) {
+				$tamara_checkout_url = $create_tamara_checkout_session_response->getCheckoutResponse()->getCheckoutUrl();
+				$tamara_checkout_session_id = $create_tamara_checkout_session_response->getCheckoutResponse()->getCheckoutId();
+
+				$this->store_meta_data_from_checkout_response(
+					$wc_order_id,
+					$tamara_checkout_session_id,
+					$tamara_checkout_url,
+					$checkout_payment_type,
+					$instalment_period
+				);
+
+				return [
+					'result' => 'success',
+					'redirect' => $tamara_checkout_url,
+					'tamara_checkout_url' => $tamara_checkout_url,
+					'tamara_checkout_session_id' => $tamara_checkout_session_id,
+				];
+			} else {
+				$error_message = $create_tamara_checkout_session_response->getMessage();
+				$errors = $create_tamara_checkout_session_response->getErrors();
+
+				array_walk($errors, function (&$tmp_item, $tmp_index) {
+					$tmp_item = $tmp_item['error_code'] ?? null;
+				});
+				$error_message = $this->_t( $error_message );
+				$error_message .= "<br />\n";
+				$error_message .= implode("<br />\n", $errors);
 			}
 		}
 
-		if ( isset( $create_tamara_checkout_session_response ) && $create_tamara_checkout_session_response->isSuccess() ) {
-			$tamara_checkout_url = $create_tamara_checkout_session_response->getCheckoutResponse()->getCheckoutUrl();
-			$tamara_checkout_session_id = $create_tamara_checkout_session_response->getCheckoutResponse()->getCheckoutId();
-
-			$this->store_meta_data_from_checkout_response(
-				$wc_order_id,
-				$tamara_checkout_session_id,
-				$tamara_checkout_url,
-				$checkout_payment_type,
-				$instalment_period
-			);
-
-			return [
-				'result' => 'success',
-				'redirect' => $tamara_checkout_url,
-				'tamara_checkout_url' => $tamara_checkout_url,
-				'tamara_checkout_session_id' => $tamara_checkout_session_id,
-			];
+		if ( function_exists( 'wc_add_notice' ) && !empty( $error_message ) ) {
+			wc_add_notice( $error_message, 'error' );
 		}
 
 		// If this is the failed process, return false instead of ['result' => 'success']
@@ -235,17 +243,22 @@ class Tamara_Client {
 
 		foreach ( $wc_order_items as $item_id => $wc_order_item ) {
 			$order_item = new OrderItem();
-			/** @var WC_Product $wc_order_item_product */
+			/** @var \WC_Order_Item_Product $wc_order_item */
+			/** @var \WC_Product_Simple $wc_order_item_product */
 			$wc_order_item_product = $wc_order_item->get_product();
+
 			if ( $wc_order_item_product ) {
 				$wc_order_item_name = wp_strip_all_tags( $wc_order_item->get_name() );
 				$wc_order_item_quantity = $wc_order_item->get_quantity();
-				$wc_order_item_sku = $wc_order_item_product->get_sku() ?? 'N/A';
+				$wc_order_item_sku = empty( $wc_order_item_product->get_sku() ) ? (string) $item_id : $wc_order_item_product->get_sku();
 				$wc_order_item_total_tax = $wc_order_item->get_total_tax();
 				$wc_order_item_total = $wc_order_item->get_total() + $wc_order_item_total_tax;
+
 				$wc_order_item_categories = wp_strip_all_tags(
 					wc_get_product_category_list( $wc_order_item_product->get_id() )
-				) ?? 'N/A';
+				);
+				$wc_order_item_categories = empty($wc_order_item_categories) ? 'N/A' : $wc_order_item_categories;
+
 				$wc_order_item_regular_price = $wc_order_item_product->get_regular_price();
 				$wc_order_item_sale_price = $wc_order_item_product->get_sale_price();
 				$item_price = $wc_order_item_sale_price ?? $wc_order_item_regular_price;
@@ -280,7 +293,7 @@ class Tamara_Client {
 				$wc_order_item_product = $wc_order_item->get_data();
 				$wc_order_item_name = wp_strip_all_tags( $wc_order_item_product['name'] ) ?? 'N/A';
 				$wc_order_item_quantity = $wc_order_item_product['quantity'] ?? 1;
-				$wc_order_item_sku = $wc_order_item_product['sku'] ?? 'N/A';
+				$wc_order_item_sku = empty($wc_order_item_product['sku']) ? (string) $item_id : $wc_order_item_product['sku'];
 				$wc_order_item_total_tax = $wc_order_item_product['total_tax'] ?? 0;
 				$wc_order_item_total = $wc_order_item_product['total'] ?? 0;
 				$wc_order_item_categories = $wc_order_item_product['category'] ?? 'N/A';
@@ -346,10 +359,9 @@ class Tamara_Client {
 	 * @return string
 	 */
 	protected function get_tamara_cancel_url( $params = [] ): string {
-		$tamara_cancel_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'cancel_url' )
-			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'cancel_url' )
-			: wp_app_route_wp_url( 'tamara-cancel' );
-
+		$tamara_cancel_url = !empty(Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->cancel_url)
+			? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->cancel_url
+			: wp_app_route_wp_url( 'wp-api-tamara-cancel', $params );
 		$tamara_cancel_url = add_query_arg( $params, $tamara_cancel_url );
 
 		return $this->general_helper->remove_trailing_slashes( $tamara_cancel_url );
@@ -452,7 +464,7 @@ class Tamara_Client {
 		$city = ! empty( $wc_address['city'] ) ? $wc_address['first_name'] : 'N/A';
 		$state = ! empty( $wc_address['state'] ) ? $wc_address['first_name'] : 'N/A';
 		$phone = ! empty( $wc_address['phone'] ) ? $wc_address['phone'] : null;
-		$country = ! empty( $wc_address['country'] ) ? $wc_address['country'] : $this->get_default_billing_country_code();
+		$country = ! empty( $wc_address['country'] ) ? $wc_address['country'] : General_Helper::get_store_base_country_code();
 
 		$tamara_address = new Address();
 		$tamara_address->setFirstName( (string) $first_name );
