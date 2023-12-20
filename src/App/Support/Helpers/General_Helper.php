@@ -173,6 +173,7 @@ class General_Helper {
 			return;
 		}
 		$formatted_message = is_array( $message ) ? wp_json_encode( $message ) : (string) $message;
+
 		static::write_to_log( $formatted_message );
 	}
 
@@ -182,7 +183,7 @@ class General_Helper {
 	 * @return string
 	 */
 	public static function get_log_message_file_path(): string {
-		$upload_dir = defined( 'UPLOADS' ) ? UPLOADS : wp_get_upload_dir();
+		$upload_dir = defined( 'UPLOADS' ) ? UPLOADS : wp_get_upload_dir()['basedir'];
 		$log_file_name = Tamara_Checkout_WP_Plugin::MESSAGE_LOG_FILE_NAME;
 		return $upload_dir . DIRECTORY_SEPARATOR . $log_file_name;
 	}
@@ -195,6 +196,7 @@ class General_Helper {
 
 	protected static function write_to_log( string $message ): void {
 		$log_file_path = static::get_log_message_file_path();
+
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
 		file_put_contents( $log_file_path, sprintf( "[%s] %s\n", static::current_date(), $message ), FILE_APPEND );
 	}
