@@ -94,7 +94,7 @@ class Tamara_Client {
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$error_message = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
 		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' )."<br />\n". $this->_t( $tamara_checkout_exception->getMessage() );
+			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
 		}
 
 		if ( isset( $create_tamara_checkout_session_response ) ) {
@@ -120,16 +120,19 @@ class Tamara_Client {
 				$error_message = $create_tamara_checkout_session_response->getMessage();
 				$errors = $create_tamara_checkout_session_response->getErrors();
 
-				array_walk($errors, function (&$tmp_item, $tmp_index) {
-					$tmp_item = $tmp_item['error_code'] ?? null;
-				});
+				array_walk(
+					$errors,
+					function ( &$tmp_item, $tmp_index ) {
+						$tmp_item = $tmp_item['error_code'] ?? null;
+					}
+				);
 				$error_message = $this->_t( $error_message );
 				$error_message .= "<br />\n";
-				$error_message .= implode("<br />\n", $errors);
+				$error_message .= implode( "<br />\n", $errors );
 			}
 		}
 
-		if ( function_exists( 'wc_add_notice' ) && !empty( $error_message ) ) {
+		if ( function_exists( 'wc_add_notice' ) && ! empty( $error_message ) ) {
 			wc_add_notice( $error_message, 'error' );
 		}
 
@@ -256,7 +259,7 @@ class Tamara_Client {
 				$wc_order_item_categories = wp_strip_all_tags(
 					wc_get_product_category_list( $wc_order_item_product->get_id() )
 				);
-				$wc_order_item_categories = empty($wc_order_item_categories) ? 'N/A' : $wc_order_item_categories;
+				$wc_order_item_categories = empty( $wc_order_item_categories ) ? 'N/A' : $wc_order_item_categories;
 
 				$wc_order_item_regular_price = $wc_order_item_product->get_regular_price();
 				$wc_order_item_sale_price = $wc_order_item_product->get_sale_price();
@@ -292,7 +295,7 @@ class Tamara_Client {
 				$wc_order_item_product = $wc_order_item->get_data();
 				$wc_order_item_name = wp_strip_all_tags( $wc_order_item_product['name'] ) ?? 'N/A';
 				$wc_order_item_quantity = $wc_order_item_product['quantity'] ?? 1;
-				$wc_order_item_sku = empty($wc_order_item_product['sku']) ? (string) $item_id : $wc_order_item_product['sku'];
+				$wc_order_item_sku = empty( $wc_order_item_product['sku'] ) ? (string) $item_id : $wc_order_item_product['sku'];
 				$wc_order_item_total_tax = $wc_order_item_product['total_tax'] ?? 0;
 				$wc_order_item_total = $wc_order_item_product['total'] ?? 0;
 				$wc_order_item_categories = $wc_order_item_product['category'] ?? 'N/A';
@@ -358,7 +361,7 @@ class Tamara_Client {
 	 * @return string
 	 */
 	protected function get_tamara_cancel_url( $params = [] ): string {
-		$tamara_cancel_url = !empty(Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->cancel_url)
+		$tamara_cancel_url = ! empty( Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->cancel_url )
 			? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->cancel_url
 			: wp_app_route_wp_url( 'wp-api-tamara-cancel', $params );
 		$tamara_cancel_url = add_query_arg( $params, $tamara_cancel_url );
@@ -386,17 +389,16 @@ class Tamara_Client {
 	/**
 	 * @throws \Exception
 	 */
-	public function handle_tamara_payment_cancel_url ($wc_order_id)
-	{
-		$wc_order = wc_get_order($wc_order_id);
+	public function handle_tamara_payment_cancel_url( $wc_order_id ) {
+		$wc_order = wc_get_order( $wc_order_id );
 		$gateway_settings = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings();
 
-		if (Tamara_Order_Helper::is_order_authorised($wc_order_id)) {
-			WC_Order_Helper::prevent_order_cancel_action($wc_order, $wc_order_id);
-		} elseif (!empty($wc_order_id)) {
+		if ( Tamara_Order_Helper::is_order_authorised( $wc_order_id ) ) {
+			WC_Order_Helper::prevent_order_cancel_action( $wc_order, $wc_order_id );
+		} elseif ( ! empty( $wc_order_id ) ) {
 			$new_order_status = $gateway_settings->get_payment_cancel_status();
-			$order_note = General_Helper::convert_message('The payment for this order has been cancelled from Tamara.');
-			WC_Order_Helper::update_order_status_and_add_order_note($wc_order, $order_note, $new_order_status, '');
+			$order_note = General_Helper::convert_message( 'The payment for this order has been cancelled from Tamara.' );
+			WC_Order_Helper::update_order_status_and_add_order_note( $wc_order, $order_note, $new_order_status, '' );
 			$cancel_url_from_tamara = add_query_arg(
 				[
 					'tamara_custom_status' => 'tamara-p-canceled',
@@ -404,42 +406,43 @@ class Tamara_Client {
 					'cancel_order' => 'true',
 					'order' => $wc_order->get_order_key(),
 					'order_id' => $wc_order_id,
-					'_wpnonce' => wp_create_nonce('woocommerce-cancel_order'),
+					'_wpnonce' => wp_create_nonce( 'woocommerce-cancel_order' ),
 				],
 				$wc_order->get_cancel_order_url_raw()
 			);
-			wp_redirect($cancel_url_from_tamara);
+			wp_safe_redirect( $cancel_url_from_tamara );
+			exit;
 		}
 	}
-//
-//	/**
-//	 * @throws \Exception
-//	 */
-//	public function handle_tamara_payment_failure_url ($wc_order_id)
-//	{
-//		$wc_order = wc_get_order($wc_order_id);
-//		$gateway_settings = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings();
-//
-//		if (Tamara_Order_Helper::is_order_authorised($wc_order_id)) {
-//			WC_Order_Helper::prevent_order_cancel_action($wc_order, $wc_order_id);
-//		} elseif (!empty($wc_order_id)) {
-//			$new_order_status = $gateway_settings->get_payment_failure_status();
-//			$order_note = General_Helper::convert_message('The payment for this order has been declined from Tamara');
-//			WC_Order_Helper::update_order_status_and_add_order_note($wc_order, $order_note, $new_order_status, '');
-//			$failure_url_from_tamara = add_query_arg(
-//				[
-//					'tamara_custom_status' => 'tamara-p-failed',
-//					'redirect_from' => 'tamara',
-//					'cancel_order' => 'true',
-//					'order' => $wc_order->get_order_key(),
-//					'order_id' => $wc_order_id,
-//					'_wpnonce' => wp_create_nonce('woocommerce-cancel_order'),
-//				],
-//				$wc_order->get_cancel_order_url_raw()
-//			);
-//			wp_redirect($failure_url_from_tamara);
-//		}
-//	}
+
+		/**
+		* @throws \Exception
+		*/
+	public function handle_tamara_payment_failure_url( $wc_order_id ) {
+		$wc_order = wc_get_order( $wc_order_id );
+		$gateway_settings = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings();
+
+		if ( Tamara_Order_Helper::is_order_authorised( $wc_order_id ) ) {
+			WC_Order_Helper::prevent_order_cancel_action( $wc_order, $wc_order_id );
+		} elseif ( ! empty( $wc_order_id ) ) {
+			$new_order_status = $gateway_settings->get_payment_failure_status();
+			$order_note = General_Helper::convert_message( 'The payment for this order has been declined from Tamara' );
+			WC_Order_Helper::update_order_status_and_add_order_note( $wc_order, $order_note, $new_order_status, '' );
+			$failure_url_from_tamara = add_query_arg(
+				[
+					'tamara_custom_status' => 'tamara-p-failed',
+					'redirect_from' => 'tamara',
+					'cancel_order' => 'true',
+					'order' => $wc_order->get_order_key(),
+					'order_id' => $wc_order_id,
+					'_wpnonce' => wp_create_nonce( 'woocommerce-cancel_order' ),
+				],
+				$wc_order->get_cancel_order_url_raw()
+			);
+			wp_safe_redirect( $failure_url_from_tamara );
+			exit;
+		}
+	}
 
 	/**
 	 * Get Tamara Ipn Url to handle notification

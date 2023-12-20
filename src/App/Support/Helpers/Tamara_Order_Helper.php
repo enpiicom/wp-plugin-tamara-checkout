@@ -13,8 +13,7 @@ class Tamara_Order_Helper {
 	 *
 	 * @return bool
 	 */
-	public static function is_order_authorised($wc_order_id) : bool {
-		return ! ! get_post_meta($wc_order_id, '_tamara_authorized', true);
+	public static function is_order_authorised( $wc_order_id ): bool {
+		return ! ! get_post_meta( $wc_order_id, '_tamara_authorized', true );
 	}
-
 }
