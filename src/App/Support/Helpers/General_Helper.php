@@ -13,9 +13,9 @@ class General_Helper {
 	 *
 	 * @return string
 	 */
-	public function get_current_country_code(): string {
+	public static function get_current_country_code(): string {
 		$store_base_country = WC()->countries->get_base_country() ?? Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
-		$currency_country_mapping = $this->get_currency_country_mappings();
+		$currency_country_mapping = static::get_currency_country_mappings();
 
 		return $currency_country_mapping[ strtoupper( get_woocommerce_currency() ) ] ?? $store_base_country;
 	}
@@ -80,7 +80,7 @@ class General_Helper {
 	 *
 	 * @return string
 	 */
-	public function get_current_language_code(): string {
+	public static function get_current_language_code(): string {
 		$lang = substr( get_locale(), 0, 2 ) ?? 'en';
 		return strtolower( $lang );
 	}
@@ -159,4 +159,52 @@ class General_Helper {
 	public static function format_number_general( $amount ): string {
 		return number_format( floatval( $amount ), 2, '.', '' );
 	}
+
+	/**
+	 * Handle Tamara log message
+	 *
+	 * @param $message
+	 */
+
+	public static function log_message($message): void {
+		$tamara_gateway_service = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service();
+		$gateway_settings = $tamara_gateway_service->get_settings(true);
+		if (!$gateway_settings->get_custom_log_message_enabled()) {
+			return;
+		}
+		$formattedMessage = is_array($message) ? json_encode($message) : (string)$message;
+		static::write_to_log($formattedMessage);
+	}
+
+	/**
+	 * Get Tamara log file path
+	 *
+	 * @return string
+	 */
+	public static function get_log_message_file_path(): string {
+		$uploadDir = defined('UPLOADS') ? UPLOADS : WP_CONTENT_DIR . '/uploads';
+		$logFileName = Tamara_Checkout_WP_Plugin::MESSAGE_LOG_FILE_NAME;
+		return $uploadDir . DIRECTORY_SEPARATOR . $logFileName;
+	}
+
+	/**
+	 * Write message to the log file
+	 *
+	 * @param string $message
+	 */
+
+	protected static function write_to_log(string $message): void {
+		$logFilePath = static::get_log_message_file_path();
+		file_put_contents($logFilePath, sprintf("[%s] %s\n", static::current_date(), $message), FILE_APPEND);
+	}
+
+	/**
+	 * Get current date formatted for log
+	 *
+	 * @return string
+	 */
+	protected static function current_date(): string {
+		return gmdate('Y-m-d h:i:s');
+	}
+
 }

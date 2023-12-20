@@ -7,6 +7,8 @@ namespace Tamara_Checkout\App\Services;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Helpers\Tamara_Order_Helper;
+use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
@@ -41,10 +43,7 @@ class Tamara_Client {
 
 	protected $api_client;
 
-	protected $general_helper;
-
 	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
-		$this->general_helper = new General_Helper();
 		$this->tamara_checkout_wp_plugin = Tamara_Checkout_WP_Plugin::wp_app_instance();
 		$logger = null;
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
@@ -348,7 +347,7 @@ class Tamara_Client {
 			: wp_app_route_wp_url( 'tamara-success' );
 		$tamara_success_url = add_query_arg( $params, $tamara_success_url );
 
-		return $this->general_helper->remove_trailing_slashes( $tamara_success_url );
+		return General_Helper::remove_trailing_slashes( $tamara_success_url );
 	}
 
 	/**
@@ -364,7 +363,7 @@ class Tamara_Client {
 			: wp_app_route_wp_url( 'wp-api-tamara-cancel', $params );
 		$tamara_cancel_url = add_query_arg( $params, $tamara_cancel_url );
 
-		return $this->general_helper->remove_trailing_slashes( $tamara_cancel_url );
+		return General_Helper::remove_trailing_slashes( $tamara_cancel_url );
 	}
 
 	/**
@@ -375,14 +374,72 @@ class Tamara_Client {
 	 * @return string
 	 */
 	protected function get_tamara_failure_url( $params = [] ): string {
-		$tamara_failure_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'failure_url' )
-			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_option( 'failure_url' )
-			: wp_app_route_wp_url( 'tamara-failure' );
+		$tamara_failure_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_settings()->failure_url
+			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_settings()->failure_url
+			: wp_app_route_wp_url( 'wp-api-tamara-failure', $params );
 
 		$tamara_failure_url = add_query_arg( $params, $tamara_failure_url );
 
-		return $this->general_helper->remove_trailing_slashes( $tamara_failure_url );
+		return General_Helper::remove_trailing_slashes( $tamara_failure_url );
 	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function handle_tamara_payment_cancel_url ($wc_order_id)
+	{
+		$wc_order = wc_get_order($wc_order_id);
+		$gateway_settings = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings();
+
+		if (Tamara_Order_Helper::is_order_authorised($wc_order_id)) {
+			WC_Order_Helper::prevent_order_cancel_action($wc_order, $wc_order_id);
+		} elseif (!empty($wc_order_id)) {
+			$new_order_status = $gateway_settings->get_payment_cancel_status();
+			$order_note = General_Helper::convert_message('The payment for this order has been cancelled from Tamara.');
+			WC_Order_Helper::update_order_status_and_add_order_note($wc_order, $order_note, $new_order_status, '');
+			$cancel_url_from_tamara = add_query_arg(
+				[
+					'tamara_custom_status' => 'tamara-p-canceled',
+					'redirect_from' => 'tamara',
+					'cancel_order' => 'true',
+					'order' => $wc_order->get_order_key(),
+					'order_id' => $wc_order_id,
+					'_wpnonce' => wp_create_nonce('woocommerce-cancel_order'),
+				],
+				$wc_order->get_cancel_order_url_raw()
+			);
+			wp_redirect($cancel_url_from_tamara);
+		}
+	}
+//
+//	/**
+//	 * @throws \Exception
+//	 */
+//	public function handle_tamara_payment_failure_url ($wc_order_id)
+//	{
+//		$wc_order = wc_get_order($wc_order_id);
+//		$gateway_settings = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings();
+//
+//		if (Tamara_Order_Helper::is_order_authorised($wc_order_id)) {
+//			WC_Order_Helper::prevent_order_cancel_action($wc_order, $wc_order_id);
+//		} elseif (!empty($wc_order_id)) {
+//			$new_order_status = $gateway_settings->get_payment_failure_status();
+//			$order_note = General_Helper::convert_message('The payment for this order has been declined from Tamara');
+//			WC_Order_Helper::update_order_status_and_add_order_note($wc_order, $order_note, $new_order_status, '');
+//			$failure_url_from_tamara = add_query_arg(
+//				[
+//					'tamara_custom_status' => 'tamara-p-failed',
+//					'redirect_from' => 'tamara',
+//					'cancel_order' => 'true',
+//					'order' => $wc_order->get_order_key(),
+//					'order_id' => $wc_order_id,
+//					'_wpnonce' => wp_create_nonce('woocommerce-cancel_order'),
+//				],
+//				$wc_order->get_cancel_order_url_raw()
+//			);
+//			wp_redirect($failure_url_from_tamara);
+//		}
+//	}
 
 	/**
 	 * Get Tamara Ipn Url to handle notification
@@ -442,7 +499,7 @@ class Tamara_Client {
 		$wc_shipping_address['country'] = ! empty( $wc_shipping_address['country'] )
 			? $wc_shipping_address['country']
 			: ( ! empty( $wc_billing_address['country'] ) ? $wc_billing_address['country']
-				: $this->general_helper->get_current_country_code() );
+				: General_Helper::get_current_country_code() );
 
 		$wc_shipping_address['phone'] = ! empty( $wc_shipping_address['phone'] )
 			? $wc_shipping_address['phone']
@@ -529,7 +586,7 @@ class Tamara_Client {
 		$order->setTotalAmount( new Money( General_Helper::format_tamara_number( $wc_order->get_total() ), $order->getCurrency() ) );
 		$order->setCountryCode(
 			! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
-			: $this->general_helper->get_current_country_code()
+			: General_Helper::get_current_country_code()
 		);
 		$order->setPaymentType( $payment_type );
 		$order->setInstalments( $instalment_period );
