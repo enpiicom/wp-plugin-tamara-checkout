@@ -10,9 +10,15 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
+use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
+use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Payment_Types_Trait;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use WC_Order;
 
@@ -23,12 +29,32 @@ use WC_Order;
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
+	use Tamara_Payment_Types_Trait;
+
 	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
 	public const DEFAULT_COUNTRY_CODE = 'SA';
-	const TAMARA_CHECKOUT = 'tamara-checkout',
-			MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
+	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
 
+	const TAMARA_CHECKOUT = 'tamara-checkout',
+		  TAMARA_GATEWAY_PAY_NOW = 'tamara-gateway-pay-now',
+		  TAMARA_GATEWAY_PAY_NEXT_MONTH = 'tamara-gateway-pay-next-month',
+		  TAMARA_GATEWAY_PAY_BY_INSTALMENTS_ID = 'tamara-gateway-pay-by-instalments',
+		  TAMARA_GATEWAY_PAY_IN_X = 'tamara-gateway-pay-in-',
+		  TAMARA_GATEWAY_PAY_IN_2 = 'tamara-gateway-pay-in-2',
+		  TAMARA_GATEWAY_PAY_IN_3 = 'tamara-gateway-pay-in-3',
+		  TAMARA_GATEWAY_PAY_IN_4 = 'tamara-gateway-pay-in-4',
+		  TAMARA_GATEWAY_PAY_IN_5 = 'tamara-gateway-pay-in-5',
+		  TAMARA_GATEWAY_PAY_IN_6 = 'tamara-gateway-pay-in-6',
+		  TAMARA_GATEWAY_PAY_IN_7 = 'tamara-gateway-pay-in-7',
+		  TAMARA_GATEWAY_PAY_IN_8 = 'tamara-gateway-pay-in-8',
+		  TAMARA_GATEWAY_PAY_IN_9 = 'tamara-gateway-pay-in-9',
+		  TAMARA_GATEWAY_PAY_IN_10 = 'tamara-gateway-pay-in-10',
+		  TAMARA_GATEWAY_PAY_IN_11 = 'tamara-gateway-pay-in-11',
+		  TAMARA_GATEWAY_PAY_IN_12 = 'tamara-gateway-pay-in-12',
+		  TAMARA_GATEWAY_SINGLE_CHECKOUT_ID = 'tamara-gateway-checkout';
+
+	protected $customer_phone_number;
 
 	public function manipulate_hooks(): void {
 		// We want to use the check prerequisites within the plugins_loaded action
@@ -101,6 +127,28 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		return wp_app( Tamara_WC_Payment_Gateway::class );
 	}
 
+	public function get_tamara_gateway_single_checkout_service() {
+		return wp_app( Single_Checkout_WC_Payment_Gateway::class );
+	}
+
+	public function get_tamara_gateway_pay_next_month_service() {
+		return wp_app( Pay_Next_Month_WC_Payment_Gateway::class );
+	}
+
+	public function get_tamara_gateway_pay_now_service() {
+		return wp_app( Pay_Now_WC_Payment_Gateway::class );
+	}
+
+	public function get_tamara_gateway_pay_in_x_service($instalment)
+	{
+		return wp_app( 'Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_'.$instalment.'_WC_Payment_Gateway');
+	}
+
+	public function get_customer_phone_number()
+	{
+		return $this->customer_phone_number;
+	}
+
 	/**
 	 * We want to check the needed dependency for this plugin to work
 	 */
@@ -168,7 +216,27 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		echo '<meta name="generator" content="Tamara Checkout ' . esc_attr( $this->get_version() ) . '" />';
 	}
 
-	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
+	/**
+	 * @param $available_gateways
+	 *
+	 * @return array
+	 */
+	public function register_tamara_payment_types_on_checkout( $available_gateways ): array {
+		Get_Tamara_Payment_Options_Query::execute_now();
+
+		if ($this->get_tamara_gateway_service()->get_settings()->get_enabled()
+		    && is_checkout() && $this->has_available_payment_options() && WC_Order_Helper::is_cart_valid()) {
+			if ( $this->is_single_checkout_enabled() ) {
+				$available_gateways = $this->possibly_add_tamara_single_checkout($available_gateways);
+			} else {
+				$available_gateways = $this->register_available_payment_options($available_gateways);
+			}
+		}
+
+		if ( ! WC_Order_Helper::is_cart_valid() ) {
+			$available_gateways =  $this->unset_default_gateway($available_gateways);
+		}
+
 		return $available_gateways;
 	}
 
@@ -422,6 +490,29 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$this->manipulate_hooks_after_settings();
 	}
 
+
+	/**
+	 * Update phone number on every ajax calls on checkout
+	 *
+	 * @param $posted_data
+	 *
+	 * @return void
+	 */
+	public function get_updated_phone_number_on_checkout($posted_data): void {
+		global $woocommerce;
+
+		// Parsing posted data on checkout
+		$post = array();
+		$vars = explode('&', $posted_data);
+		foreach ($vars as $k => $value) {
+			$v = explode('=', urldecode($value));
+			$post[$v[0]] = $v[1];
+		}
+
+		// Update phone number get from posted data
+		$this->customer_phone_number = $post['billing_phone'];
+	}
+
 	/**
 	 *
 	 * @return void
@@ -444,7 +535,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
-			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
+			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'register_tamara_payment_types_on_checkout'], 9998, 1 );
+
+			add_action( 'woocommerce_checkout_update_order_review', [$this, 'get_updated_phone_number_on_checkout']);
 		}
 	}
 }
