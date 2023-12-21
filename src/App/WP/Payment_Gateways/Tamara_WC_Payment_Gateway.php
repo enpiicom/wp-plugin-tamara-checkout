@@ -102,6 +102,14 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	}
 
 	/**
+	 * @inheritDoc
+	 * @throws \Exception
+	 */
+	public function process_payment( $wc_order_id ) {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->process_payment( $wc_order_id );
+	}
+
+	/**
 	 * Translate a text using the plugin's text domain
 	 *
 	 * @param mixed $untranslated_text Text to be translated

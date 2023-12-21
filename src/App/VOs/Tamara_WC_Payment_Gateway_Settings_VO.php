@@ -183,4 +183,12 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		);
 		return $excluded_product_categories_data;
 	}
+
+	public function get_payment_cancel_status(): string {
+		return $this->tamara_payment_cancel ?? 'wc-tamara-p-canceled';
+	}
+
+	public function get_payment_failure_status(): string {
+		return $this->tamara_payment_failure ?? 'wc-tamara-p-failed';
+	}
 }
