@@ -106,7 +106,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_tamara_gateway_service(): Tamara_WC_Payment_Gateway {
-		return wp_app(Tamara_WC_Payment_Gateway::class);
+		return wp_app( Tamara_WC_Payment_Gateway::class );
 	}
 
 	public function get_customer_phone_number() {
@@ -505,7 +505,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
-			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout'], 9998, 1 );
+			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
 
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
 		}

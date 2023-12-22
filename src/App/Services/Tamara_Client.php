@@ -124,7 +124,7 @@ class Tamara_Client {
 				array_walk(
 					$errors,
 					function ( &$tmp_item, $tmp_index ) {
-						$tmp_item = General_Helper::convert_message($tmp_item['error_code']) ?? null;
+						$tmp_item = General_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
 					}
 				);
 				$error_message = General_Helper::convert_message( $error_message );

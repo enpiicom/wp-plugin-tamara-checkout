@@ -29,9 +29,9 @@ class General_Helper {
 	 * @throws \Exception
 	 */
 	public static function convert_message( $tamara_message ): string {
-		return static::get_error_map()[$tamara_message] ?
-			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t(static::get_error_map()[$tamara_message]) :
-			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t($tamara_message);
+		return static::get_error_map()[ $tamara_message ] ?
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( static::get_error_map()[ $tamara_message ] ) :
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
 	}
 
 	/**
