@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\Tests\App\Jobs;
 
-use Codeception\Stub;
 use Mockery;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
