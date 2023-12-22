@@ -32,6 +32,37 @@ use Tamara_Checkout\Tests\Support\Unit\Libs\Unit_Test_Case;
 
 class Get_Tamara_Payment_Options_Query_Test extends Unit_Test_Case {
 
+	public function test_handle() {
+		// Create a mock object for the Get_Tamara_Payment_Options_Query class.
+		$test_object = Mockery::mock( Get_Tamara_Payment_Options_Query::class )
+			->shouldAllowMockingProtectedMethods()
+			->shouldAllowMockingMethod( 'handle' )
+			->makePartial();
+
+		// Setup the expected outcomes for the methods called inside the handle method.
+		$remote_available_payment_types = [ 'method1', 'method2' ];
+		$remote_payment_methods = [ 'pay_in_3', 'pay_later' ];
+		$processed_gateways = [ 'processed_method1', 'processed_method2' ];
+
+		// Configure the mock to return the expected values when certain methods are called.
+		$test_object->shouldReceive( 'fetch_payment_options_availability' )
+			->andReturn( $remote_available_payment_types );
+
+		$test_object->shouldReceive( 'convert_tamara_payment_types_to_wc_payment_methods' )
+			->with( $remote_available_payment_types )
+			->andReturn( $remote_payment_methods );
+
+		$test_object->shouldReceive( 'process_available_gateways' )
+			->with( $remote_payment_methods )
+			->andReturn( $processed_gateways );
+
+		// Calling the handle method on the mock object now uses the mocked methods.
+		$result = $test_object->handle();
+
+		// Assert that the result matches the expected processed gateways.
+		$this->assertEquals( $processed_gateways, $result );
+	}
+
 	/**
 	 * @throws \ReflectionException
 	 */
@@ -88,57 +119,88 @@ class Get_Tamara_Payment_Options_Query_Test extends Unit_Test_Case {
 		];
 
 		// Todo: We need to mock method _t and return somevalue
-		$wc_tamara_payment_type_mock = \Mockery::mock(WC_Tamara_Payment_Type::class)
-		                                       ->makePartial()->shouldAllowMockingProtectedMethods();
-		                                                                            ;
-		$wc_tamara_payment_type_mock->shouldReceive('_t')->andReturn('value');
+		$wc_tamara_payment_type_mock = \Mockery::mock( WC_Tamara_Payment_Type::class )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
 
-//		\WP_Mock::userFunction( 'get_locale' )
-//		        ->once()
-//		        ->andReturn( 'en' );
-//
+		$wc_tamara_payment_type_mock->shouldReceive( '_t' )->andReturn( 'value' );
+
+		// phpcs::ignore Squiz.PHP.CommentedOutCode.Found
+		//      \WP_Mock::userFunction( 'get_locale' )
+		//                    ->once()
+		//                    ->andReturn( 'en' );
+
 		$remote_available_payment_types = [
 			0 => [
-					'payment_type' => 'PAY_NOW',
-					'instalment' => 0,
-				],
+				'payment_type' => 'PAY_NOW',
+				'instalment' => 0,
+			],
 			1 => [
-					'payment_type' => 'PAY_NEXT_MONTH',
-					'instalment' => 0,
-				],
+				'payment_type' => 'PAY_NEXT_MONTH',
+				'instalment' => 0,
+			],
 			2 => [
-					'payment_type' => 'PAY_BY_INSTALMENTS',
-					'instalment' => 3,
-				],
+				'payment_type' => 'PAY_BY_INSTALMENTS',
+				'instalment' => 3,
+			],
 		];
 
 		$test_object = Mockery::mock( Get_Tamara_Payment_Options_Query::class )
-								->shouldAllowMockingMethod('convert_tamara_payment_types_to_wc_payment_methods')
-		                        ->shouldAllowMockingProtectedMethods()->makePartial();
+			->shouldAllowMockingMethod( 'convert_tamara_payment_types_to_wc_payment_methods' )
+			->shouldAllowMockingProtectedMethods()
+			->makePartial();
 
-		$test_object->shouldReceive('get_payment_type_to_service_mappings')->andReturn($mappings);
-
-//		$payment_methods_result = $test_object->convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types);
+		$test_object->shouldReceive( 'get_payment_type_to_service_mappings' )->andReturn( $mappings );
+		// phpcs::ignore Squiz.PHP.CommentedOutCode.Found
+		// $payment_methods_result = $test_object->convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types);
 	}
 
 	/**
 	 * @throws \ReflectionException
 	 */
-	public function test_get_plugin_instance():void {
-		$test_object = $this->getMockBuilder(Get_Tamara_Payment_Options_Query::class)
-		              ->disableOriginalConstructor()
-		              ->onlyMethods(['get_plugin_instance'])->getMock();
+	public function test_process_available_gateways(): void {
+		$available_gateways = [
+			'tamara-gateway' => 'Tamara',
+		];
+
+		$new_gateways = [
+			'tamara-gateway-pay-later' => 'Pay_Later',
+			'tamara-gateway-pay-now' => 'Pay_Now',
+		];
+
+		$test_object = Mockery::mock( Get_Tamara_Payment_Options_Query::class )
+			->shouldAllowMockingProtectedMethods()
+			->shouldAllowMockingMethod( 'process_available_gateways' )
+			->makePartial();
+		$this->set_property_value( $test_object, 'available_gateways', $available_gateways );
 
 		// Invoke the method and get the result
-		$result = $this->invoke_protected_method($test_object, 'get_plugin_instance');
+		$result = $test_object->process_available_gateways( $new_gateways );
 
-		// Verify the result is an instance of Tamara_Checkout_WP_Plugin
-		$this->assertInstanceOf(Tamara_Checkout_WP_Plugin::class, $result);
+		// Verify the result returns the expected array
+		$this->assertEquals( $new_gateways, $result );
 	}
 
-	public function test_get_payment_type_to_service_mappings():void {
-		$test_object = Mockery::mock(Get_Tamara_Payment_Options_Query::class)->shouldAllowMockingProtectedMethods()
-			->shouldAllowMockingMethod('get_payment_type_to_service_mappings')->makePartial();
+	/**
+	 * @throws \ReflectionException
+	 */
+	public function test_get_plugin_instance(): void {
+		$test_object = $this->getMockBuilder( Get_Tamara_Payment_Options_Query::class )
+			->disableOriginalConstructor()
+			->onlyMethods( [ 'get_plugin_instance' ] )->getMock();
+
+		// Invoke the method and get the result
+		$result = $this->invoke_protected_method( $test_object, 'get_plugin_instance' );
+
+		// Verify the result is an instance of Tamara_Checkout_WP_Plugin
+		$this->assertInstanceOf( Tamara_Checkout_WP_Plugin::class, $result );
+	}
+
+	public function test_get_payment_type_to_service_mappings(): void {
+		$test_object = Mockery::mock( Get_Tamara_Payment_Options_Query::class )
+			->shouldAllowMockingProtectedMethods()
+			->shouldAllowMockingMethod( 'get_payment_type_to_service_mappings' )
+			->makePartial();
 		$expected = [
 			'PAY_LATER_0' => Tamara_WC_Payment_Gateway::class,
 			'PAY_NOW_0' => Pay_Now_WC_Payment_Gateway::class,
@@ -159,7 +221,6 @@ class Get_Tamara_Payment_Options_Query_Test extends Unit_Test_Case {
 		$mapping_result = $test_object->get_payment_type_to_service_mappings();
 
 		// Verify the result is as expected
-		$this->assertEquals($expected, $mapping_result);
+		$this->assertEquals( $expected, $mapping_result );
 	}
-
 }

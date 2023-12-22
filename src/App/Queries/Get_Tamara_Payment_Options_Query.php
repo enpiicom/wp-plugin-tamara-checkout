@@ -105,8 +105,9 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 	protected function process_available_gateways( array $remote_payment_methods ): array {
 		$available_gateways = $this->available_gateways;
 		$tamara_default_gateway_key = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
-		$tamara_default_gateway_offset = array_search( $tamara_default_gateway_key,
-			array_keys( WC()->payment_gateways->payment_gateways() )
+		$tamara_default_gateway_offset = array_search(
+			$tamara_default_gateway_key,
+			array_keys( $available_gateways )
 		);
 		$available_gateways = array_merge(
 			array_slice( $available_gateways, 0, $tamara_default_gateway_offset ),
