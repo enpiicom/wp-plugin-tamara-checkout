@@ -12,23 +12,24 @@ trait WP_Attribute_Trait {
 		if ( is_user_logged_in() ) {
 			$current_user_id = get_current_user_id() ?? null;
 
-			return Date( 'd-m-Y',
-					strtotime( get_the_author_meta( 'user_registered', $current_user_id ) ) )
-			       ?? Date( 'd-m-Y', time() );
+			return gmdate(
+				'd-m-Y',
+				strtotime( get_the_author_meta( 'user_registered', $current_user_id ) )
+			)
+					?? gmdate( 'd-m-Y', time() );
 		} else {
-			return Date( 'd-m-Y', time() );
+			return gmdate( 'd-m-Y', time() );
 		}
 	}
 
-	public function get_current_user_has_delivered_order() : bool
-	{
+	public function get_current_user_has_delivered_order(): bool {
 		if ( is_user_logged_in() ) {
 			$current_user_id  = get_current_user_id() ?? null;
 			$args           = [
 				'customer_id' => $current_user_id,
 				'post_status' => [ 'shipped', 'completed', 'wc-shipped', 'wc-completed' ],
 				'post_type'   => 'shop_order',
-				'return'      => 'ids'
+				'return'      => 'ids',
 			];
 			$order_completed = count( wc_get_orders( $args ) );
 
@@ -44,7 +45,7 @@ trait WP_Attribute_Trait {
 			$args          = [
 				'customer_id' => $current_user_id,
 				'post_type'   => 'shop_order',
-				'return'      => 'ids'
+				'return'      => 'ids',
 			];
 
 			return count( wc_get_orders( $args ) ) ?? 0;
@@ -60,17 +61,17 @@ trait WP_Attribute_Trait {
 				'customer_id' => $currentUserId,
 				'post_type'   => 'shop_order',
 				'orderby'     => 'date',
-				'order'       => 'ASC'
+				'order'       => 'ASC',
 			];
 			$orders        = wc_get_orders( $args );
 			if ( $orders ) {
-				return date( 'd-m-Y', strtotime((string) $orders[0]->get_date_created() ) ) ?? date( 'd-m-Y', time() );
+				return gmdate( 'd-m-Y', strtotime( (string) $orders[0]->get_date_created() ) ) ?? gmdate( 'd-m-Y', time() );
 			}
 		}
-		return date( 'd-m-Y', time() );
+		return gmdate( 'd-m-Y', time() );
 	}
 
-	public function get_current_user_order_amount_last_3_months() : float{
+	public function get_current_user_order_amount_last_3_months(): float {
 		$total_amount = 0;
 		if ( is_user_logged_in() ) {
 			$current_user_id = get_current_user_id() ?? null;
@@ -78,11 +79,11 @@ trait WP_Attribute_Trait {
 				'customer_id' => $current_user_id,
 				'post_type'   => 'shop_order',
 				'date_query'  =>
-					array(
-						array(
-							'after' => date( 'Y-m-d', strtotime( '3 months ago' ) )
-						)
-					),
+					[
+						[
+							'after' => gmdate( 'Y-m-d', strtotime( '3 months ago' ) ),
+						],
+					],
 				'inclusive'   => true,
 			];
 
@@ -104,11 +105,11 @@ trait WP_Attribute_Trait {
 				'customer_id' => $current_user_id,
 				'post_type'   => 'shop_order',
 				'date_query'  =>
-					array(
-						array(
-							'after' => date( 'Y-m-d', strtotime( '3 months ago' ) )
-						)
-					),
+					[
+						[
+							'after' => gmdate( 'Y-m-d', strtotime( '3 months ago' ) ),
+						],
+					],
 				'inclusive'   => true,
 			];
 

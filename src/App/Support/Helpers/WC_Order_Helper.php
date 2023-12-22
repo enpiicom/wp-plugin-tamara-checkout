@@ -78,13 +78,13 @@ class WC_Order_Helper {
 	 *
 	 * @return mixed
 	 */
-	public static function define_total_amount_to_calculate($amount) {
-		if (is_checkout_pay_page()) {
+	public static function define_total_amount_to_calculate( $amount ) {
+		if ( is_checkout_pay_page() ) {
 			global $wp;
-			if (isset($wp->query_vars['order-pay']) && absint($wp->query_vars['order-pay']) > 0) {
-				$wc_order_id = absint($wp->query_vars['order-pay']);
-				$wc_order = wc_get_order($wc_order_id);
-				if ($wc_order) {
+			if ( isset( $wp->query_vars['order-pay'] ) && absint( $wp->query_vars['order-pay'] ) > 0 ) {
+				$wc_order_id = absint( $wp->query_vars['order-pay'] );
+				$wc_order = wc_get_order( $wc_order_id );
+				if ( $wc_order ) {
 					return $wc_order->get_total();
 				}
 			}
@@ -98,14 +98,14 @@ class WC_Order_Helper {
 	 */
 	public static function get_current_cart_info(): array {
 		$cart_total = static::define_total_amount_to_calculate( WC()->cart->total );
-		$country_code = General_Helper::get_currency_country_mappings()[get_woocommerce_currency()];
+		$country_code = General_Helper::get_currency_country_mappings()[ get_woocommerce_currency() ];
 		$customer_phone = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_customer_phone_number() ??
-		                 WC()->customer->get_billing_phone();
+						WC()->customer->get_billing_phone();
 
 		return [
 			'cart_total' => $cart_total,
 			'customer_phone' => $customer_phone,
-			'country_code' => $country_code
+			'country_code' => $country_code,
 		];
 	}
 
@@ -118,14 +118,14 @@ class WC_Order_Helper {
 		$all_cart_items = WC()->cart->get_cart();
 		$product_ids = [];
 
-		foreach ($all_cart_items as $item => $values) {
+		foreach ( $all_cart_items as $item => $values ) {
 			$item_id = $values['data']->get_id() ?? null;
 			$product_ids[] = $item_id;
-			$product = wc_get_product($item_id);
+			$product = wc_get_product( $item_id );
 			// Check if a product is a variation add add its parent id to the list.
-			if ($product instanceof \WC_Product_Variation) {
+			if ( $product instanceof \WC_Product_Variation ) {
 				$product_parent_id = $product->get_parent_id() ?? null;
-				if (!in_array($product_parent_id, $product_ids)) {
+				if ( ! in_array( $product_parent_id, $product_ids ) ) {
 					$productIds[] = $product_parent_id;
 				}
 			}
@@ -143,9 +143,9 @@ class WC_Order_Helper {
 		$all_cart_items = WC()->cart->get_cart();
 		$all_product_category_ids = [];
 
-		foreach ($all_cart_items as $item => $values) {
+		foreach ( $all_cart_items as $item => $values ) {
 			$product_id = $values['data']->get_id() ?? null;
-			$all_product_category_ids = array_merge($all_product_category_ids, wc_get_product_cat_ids($product_id));
+			$all_product_category_ids = array_merge( $all_product_category_ids, wc_get_product_cat_ids( $product_id ) );
 		}
 
 		return $all_product_category_ids;
@@ -154,8 +154,8 @@ class WC_Order_Helper {
 	/**
 	 * @return bool
 	 */
-	public static function is_cart_valid() : bool {
-		if (!is_checkout() || is_checkout_pay_page()) {
+	public static function is_cart_valid(): bool {
+		if ( ! is_checkout() || is_checkout_pay_page() ) {
 			return true;
 		}
 		$gateway_service = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service();
@@ -164,9 +164,9 @@ class WC_Order_Helper {
 		$excluded_product_categories = $gateway_settings->get_excluded_product_category_ids() ?? [];
 		$cart_item_ids = static::get_all_product_ids_in_cart();
 		$cart_item_category_ids = static::get_all_product_category_ids_in_cart();
-		$has_excluded_items = !empty(array_intersect($cart_item_ids, $excluded_product_ids));
-		$has_excluded_categories = !empty(array_intersect($cart_item_category_ids, $excluded_product_categories));
+		$has_excluded_items = ! empty( array_intersect( $cart_item_ids, $excluded_product_ids ) );
+		$has_excluded_categories = ! empty( array_intersect( $cart_item_category_ids, $excluded_product_categories ) );
 
-		return !($has_excluded_items || $has_excluded_categories);
+		return ! ( $has_excluded_items || $has_excluded_categories );
 	}
 }

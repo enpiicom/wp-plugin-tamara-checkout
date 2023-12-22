@@ -146,13 +146,13 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	public function get_excluded_products_ids(): array {
 		$excluded_products = $this->excluded_products;
 
-		return array_map('trim', explode(',', (string) $excluded_products));
+		return array_map( 'trim', explode( ',', (string) $excluded_products ) );
 	}
 
 	public function get_excluded_product_category_ids(): array {
 		$excluded_product_categories = $this->excluded_product_categories;
 
-		return array_map('trim', explode(',', (string) $excluded_product_categories));
+		return array_map( 'trim', explode( ',', (string) $excluded_product_categories ) );
 	}
 
 	public function get_api_token(): string {

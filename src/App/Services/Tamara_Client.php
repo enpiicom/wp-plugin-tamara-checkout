@@ -92,7 +92,6 @@ class Tamara_Client {
 				$instalment_period
 			);
 
-			dev_error_log($create_tamara_checkout_session_response);
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$error_message = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
 		} catch ( Exception $tamara_checkout_exception ) {
@@ -232,7 +231,7 @@ class Tamara_Client {
 			'is_existing_customer' => is_user_logged_in(),
 		];
 
-		return new RiskAssessment($data);
+		return new RiskAssessment( $data );
 	}
 
 	/**

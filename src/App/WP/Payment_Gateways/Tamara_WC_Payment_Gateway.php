@@ -34,9 +34,9 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public const SANDBOX_API_URL = 'https://api-sandbox.tamara.co';
 
 	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS',
-				 PAYMENT_TYPE_PAY_LATER = 'PAY_BY_LATER',
-				 PAYMENT_TYPE_PAY_NOW = 'PAY_NOW',
-				 PAYMENT_TYPE_PAY_NEXT_MONTH = 'PAY_NEXT_MONTH';
+				PAYMENT_TYPE_PAY_LATER = 'PAY_BY_LATER',
+				PAYMENT_TYPE_PAY_NOW = 'PAY_NOW',
+				PAYMENT_TYPE_PAY_NEXT_MONTH = 'PAY_NEXT_MONTH';
 
 	public $id = 'tamara-gateway';
 

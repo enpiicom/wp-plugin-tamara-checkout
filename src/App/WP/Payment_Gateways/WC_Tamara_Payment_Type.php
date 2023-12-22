@@ -17,11 +17,11 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 	/**
 	 * @throws \Exception
 	 */
-	public function __construct(array $config) {
-		$this->bind_config($config);
+	public function __construct( array $config ) {
+		$this->bind_config( $config );
 		$current_language = General_Helper::get_current_language();
 		$this->title = $current_language === 'ar' ? $this->description_ar : $this->description_en;
-		$this->title = !empty($this->title) ? $this->title : $this->_t('Tamara Pay In 3');
+		$this->title = ! empty( $this->title ) ? $this->title : $this->_t( 'Tamara Pay In 3' );
 
 		$this->method_title = $this->title;
 	}
@@ -42,7 +42,14 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 		);
 	}
 
-	protected function _t($text) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t($text);
+	/**
+	 * @param $text
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+	protected function _t( $text ): string {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $text );
 	}
 }

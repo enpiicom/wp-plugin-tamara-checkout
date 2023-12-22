@@ -23,9 +23,9 @@ class Tamara_Order_Helper {
 	 *
 	 * @return bool
 	 */
-	public static function is_supported_country($country_code) : bool {
-		$supported_countries = ['SA', 'AE', 'KW', 'BH'];
+	public static function is_supported_country( $country_code ): bool {
+		$supported_countries = [ 'SA', 'AE', 'KW', 'BH' ];
 
-		return !!in_array($country_code, $supported_countries);
+		return ! ! in_array( $country_code, $supported_countries );
 	}
 }

@@ -175,7 +175,7 @@ class General_Helper {
 	}
 
 	public static function get_current_language() {
-		return substr(get_locale(), 0, 2) ?? 'en';
+		return substr( get_locale(), 0, 2 ) ?? 'en';
 	}
 
 	/**
