@@ -83,7 +83,7 @@ class Tamara_Client {
 	 * @return array|bool
 	 * @throws \Exception
 	 */
-	public function process_payment( $wc_order_id, $checkout_payment_type, $instalment_period ) {
+	public function proceed_tamara_checkout_session( $wc_order_id, $checkout_payment_type, $instalment_period ) {
 		$wc_order = wc_get_order( $wc_order_id );
 		try {
 			$create_tamara_checkout_session_response = $this->build_checkout_session_request(
@@ -93,9 +93,9 @@ class Tamara_Client {
 			);
 
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$error_message = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
+			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
 		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = General_Helper::convert_message( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . General_Helper::convert_message( $tamara_checkout_exception->getMessage() );
+			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
 		}
 
 		if ( isset( $create_tamara_checkout_session_response ) ) {
@@ -124,7 +124,7 @@ class Tamara_Client {
 				array_walk(
 					$errors,
 					function ( &$tmp_item, $tmp_index ) {
-						$tmp_item = $tmp_item['error_code'] ?? null;
+						$tmp_item = General_Helper::convert_message($tmp_item['error_code']) ?? null;
 					}
 				);
 				$error_message = General_Helper::convert_message( $error_message );
@@ -397,7 +397,7 @@ class Tamara_Client {
 			WC_Order_Helper::prevent_order_cancel_action( $wc_order, $wc_order_id );
 		} elseif ( ! empty( $wc_order_id ) ) {
 			$new_order_status = $gateway_settings->get_payment_cancel_status();
-			$order_note = General_Helper::convert_message( 'The payment for this order has been cancelled from Tamara.' );
+			$order_note = $this->_t( 'The payment for this order has been cancelled from Tamara.' );
 			WC_Order_Helper::update_order_status_and_add_order_note( $wc_order, $order_note, $new_order_status, '' );
 			$cancel_url_from_tamara = add_query_arg(
 				[
@@ -426,7 +426,7 @@ class Tamara_Client {
 			WC_Order_Helper::prevent_order_cancel_action( $wc_order, $wc_order_id );
 		} elseif ( ! empty( $wc_order_id ) ) {
 			$new_order_status = $gateway_settings->get_payment_failure_status();
-			$order_note = General_Helper::convert_message( 'The payment for this order has been declined from Tamara' );
+			$order_note = $this->_t( 'The payment for this order has been declined from Tamara' );
 			WC_Order_Helper::update_order_status_and_add_order_note( $wc_order, $order_note, $new_order_status, '' );
 			$failure_url_from_tamara = add_query_arg(
 				[
@@ -596,7 +596,7 @@ class Tamara_Client {
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()
 			)
 		);
-		$order->setDescription( General_Helper::convert_message( 'Use Tamara Gateway with WooCommerce' ) );
+		$order->setDescription( $this->_t( 'Use Tamara Gateway with WooCommerce' ) );
 		$order->setTaxAmount(
 			new Money(
 				General_Helper::format_tamara_number( $wc_order->get_total_tax() ),
@@ -629,5 +629,16 @@ class Tamara_Client {
 		$order->setItems( $this->populate_tamara_order_items( $wc_order ) );
 
 		return $order;
+	}
+
+	/**
+	 * @param $untranslated_text
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+	protected function _t( $untranslated_text ): string {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 }

@@ -106,23 +106,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_tamara_gateway_service(): Tamara_WC_Payment_Gateway {
-		return wp_app( Tamara_WC_Payment_Gateway::class );
-	}
-
-	public function get_tamara_gateway_single_checkout_service() {
-		return wp_app( Single_Checkout_WC_Payment_Gateway::class );
-	}
-
-	public function get_tamara_gateway_pay_next_month_service() {
-		return wp_app( Pay_Next_Month_WC_Payment_Gateway::class );
-	}
-
-	public function get_tamara_gateway_pay_now_service() {
-		return wp_app( Pay_Now_WC_Payment_Gateway::class );
-	}
-
-	public function get_tamara_gateway_pay_in_x_service( $instalment ) {
-		return wp_app( 'Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_' . $instalment . '_WC_Payment_Gateway' );
+		return wp_app(Tamara_WC_Payment_Gateway::class);
 	}
 
 	public function get_customer_phone_number() {
@@ -201,7 +185,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 * @return array
 	 */
-	public function register_tamara_payment_types_on_checkout( $available_gateways ): array {
+	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
 		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings()->get_enabled() ) {
 			$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
@@ -521,7 +505,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
-			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'register_tamara_payment_types_on_checkout' ], 9998, 1 );
+			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout'], 9998, 1 );
 
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
 		}

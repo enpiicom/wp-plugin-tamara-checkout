@@ -35,7 +35,7 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 	 * @throws \Exception
 	 */
 	public function process_payment( $wc_order_id ) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->process_payment(
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->proceed_tamara_checkout_session(
 			$wc_order_id,
 			$this->payment_type,
 			$this->instalment
@@ -43,13 +43,13 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * @param $text
+	 * @param $untranslated_text
 	 *
 	 * @return string
 	 * @throws \Exception
 	 */
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	protected function _t( $text ): string {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $text );
+	protected function _t( $untranslated_text ): string {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 }

@@ -29,7 +29,9 @@ class General_Helper {
 	 * @throws \Exception
 	 */
 	public static function convert_message( $tamara_message ): string {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
+		return static::get_error_map()[$tamara_message] ?
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t(static::get_error_map()[$tamara_message]) :
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t($tamara_message);
 	}
 
 	/**
@@ -38,7 +40,7 @@ class General_Helper {
 	 * @throws \Exception
 	 */
 	public static function get_error_map(): array {
-		$error_messages = [
+		return [
 			'total_amount_invalid_limit_24hrs_gmv' => 'We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method.',
 			'tamara_disabled' => 'Tamara is currently unavailable, please try again later.',
 			'consumer_invalid_phone_number' => 'Invalid Consumer Phone Number',
@@ -48,20 +50,7 @@ class General_Helper {
 			'shipping_address_invalid_phone_number' => 'Invalid Shipping Address Phone Number.',
 			'total_amount_invalid_limit' => 'The grand total of order is over/under limit of Tamara.',
 			'currency_unsupported' => 'We do not support cross currencies. Please select the correct currency for your country.',
-			'Your order information is invalid' => 'Your order information is invalid.',
-			'Invalid country code' => 'Invalid country code.',
-			'We do not support your delivery country' => 'We do not support your delivery country.',
-			'Your phone number is invalid. Please check again' => 'Your phone number is invalid. Please check again.',
-			'We do not support cross currencies. Please select the correct currency for your country' => 'We do not support cross currencies. Please select the correct currency for your country.',
 		];
-
-		// Use array_map to translate all messages.
-		return array_map(
-			function ( $message ) {
-				return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $message );
-			},
-			$error_messages
-		);
 	}
 
 	/**
