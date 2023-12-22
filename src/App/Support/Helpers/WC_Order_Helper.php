@@ -134,7 +134,6 @@ class WC_Order_Helper {
 		return $product_ids;
 	}
 
-
 	/**
 	 * Get all category ids of items in cart, including ancestors and subcategories.
 	 *

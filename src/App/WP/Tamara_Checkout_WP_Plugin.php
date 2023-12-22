@@ -14,18 +14,19 @@ use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
+use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Payment_Types_Trait;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_GatewayWC;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_GatewayWC;
+use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_GatewayWC;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
-use WC_Order;
+use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 /**
  * @inheritDoc
  * @package Tamara_Checkout\App\WP
- * static @method Tamara_Checkout_WP_Plugin wp_app_instance()
+ * @method static Tamara_Checkout_WP_Plugin wp_app_instance()
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
@@ -36,23 +37,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public const DEFAULT_COUNTRY_CODE = 'SA';
 	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
 
-	const TAMARA_CHECKOUT = 'tamara-checkout',
-		  TAMARA_GATEWAY_PAY_NOW = 'tamara-gateway-pay-now',
-		  TAMARA_GATEWAY_PAY_NEXT_MONTH = 'tamara-gateway-pay-next-month',
-		  TAMARA_GATEWAY_PAY_BY_INSTALMENTS_ID = 'tamara-gateway-pay-by-instalments',
-		  TAMARA_GATEWAY_PAY_IN_X = 'tamara-gateway-pay-in-',
-		  TAMARA_GATEWAY_PAY_IN_2 = 'tamara-gateway-pay-in-2',
-		  TAMARA_GATEWAY_PAY_IN_3 = 'tamara-gateway-pay-in-3',
-		  TAMARA_GATEWAY_PAY_IN_4 = 'tamara-gateway-pay-in-4',
-		  TAMARA_GATEWAY_PAY_IN_5 = 'tamara-gateway-pay-in-5',
-		  TAMARA_GATEWAY_PAY_IN_6 = 'tamara-gateway-pay-in-6',
-		  TAMARA_GATEWAY_PAY_IN_7 = 'tamara-gateway-pay-in-7',
-		  TAMARA_GATEWAY_PAY_IN_8 = 'tamara-gateway-pay-in-8',
-		  TAMARA_GATEWAY_PAY_IN_9 = 'tamara-gateway-pay-in-9',
-		  TAMARA_GATEWAY_PAY_IN_10 = 'tamara-gateway-pay-in-10',
-		  TAMARA_GATEWAY_PAY_IN_11 = 'tamara-gateway-pay-in-11',
-		  TAMARA_GATEWAY_PAY_IN_12 = 'tamara-gateway-pay-in-12',
-		  TAMARA_GATEWAY_SINGLE_CHECKOUT_ID = 'tamara-gateway-checkout';
+	const TAMARA_CHECKOUT = 'tamara-checkout';
 
 	protected $customer_phone_number;
 
@@ -128,15 +113,15 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_tamara_gateway_single_checkout_service() {
-		return wp_app( Single_Checkout_WC_Payment_Gateway::class );
+		return wp_app( Single_Checkout_WC_Payment_GatewayWC::class );
 	}
 
 	public function get_tamara_gateway_pay_next_month_service() {
-		return wp_app( Pay_Next_Month_WC_Payment_Gateway::class );
+		return wp_app( Pay_Next_Month_WC_Payment_GatewayWC::class );
 	}
 
 	public function get_tamara_gateway_pay_now_service() {
-		return wp_app( Pay_Now_WC_Payment_Gateway::class );
+		return wp_app( Pay_Now_WC_Payment_GatewayWC::class );
 	}
 
 	public function get_tamara_gateway_pay_in_x_service($instalment)
@@ -221,23 +206,21 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 * @return array
 	 */
-	public function register_tamara_payment_types_on_checkout( $available_gateways ): array {
-		Get_Tamara_Payment_Options_Query::execute_now();
+	public function register_tamara_payment_types_on_checkout( $available_gateways ):array {
+		$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
+		$cart_total        = $current_cart_info['cart_total'] ?? null;
+		$customer_phone    = $current_cart_info['customer_phone'] ?? '';
+		$country_code      = !empty($current_cart_info['country_code']) ? $current_cart_info['country_code'] : Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+		$currency_by_country_code = array_flip(General_Helper::get_currency_country_mappings());
+		$currency_code = $currency_by_country_code[$country_code];
+		$order_total = new Money(General_Helper::format_tamara_number($cart_total), $currency_code);
 
-		if ($this->get_tamara_gateway_service()->get_settings()->get_enabled()
-		    && is_checkout() && $this->has_available_payment_options() && WC_Order_Helper::is_cart_valid()) {
-			if ( $this->is_single_checkout_enabled() ) {
-				$available_gateways = $this->possibly_add_tamara_single_checkout($available_gateways);
-			} else {
-				$available_gateways = $this->register_available_payment_options($available_gateways);
-			}
-		}
-
-		if ( ! WC_Order_Helper::is_cart_valid() ) {
-			$available_gateways =  $this->unset_default_gateway($available_gateways);
-		}
-
-		return $available_gateways;
+		return Get_Tamara_Payment_Options_Query::execute_now([
+			'available_gateways' => $available_gateways,
+			'order_total' => $order_total,
+			'country_code' => $country_code,
+			'customer_phone' => $customer_phone,
+		]);
 	}
 
 	/**
@@ -249,7 +232,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t_x( $untranslated_text, $context ): string {
+	public function _x( $untranslated_text, $context ): string {
 		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralContext, WordPress.WP.I18n.NonSingularStringLiteralDomain
 		return _x( $untranslated_text, $context, $this->get_text_domain() );
 	}
@@ -264,7 +247,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return array
 	 */
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t_n_noop( string $singular, string $plural ): array {
+	public function _n_noop( string $singular, string $plural ): array {
 		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralSingular, WordPress.WP.I18n.NonSingularStringLiteralPlural, WordPress.WP.I18n.NonSingularStringLiteralDomain
 		return _n_noop( $singular, $plural, $this->get_text_domain() );
 	}
@@ -312,12 +295,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-p-canceled',
 			[
-				'label' => $this->_t_x( 'Tamara Payment Cancelled', 'Order status' ),
+				'label' => $this->_x( 'Tamara Payment Cancelled', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Payment Cancelled <span class="count">(%s)</span>',
 					'Tamara Payment Cancelled <span class="count">(%s)</span>'
 				),
@@ -327,12 +310,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-p-failed',
 			[
-				'label' => $this->_t_x( 'Tamara Payment Failed', 'Order status' ),
+				'label' => $this->_x( 'Tamara Payment Failed', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Payment Failed <span class="count">(%s)</span>',
 					'Tamara Payment Failed <span class="count">(%s)</span>'
 				),
@@ -342,12 +325,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-c-failed',
 			[
-				'label' => $this->_t_x( 'Tamara Capture Failed', 'Order status' ),
+				'label' => $this->_x( 'Tamara Capture Failed', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Capture Failed <span class="count">(%s)</span>',
 					'Tamara Capture Failed <span class="count">(%s)</span>'
 				),
@@ -357,12 +340,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-a-done',
 			[
-				'label' => $this->_t_x( 'Tamara Authorise Success', 'Order status' ),
+				'label' => $this->_x( 'Tamara Authorise Success', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Authorise Success <span class="count">(%s)</span>',
 					'Tamara Authorise Success <span class="count">(%s)</span>'
 				),
@@ -372,12 +355,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-a-failed',
 			[
-				'label' => $this->_t_x( 'Tamara Authorise Failed', 'Order status' ),
+				'label' => $this->_x( 'Tamara Authorise Failed', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Authorise Failed <span class="count">(%s)</span>',
 					'Tamara Authorise Failed <span class="count">(%s)</span>'
 				),
@@ -387,12 +370,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-o-canceled',
 			[
-				'label' => $this->_t_x( 'Tamara Order Cancelled', 'Order status' ),
+				'label' => $this->_x( 'Tamara Order Cancelled', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Order Cancelled <span class="count">(%s)</span>',
 					'Tamara Order Cancelled <span class="count">(%s)</span>'
 				),
@@ -402,12 +385,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		register_post_status(
 			'wc-tamara-p-capture',
 			[
-				'label' => $this->_t_x( 'Tamara Payment Capture', 'Order status' ),
+				'label' => $this->_x( 'Tamara Payment Capture', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
-				'label_count' => $this->_t_n_noop(
+				'label_count' => $this->_n_noop(
 					'Tamara Payment Capture <span class="count">(%s)</span>',
 					'Tamara Payment Capture <span class="count">(%s)</span>'
 				),
@@ -424,31 +407,31 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function add_tamara_custom_order_statuses( array $order_statuses ): array {
-		$order_statuses['wc-tamara-p-canceled'] = $this->_t_x(
+		$order_statuses['wc-tamara-p-canceled'] = $this->_x(
 			'Tamara Payment Cancelled',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-p-failed'] = $this->_t_x(
+		$order_statuses['wc-tamara-p-failed'] = $this->_x(
 			'Tamara Payment Failed',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-c-failed'] = $this->_t_x(
+		$order_statuses['wc-tamara-c-failed'] = $this->_x(
 			'Tamara Capture Failed',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-a-done'] = $this->_t_x(
+		$order_statuses['wc-tamara-a-done'] = $this->_x(
 			'Tamara Authorise Done',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-a-failed'] = $this->_t_x(
+		$order_statuses['wc-tamara-a-failed'] = $this->_x(
 			'Tamara Authorise Failed',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-o-canceled'] = $this->_t_x(
+		$order_statuses['wc-tamara-o-canceled'] = $this->_x(
 			'Tamara Order Cancelled',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-p-capture'] = $this->_t_x(
+		$order_statuses['wc-tamara-p-capture'] = $this->_x(
 			'Tamara Payment Capture',
 			'Order status'
 		);

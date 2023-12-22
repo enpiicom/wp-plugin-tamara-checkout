@@ -5,75 +5,53 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Shared\Base_Query;
+use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Payment_Types_Trait;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Checkout\PaymentOptionsAvailability;
-use Tamara_Checkout\Deps\Tamara\Model\Money;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
 
 class Get_Tamara_Payment_Options_Query extends Base_Query {
 
 	use Executable_Trait;
 	use Tamara_Payment_Types_Trait;
+	use Config_Trait;
+
+	protected $available_gateways;
+	protected $order_total;
+	protected $country_code;
+	protected $customer_phone;
+	protected $is_vip = false;
+
+	/**
+	 * @throws \Exception
+	 */
+	public function __construct(array $config) {
+		$this->bind_config($config);
+	}
 
 	/**
 	 * @throws \Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException
 	 */
-	public function handle() {
+	public function handle(): array {
 		$remote_available_payment_types = $this->fetch_payment_options_availability();
-		$available_payment_methods = $this->convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types);
-//		$build_available_payment_options = $this->build_payment_options($available_payment_methods);
-		$available_payment_options = [];
-//		if ( $get_from_cache ) {
-//			$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
-//			$cart_total        = $current_cart_info['cart_total'] ?? null;
-//			$customer_phone    = $current_cart_info['customer_phone'] ?? '';
-//			$country_code      = $current_cart_info['country_code'] ?? Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
-//			$country_payment_types_cache_key = $this->build_country_payment_types_cache_key($cart_total, $customer_phone,
-//				$country_code, $is_vip);
-//			$available_payment_options = get_transient($country_payment_types_cache_key);
-//
-//			if (empty($available_payment_options) && Tamara_Order_Helper::is_supported_country($country_code)) {
-//
-//
-//				if ($check_payment_options_availability_response->isSuccess()) {
-//					$available_payment_options = $this->get_payment_options_availability($check_payment_options_availability_response);
-//					set_transient($country_payment_types_cache_key, $available_payment_options, 600);
-//				} else {
-//					$errors = $check_payment_options_availability_response->getMessage();
-//					General_Helper::log_message(
-//						sprintf("Tamara Checkout Payment Options Availibility Check Failed.\nError message: ' %s'",
-//							$errors)
-//					);
-//
-//					return false;
-//				}
-//			}
-//		}
+		$remote_payment_methods = $this->convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types);
 
-		return $available_payment_options;
+		return $this->process_available_gateways($remote_payment_methods);
 	}
 
 	/**
 	 * @throws \Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException
 	 */
 	protected function fetch_payment_options_availability(): array {
-		$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
-			$cart_total        = $current_cart_info['cart_total'] ?? null;
-			$customer_phone    = $current_cart_info['customer_phone'] ?? '';
-			$country_code      = $current_cart_info['country_code'] ?? Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
-		$currency_by_country_code = array_flip(General_Helper::get_currency_country_mappings());
-		$currency = $currency_by_country_code[$country_code];
-		$order_total = new Money(General_Helper::format_tamara_number($cart_total), $currency);
 		$payment_options_availability = new PaymentOptionsAvailability(
-			$country_code,
-			$order_total,
-			$customer_phone,
-			false);
+			$this->country_code,
+			$this->order_total,
+			$this->customer_phone,
+			$this->is_vip
+			);
 		$request = new CheckPaymentOptionsAvailabilityRequest($payment_options_availability);
 		$tamara_client = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_api_client();
 		$response = $tamara_client->checkPaymentOptionsAvailability($request);
@@ -83,21 +61,45 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 
 	/**
 	 * @param $remote_available_payment_types
+	 *
+	 * @return array
 	 */
-	protected function convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types) {
-		array_walk($remote_available_payment_types, function (&$item, $index) {
+	protected function convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types): array {
+		array_walk($remote_available_payment_types, function (&$item) {
 			$item['to_map'] = $item['payment_type'] . '_' . $item['instalment'];
 		});
 
-		$mappings = [
-			'PAY_NOW_0' => Pay_Now_WC_Payment_Gateway::class,
-		];
+		$mappings = General_Helper::get_payment_type_to_service_mappings();
 
 		$payment_methods = [];
 		foreach ($remote_available_payment_types as $index => $payment_type) {
-			$payment_methods[$index] = $mappings[$payment_type['to_map']] ?? null;
+			if (!empty($mappings[$payment_type['to_map']])) {
+				$class_name = $mappings[$payment_type['to_map']];
+				$tmp_payment_method = new $class_name($payment_type);
+				$payment_methods[$tmp_payment_method->id] = $tmp_payment_method;
+			}
 		}
-		dev_error_log($payment_methods);
+
+		return $payment_methods;
+	}
+
+	/**
+	 * @param  array  $remote_payment_methods
+	 *
+	 * @return array
+	 */
+	protected function process_available_gateways(array $remote_payment_methods): array {
+		$available_gateways = $this->available_gateways;
+		$tamara_default_gateway_key = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
+		$tamara_default_gateway_offset = array_search($tamara_default_gateway_key, array_keys(WC()->payment_gateways->payment_gateways()));
+		$available_gateways = array_merge(
+			array_slice($available_gateways, 0, $tamara_default_gateway_offset),
+			$remote_payment_methods,
+			array_slice($available_gateways, $tamara_default_gateway_offset, null)
+		);
+		unset($available_gateways[$tamara_default_gateway_key]);
+
+		return $available_gateways;
 	}
 
 }
