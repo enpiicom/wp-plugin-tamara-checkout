@@ -202,22 +202,28 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return array
 	 */
 	public function register_tamara_payment_types_on_checkout( $available_gateways ): array {
-		$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
-		$cart_total        = $current_cart_info['cart_total'] ?? 0;
-		$customer_phone    = $current_cart_info['customer_phone'] ?? '';
-		$country_code      = ! empty( $current_cart_info['country_code'] ) ? $current_cart_info['country_code'] : self::DEFAULT_COUNTRY_CODE;
-		$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
-		$currency_code = $currency_by_country_code[ $country_code ];
-		$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
+		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings()->get_enabled() ) {
+			$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
+			$cart_total = $current_cart_info['cart_total'] ?? 0;
+			$customer_phone = $current_cart_info['customer_phone'] ?? '';
+			$country_code = ! empty( $current_cart_info['country_code'] )
+				? $current_cart_info['country_code']
+				: self::DEFAULT_COUNTRY_CODE;
+			$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
+			$currency_code = $currency_by_country_code[ $country_code ];
+			$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
 
-		return Get_Tamara_Payment_Options_Query::execute_now(
-			[
-				'available_gateways' => $available_gateways,
-				'order_total' => $order_total,
-				'country_code' => $country_code,
-				'customer_phone' => $customer_phone,
-			]
-		);
+			return Get_Tamara_Payment_Options_Query::execute_now(
+				[
+					'available_gateways' => $available_gateways,
+					'order_total' => $order_total,
+					'country_code' => $country_code,
+					'customer_phone' => $customer_phone,
+				]
+			);
+		}
+
+		return $available_gateways;
 	}
 
 	/**
