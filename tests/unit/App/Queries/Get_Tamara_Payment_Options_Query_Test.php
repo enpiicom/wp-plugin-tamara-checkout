@@ -9,9 +9,20 @@ use Mockery;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_10_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_11_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_12_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_2_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_3_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_4_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_5_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_6_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_7_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_8_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_9_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\WC_Tamara_Payment_Type;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
@@ -77,12 +88,15 @@ class Get_Tamara_Payment_Options_Query_Test extends Unit_Test_Case {
 		];
 
 		// Todo: We need to mock method _t and return somevalue
-		$wc_tamara_payment_type_mock = \Mockery::mock(WC_Tamara_Payment_Type::class)->makePartial()->shouldAllowMockingProtectedMethods();
+		$wc_tamara_payment_type_mock = \Mockery::mock(WC_Tamara_Payment_Type::class)
+		                                       ->makePartial()->shouldAllowMockingProtectedMethods();
+		                                                                            ;
 		$wc_tamara_payment_type_mock->shouldReceive('_t')->andReturn('value');
 
-		\WP_Mock::userFunction( 'get_locale' )
-		        ->once()
-		        ->andReturn( 'en' );
+//		\WP_Mock::userFunction( 'get_locale' )
+//		        ->once()
+//		        ->andReturn( 'en' );
+//
 		$remote_available_payment_types = [
 			0 => [
 					'payment_type' => 'PAY_NOW',
@@ -105,6 +119,47 @@ class Get_Tamara_Payment_Options_Query_Test extends Unit_Test_Case {
 		$test_object->shouldReceive('get_payment_type_to_service_mappings')->andReturn($mappings);
 
 //		$payment_methods_result = $test_object->convert_tamara_payment_types_to_wc_payment_methods($remote_available_payment_types);
+	}
+
+	/**
+	 * @throws \ReflectionException
+	 */
+	public function test_get_plugin_instance():void {
+		$test_object = $this->getMockBuilder(Get_Tamara_Payment_Options_Query::class)
+		              ->disableOriginalConstructor()
+		              ->onlyMethods(['get_plugin_instance'])->getMock();
+
+		// Invoke the method and get the result
+		$result = $this->invoke_protected_method($test_object, 'get_plugin_instance');
+
+		// Verify the result is an instance of Tamara_Checkout_WP_Plugin
+		$this->assertInstanceOf(Tamara_Checkout_WP_Plugin::class, $result);
+	}
+
+	public function test_get_payment_type_to_service_mappings():void {
+		$test_object = Mockery::mock(Get_Tamara_Payment_Options_Query::class)->shouldAllowMockingProtectedMethods()
+			->shouldAllowMockingMethod('get_payment_type_to_service_mappings')->makePartial();
+		$expected = [
+			'PAY_LATER_0' => Tamara_WC_Payment_Gateway::class,
+			'PAY_NOW_0' => Pay_Now_WC_Payment_Gateway::class,
+			'PAY_NEXT_MONTH_0' => Pay_Next_Month_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_2' => Pay_In_2_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_3' => Pay_In_3_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_4' => Pay_In_4_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_5' => Pay_In_5_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_6' => Pay_In_6_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_7' => Pay_In_7_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_8' => Pay_In_8_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_9' => Pay_In_9_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_10' => Pay_In_10_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_11' => Pay_In_11_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_12' => Pay_In_12_WC_Payment_Gateway::class,
+		];
+
+		$mapping_result = $test_object->get_payment_type_to_service_mappings();
+
+		// Verify the result is as expected
+		$this->assertEquals($expected, $mapping_result);
 	}
 
 }
