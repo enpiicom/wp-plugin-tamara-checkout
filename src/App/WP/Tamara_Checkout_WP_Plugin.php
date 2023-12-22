@@ -16,7 +16,6 @@ use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
-use Tamara_Checkout\App\Support\Traits\Tamara_Payment_Types_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_GatewayWC;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_GatewayWC;
 use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_GatewayWC;
@@ -29,8 +28,6 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
  * @method static Tamara_Checkout_WP_Plugin wp_app_instance()
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
-
-	use Tamara_Payment_Types_Trait;
 
 	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';

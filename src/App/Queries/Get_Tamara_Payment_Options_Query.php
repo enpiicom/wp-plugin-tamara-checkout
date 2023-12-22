@@ -8,7 +8,6 @@ use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Traits\Tamara_Payment_Types_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Checkout\PaymentOptionsAvailability;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
@@ -16,7 +15,6 @@ use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailability
 class Get_Tamara_Payment_Options_Query extends Base_Query {
 
 	use Executable_Trait;
-	use Tamara_Payment_Types_Trait;
 	use Config_Trait;
 
 	protected $available_gateways;
@@ -53,7 +51,7 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 			$this->is_vip
 		);
 		$request = new CheckPaymentOptionsAvailabilityRequest( $payment_options_availability );
-		$tamara_client = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_api_client();
+		$tamara_client = $this->get_plugin_instance()->get_tamara_client_service()->get_api_client();
 		$response = $tamara_client->checkPaymentOptionsAvailability( $request );
 
 		return $response->getAvailablePaymentLabels();
@@ -103,5 +101,12 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 		unset( $available_gateways[ $tamara_default_gateway_key ] );
 
 		return $available_gateways;
+	}
+
+	/**
+	 * @return \Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin
+	 */
+	protected function get_plugin_instance(): Tamara_Checkout_WP_Plugin {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance();
 	}
 }
