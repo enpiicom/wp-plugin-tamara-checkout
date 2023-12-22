@@ -8,6 +8,20 @@ use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_10_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_11_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_12_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_2_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_3_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_4_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_5_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_6_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_7_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_8_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_9_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Checkout\PaymentOptionsAvailability;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
@@ -70,7 +84,7 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 			}
 		);
 
-		$mappings = General_Helper::get_payment_type_to_service_mappings();
+		$mappings = $this->get_payment_type_to_service_mappings();
 
 		$payment_methods = [];
 		foreach ( $remote_available_payment_types as $index => $payment_type ) {
@@ -92,7 +106,9 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 	protected function process_available_gateways( array $remote_payment_methods ): array {
 		$available_gateways = $this->available_gateways;
 		$tamara_default_gateway_key = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
-		$tamara_default_gateway_offset = array_search( $tamara_default_gateway_key, array_keys( WC()->payment_gateways->payment_gateways() ) );
+		$tamara_default_gateway_offset = array_search( $tamara_default_gateway_key,
+			array_keys( WC()->payment_gateways->payment_gateways() )
+		);
 		$available_gateways = array_merge(
 			array_slice( $available_gateways, 0, $tamara_default_gateway_offset ),
 			$remote_payment_methods,
@@ -108,5 +124,27 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 	 */
 	protected function get_plugin_instance(): Tamara_Checkout_WP_Plugin {
 		return Tamara_Checkout_WP_Plugin::wp_app_instance();
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function get_payment_type_to_service_mappings(): array {
+		return [
+			'PAY_LATER_0' => Tamara_WC_Payment_Gateway::class,
+			'PAY_NOW_0' => Pay_Now_WC_Payment_Gateway::class,
+			'PAY_NEXT_MONTH_0' => Pay_Next_Month_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_2' => Pay_In_2_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_3' => Pay_In_3_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_4' => Pay_In_4_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_5' => Pay_In_5_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_6' => Pay_In_6_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_7' => Pay_In_7_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_8' => Pay_In_8_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_9' => Pay_In_9_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_10' => Pay_In_10_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_11' => Pay_In_11_WC_Payment_Gateway::class,
+			'PAY_BY_INSTALMENTS_12' => Pay_In_12_WC_Payment_Gateway::class,
+		];
 	}
 }

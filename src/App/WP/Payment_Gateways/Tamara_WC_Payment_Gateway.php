@@ -8,7 +8,6 @@ use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Get_Payment_Gateway_Admin_Form_Fields_Query;
-use Tamara_Checkout\App\Support\Traits\Tamara_Payment_Types_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -26,7 +25,6 @@ use WC_Payment_Gateway;
  */
 class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Payment_Gateway_Contract {
 	use Static_Instance_Trait;
-	use Tamara_Payment_Types_Trait;
 
 	public const ENVIRONMENT_LIVE_MODE = 'live_mode';
 	public const ENVIRONMENT_SANDBOX_MODE = 'sandbox_mode';

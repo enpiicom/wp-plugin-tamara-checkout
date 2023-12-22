@@ -4,20 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Support\Helpers;
 
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_10_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_11_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_12_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_2_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_3_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_4_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_5_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_6_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_7_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_8_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_9_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class General_Helper {
@@ -150,28 +136,6 @@ class General_Helper {
 		}
 
 		return false;
-	}
-
-	/**
-	 * @return array
-	 */
-	public static function get_payment_type_to_service_mappings(): array {
-		return [
-			'PAY_LATER_0' => Tamara_WC_Payment_Gateway::class,
-			'PAY_NOW_0' => Pay_Now_WC_Payment_GatewayWC::class,
-			'PAY_NEXT_MONTH_0' => Pay_Next_Month_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_2' => Pay_In_2_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_3' => Pay_In_3_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_4' => Pay_In_4_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_5' => Pay_In_5_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_6' => Pay_In_6_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_7' => Pay_In_7_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_8' => Pay_In_8_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_9' => Pay_In_9_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_10' => Pay_In_10_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_11' => Pay_In_11_WC_Payment_GatewayWC::class,
-			'PAY_BY_INSTALMENTS_12' => Pay_In_12_WC_Payment_GatewayWC::class,
-		];
 	}
 
 	public static function get_current_language() {

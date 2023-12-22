@@ -16,9 +16,9 @@ use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_GatewayWC;
-use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_GatewayWC;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
@@ -110,15 +110,15 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_tamara_gateway_single_checkout_service() {
-		return wp_app( Single_Checkout_WC_Payment_GatewayWC::class );
+		return wp_app( Single_Checkout_WC_Payment_Gateway::class );
 	}
 
 	public function get_tamara_gateway_pay_next_month_service() {
-		return wp_app( Pay_Next_Month_WC_Payment_GatewayWC::class );
+		return wp_app( Pay_Next_Month_WC_Payment_Gateway::class );
 	}
 
 	public function get_tamara_gateway_pay_now_service() {
-		return wp_app( Pay_Now_WC_Payment_GatewayWC::class );
+		return wp_app( Pay_Now_WC_Payment_Gateway::class );
 	}
 
 	public function get_tamara_gateway_pay_in_x_service( $instalment ) {
