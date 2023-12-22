@@ -9,6 +9,7 @@ use Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\Tamara_Order_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
+use Tamara_Checkout\App\Support\Traits\WP_Attribute_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
@@ -34,8 +35,8 @@ use WC_Order;
  */
 class Tamara_Client {
 	use Static_Instance_Trait;
+	use WP_Attribute_Trait;
 
-	protected $tamara_checkout_wp_plugin;
 	protected $working_mode = 'live';
 	protected $api_url;
 	protected $api_token;
@@ -44,7 +45,6 @@ class Tamara_Client {
 	protected $api_client;
 
 	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
-		$this->tamara_checkout_wp_plugin = Tamara_Checkout_WP_Plugin::wp_app_instance();
 		$logger = null;
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
 		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
@@ -77,22 +77,23 @@ class Tamara_Client {
 	 * Create Tamara Checkout session, if failed, put errors to `wc_notices`
 	 *
 	 * @param $wc_order_id
+	 * @param $checkout_payment_type
+	 * @param $instalment_period
 	 *
 	 * @return array|bool
 	 * @throws \Exception
 	 */
-	public function process_payment( $wc_order_id ) {
+	public function proceed_tamara_checkout_session( $wc_order_id, $checkout_payment_type, $instalment_period ) {
 		$wc_order = wc_get_order( $wc_order_id );
-		$instalment_period = 3;
-		$checkout_payment_type = 'PAY_BY_INSTALMENTS';
 		try {
 			$create_tamara_checkout_session_response = $this->build_checkout_session_request(
 				$wc_order,
 				$checkout_payment_type,
 				$instalment_period
 			);
+
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$error_message = General_Helper::convert_message( $tamara_request_dispatcher_exception->getMessage() );
+			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
 		} catch ( Exception $tamara_checkout_exception ) {
 			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
 		}
@@ -123,10 +124,10 @@ class Tamara_Client {
 				array_walk(
 					$errors,
 					function ( &$tmp_item, $tmp_index ) {
-						$tmp_item = $tmp_item['error_code'] ?? null;
+						$tmp_item = General_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
 					}
 				);
-				$error_message = $this->_t( $error_message );
+				$error_message = General_Helper::convert_message( $error_message );
 				$error_message .= "<br />\n";
 				$error_message .= implode( "<br />\n", $errors );
 			}
@@ -219,19 +220,18 @@ class Tamara_Client {
 	 * @return RiskAssessment
 	 */
 	protected function populate_tamara_risk_assessment(): RiskAssessment {
-		$risk_assessment = new RiskAssessment();
-		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
-		// Todo: Tamara PHP SDK should be updated to perform further actions for Risk Assessment
-		//
-		//      $risk_assessment->setAccountCreationDate( TamaraCheckout::getInstance()->getCurrentUserRegisterDate() );
-		//      $risk_assessment->setHasDeliveredOrder( TamaraCheckout::getInstance()->currentUserHasDeliveredOrder() );
-		//      $risk_assessment->setTotalOrderCount( TamaraCheckout::getInstance()->getCurrentUserTotalOrderCount() );
-		//      $risk_assessment->setDateOfFirstTransaction( TamaraCheckout::getInstance()->getCurrentUserDateOfFirstTransaction() );
-		//      $risk_assessment->setIsExistingCustomer( is_user_logged_in() );
-		//      $risk_assessment->setOrderAmountLast3months( TamaraCheckout::getInstance()->getCurrentUserOrderAmountLast3Months() );
-		//      $risk_assessment->setOrderCountLast3months( TamaraCheckout::getInstance()->getCurrentUserOrderCountLast3Months() );
+		$data = [
+			'account_creation_date' => $this->get_current_user_register_date(),
+			'platform_account_creation_date' => $this->get_current_user_register_date(),
+			'has_delivered_order' => $this->get_current_user_has_delivered_order(),
+			'total_order_count' => $this->get_current_user_total_order_count(),
+			'date_of_first_transaction' => $this->get_current_user_date_of_first_transaction(),
+			'order_amount_last3months' => $this->get_current_user_order_amount_last_3_months(),
+			'order_count_last3months' => $this->get_current_user_order_count_last_3_months(),
+			'is_existing_customer' => is_user_logged_in(),
+		];
 
-		return $risk_assessment;
+		return new RiskAssessment( $data );
 	}
 
 	/**
@@ -377,8 +377,8 @@ class Tamara_Client {
 	 * @return string
 	 */
 	protected function get_tamara_failure_url( $params = [] ): string {
-		$tamara_failure_url = $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_settings()->failure_url
-			? $this->tamara_checkout_wp_plugin->get_tamara_gateway_service()->get_settings()->failure_url
+		$tamara_failure_url = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->failure_url
+			? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->failure_url
 			: wp_app_route_wp_url( 'wp-api-tamara-failure', $params );
 
 		$tamara_failure_url = add_query_arg( $params, $tamara_failure_url );
@@ -397,7 +397,7 @@ class Tamara_Client {
 			WC_Order_Helper::prevent_order_cancel_action( $wc_order, $wc_order_id );
 		} elseif ( ! empty( $wc_order_id ) ) {
 			$new_order_status = $gateway_settings->get_payment_cancel_status();
-			$order_note = General_Helper::convert_message( 'The payment for this order has been cancelled from Tamara.' );
+			$order_note = $this->_t( 'The payment for this order has been cancelled from Tamara.' );
 			WC_Order_Helper::update_order_status_and_add_order_note( $wc_order, $order_note, $new_order_status, '' );
 			$cancel_url_from_tamara = add_query_arg(
 				[
@@ -426,7 +426,7 @@ class Tamara_Client {
 			WC_Order_Helper::prevent_order_cancel_action( $wc_order, $wc_order_id );
 		} elseif ( ! empty( $wc_order_id ) ) {
 			$new_order_status = $gateway_settings->get_payment_failure_status();
-			$order_note = General_Helper::convert_message( 'The payment for this order has been declined from Tamara' );
+			$order_note = $this->_t( 'The payment for this order has been declined from Tamara' );
 			WC_Order_Helper::update_order_status_and_add_order_note( $wc_order, $order_note, $new_order_status, '' );
 			$failure_url_from_tamara = add_query_arg(
 				[
@@ -539,11 +539,6 @@ class Tamara_Client {
 		return $tamara_address;
 	}
 
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t( $text ) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $text );
-	}
-
 	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
 		$logger = null;
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
@@ -598,10 +593,10 @@ class Tamara_Client {
 				'WordPress %s, WooCommerce %s, Tamara Checkout %s',
 				$GLOBALS['wp_version'],
 				$GLOBALS['woocommerce']->version,
-				$this->tamara_checkout_wp_plugin->get_version()
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()
 			)
 		);
-		$order->setDescription( $this->tamara_checkout_wp_plugin->_t( 'Use Tamara Gateway with WooCommerce' ) );
+		$order->setDescription( $this->_t( 'Use Tamara Gateway with WooCommerce' ) );
 		$order->setTaxAmount(
 			new Money(
 				General_Helper::format_tamara_number( $wc_order->get_total_tax() ),
@@ -634,5 +629,16 @@ class Tamara_Client {
 		$order->setItems( $this->populate_tamara_order_items( $wc_order ) );
 
 		return $order;
+	}
+
+	/**
+	 * @param $untranslated_text
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+	protected function _t( $untranslated_text ): string {
+		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 }
