@@ -129,6 +129,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 
 		$params = [
 			'wc_order_id' => $wc_order->get_id(),
+			'payment_type' => $this->payment_type,
 		];
 
 		$merchant_url->setSuccessUrl( wp_app_route_wp_url( 'wp-api::tamara-success', $params ) );

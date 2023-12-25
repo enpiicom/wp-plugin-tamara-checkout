@@ -6,6 +6,9 @@ namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use InvalidArgumentException;
+use Exception;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use WC_Order;
@@ -44,6 +47,16 @@ class Process_Payment_With_Tamara_Query extends Base_Query {
 		}
 	}
 
+	/**
+	 * Connect to Tamara API to create a checkout session on Tamara
+	 *  successful attempt should return an array with 'result' => 'success'
+	 *  and 'redirect' => url for WooCommerce to proceed to checkout externally
+	 *
+	 * @return false|array Return false if failed
+	 * @throws BindingResolutionException
+	 * @throws InvalidArgumentException
+	 * @throws Exception
+	 */
 	public function handle() {
 		$create_checkout_request = Build_Tamara_Create_Checkout_Request_Query::execute_now(
 			$this->wc_order,
