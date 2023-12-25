@@ -18,9 +18,13 @@ class Authorise_Tamara_Order_Job_Success extends Base_Job implements ShouldQueue
 	/**
 	 * @throws Exception
 	 */
-	public function handle( $wc_order_id, $tamara_order_id ) {
-		// Empty cart if payment done
-		WC()->cart->empty_cart();
+	public function handle( $wc_order_id, $tamara_order_id, $empty_cart = true ) {
+
+		if ( $empty_cart ) {
+			// Empty cart if payment is done through checkout
+			WC()->cart->empty_cart();
+		}
+
 		$setting = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings();
 		Tamara_Order_Helper::update_tamara_order_id_to_wc_order( $wc_order_id, $tamara_order_id );
 		$wc_order = wc_get_order( $wc_order_id );
