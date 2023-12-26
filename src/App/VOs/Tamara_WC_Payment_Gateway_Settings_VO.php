@@ -201,18 +201,18 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_payment_cancel_status(): string {
-		return $this->tamara_payment_cancel ?? 'wc-tamara-p-canceled';
+		return ! empty( $this->tamara_payment_cancel ) ? $this->tamara_payment_cancel : 'wc-tamara-p-canceled';
 	}
 
 	public function get_payment_failure_status(): string {
-		return $this->tamara_payment_failure ?? 'wc-tamara-p-failed';
+		return ! empty( $this->tamara_payment_failure ) ? $this->tamara_payment_failure : 'wc-tamara-p-failed';
 	}
 
 	public function get_payment_authorised_done_status(): string {
-		return $this->tamara_authorise_done ?? 'wc-tamara-a-done';
+		return ! empty( $this->tamara_authorise_done ) ? $this->tamara_authorise_done : 'wc-tamara-a-done';
 	}
 
 	public function get_payment_authorised_failed_status(): string {
-		return $this->tamara_authorise_failure ?? 'wc-tamara-a-failed';
+		return ! empty( $this->tamara_authorise_failure ) ? $this->tamara_authorise_failure : 'wc-tamara-a-failed';
 	}
 }
