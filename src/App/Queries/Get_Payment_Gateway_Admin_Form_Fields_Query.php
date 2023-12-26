@@ -13,14 +13,17 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	use Executable_Trait;
 
 	protected $current_settings;
+	protected $working_mode;
 
 	public function __construct( $settings ) {
 		$this->current_settings = $settings;
+		$this->working_mode = $this->current_settings['environment'] ?? 'live_mode';
 	}
 
-	public function handle() {
+	public function handle(): array {
 		$custom_log_link = $this->get_debug_log_download_link();
-		$form_fields = [
+
+		return [
 			'enabled' => [
 				'title' => $this->_t( 'Enable/Disable' ),
 				'label' => $this->_t( 'Enable Tamara Gateway' ),
@@ -29,12 +32,12 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'tamara_settings_help_texts' => [
 				'title' => $this->_t( 'Tamara Settings Help Texts' ),
 				'type' => 'title',
-				'description' => $this->getHelpTextsHtml(),
+				'description' => $this->get_help_text_html(),
 			],
 			'tamara_confidential_config' => [
 				'title' => $this->_t( 'Confidential Configuration' ),
 				'type' => 'title',
-				'description' => '<p>' . $this->_t( 'Update Your Confidential Configuration Received From Tamara. You can find that on http://partners.tamara.co.' ) . '</p>',
+				'description' => '<p>' . $this->_t( 'Update Your Confidential Configuration Received From Tamara. You can find that on http://partners.tamara.co.' ) . '</p>' . $this->handle_working_mode_fields_display(),
 			],
 			'environment' => [
 				'title' => $this->_t( 'Tamara Working Mode' ),
@@ -56,6 +59,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 					'value' => Tamara_WC_Payment_Gateway::LIVE_API_URL,
 					'required' => 'required',
 				],
+				'css' => 'width: 300px'
 			],
 			'live_api_token' => [
 				'title' => $this->_t( 'Live API Token (Merchant Token)' ),
@@ -277,10 +281,10 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 					'<div class="debug-info-manage button-primary" >' . $this->_t( 'Show Debug Info' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'debug_info_text' => [
-				'type' => 'text',
+				'type' => 'debug_info_text',
+				'title' => $this->_t( 'Platform & Extensions:' ),
 				'description' =>
-					'<h3>Platform & Extensions:</h3>
-<table class="tamara-debug-info-table"><tr><td>' . sprintf( '<strong>PHP Version:</strong> %s', PHP_VERSION ) . '</td></tr>'
+					'<table class="tamara-debug-info-table"><tr><td>' . sprintf( '<strong>PHP Version:</strong> %s', PHP_VERSION ) . '</td></tr>'
 					. '<tr><td>' . sprintf( '<strong>' . $this->_t( 'PHP loaded extensions' ) . ':</strong> %s', implode( ', ', get_loaded_extensions() ) ) . '</td></tr>'
 					. '<tr><td><h4>Default Merchant URLs:</h4></td></tr>'
 					. '<tr><td><ul><li>' . $this->_t( 'Tamara Success URL: ' ) . $this->_t( 'Default <strong>WooCommerce Order Received</strong> url is used.' ) . '</li>'
@@ -301,8 +305,6 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 					'<p style="margin-top: 2.6rem;">' . sprintf( $this->_t( 'Tamara Checkout Plugin Version: %s' ), TAMARA_CHECKOUT_VERSION ) . '</p>',
 			],
 		];
-
-		return $form_fields;
 	}
 
 	/**
@@ -310,10 +312,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	 *
 	 * @return string
 	 */
-	protected function getHelpTextsHtml() {
-		return '
-
-<div class="tamara-settings-help-texts-description">
+	protected function get_help_text_html(): string {
+		return '<div class="tamara-settings-help-texts-description">
 					<p>' . $this->_t( 'Here you can browse some help texts and find solutions for common issues with our plugin.' ) . '</p>
 					<ul>
 						<li><p class="tamara-highlight">' . $this->_t( 'If there is any issue with your API URL, API Token, Notification Key or Public Key please contact Tamara Team for support at <a href="mailto:merchant.support@tamara.co">merchant.support@tamara.co</a>' ) . '</p></li>
@@ -339,11 +339,11 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 
-	protected function get_webhook_id() {
+	protected function get_webhook_id(): string {
 		return 'webhook_id';
 	}
 
-	protected function get_debug_log_download_link() {
+	protected function get_debug_log_download_link(): string {
 		return wp_app_route_wp_url(
 			'wp-app::tamara-download-log-file',
 			[
@@ -352,23 +352,28 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 		);
 	}
 
-	protected function get_tamara_webhook_url() {
-		return 'get_tamara_webhook_url';
+	protected function get_tamara_webhook_url() : string
+	{
+		return wp_app_url('tamara-webhook');
 	}
 
-	protected function get_tamara_ipn_url() {
-		return 'get_tamara_ipn_url';
+	protected function get_tamara_ipn_url() : string
+	{
+		return wp_app_url('tamara-ipn');
 	}
 
-	protected function get_tamara_failure_url() {
-		return 'get_tamara_failure_url';
+	protected function get_tamara_failure_url() : string
+	{
+		return wp_app_url('tamara-failure');
 	}
 
-	protected function get_tamara_cancel_url() {
-		return 'get_tamara_cancel_url';
+	protected function get_tamara_cancel_url() : string
+	{
+		return wp_app_url('tamara-cancel');
 	}
 
-	protected function get_pdp_widget_positions() {
+	protected function get_pdp_widget_positions() : array
+	{
 		return [
 			'woocommerce_single_product_summary' => 'woocommerce_single_product_summary',
 			'woocommerce_after_single_product_summary' => 'woocommerce_after_single_product_summary',
@@ -378,7 +383,80 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 		];
 	}
 
-	protected function get_cart_widget_positions() {
+	protected function handle_working_mode_fields_display(): void {
+		wp_register_script( 'tamara-custom-admin-js', '',);
+		wp_enqueue_script( 'tamara-custom-admin-js' );
+
+		$js_script = <<<JS_SCRIPT
+			window.addEventListener('load', function() {
+				get_confidential_value_selected_fn();
+				document.getElementById('woocommerce_tamara-gateway_environment').onchange = get_confidential_value_selected_fn;
+			})
+
+			function get_confidential_value_selected_fn() {
+			const live_api_url = 'https://api.tamara.co';
+			const sandbox_api_url = 'https://api-sandbox.tamara.co';
+			let live_api_url_el = document.getElementById('woocommerce_tamara-gateway_live_api_url');
+			let live_api_token_el = document.getElementById('woocommerce_tamara-gateway_live_api_token');
+			let live_notif_token_el = document.getElementById('woocommerce_tamara-gateway_live_notification_token');
+			let live_public_key_el = document.getElementById('woocommerce_tamara-gateway_live_public_key');
+			let sandbox_api_url_el = document.getElementById('woocommerce_tamara-gateway_sandbox_api_url');
+			let sandbox_api_token_el = document.getElementById('woocommerce_tamara-gateway_sandbox_api_token');
+			let sandbox_notif_token_el = document.getElementById('woocommerce_tamara-gateway_sandbox_notification_token');
+			let sandbox_public_key_el = document.getElementById('woocommerce_tamara-gateway_sandbox_public_key');
+	        let value_selected;
+	        let tamara_env_toggle = document.getElementById('woocommerce_tamara-gateway_environment');
+            value_selected = tamara_env_toggle.value;
+
+            if ('live_mode' === value_selected) {
+                sandbox_api_url_el.closest('tr').style.display = 'none'
+                sandbox_api_url_el.setAttribute('required', false);
+                sandbox_api_token_el.closest('tr').style.display = 'none'
+                sandbox_api_token_el.setAttribute('required', false);
+                sandbox_notif_token_el.closest('tr').style.display = 'none'
+                sandbox_notif_token_el.setAttribute('required', false);
+                sandbox_public_key_el.closest('tr').style.display = 'none'
+
+                live_api_url_el.closest('tr').style.display = 'table-row'
+                live_api_url_el.setAttribute('required', true);
+                live_api_token_el.closest('tr').style.display = 'table-row'
+                live_api_token_el.setAttribute('required', true);
+                live_notif_token_el.closest('tr').style.display = 'table-row'
+                live_notif_token_el.setAttribute('required', true);
+                live_public_key_el.closest('tr').style.display = 'table-row'
+
+                if (!live_api_url_el.value) {
+                    live_api_url_el.value = live_api_url;
+                }
+
+            } else if ('sandbox_mode' === value_selected) {
+                live_api_url_el.closest('tr').style.display = 'none'
+                live_api_url_el.setAttribute('required', false);
+                live_api_token_el.closest('tr').style.display = 'none'
+                live_api_token_el.setAttribute('required', false);
+                live_notif_token_el.closest('tr').style.display = 'none'
+                live_notif_token_el.setAttribute('required', false);
+                live_public_key_el.closest('tr').style.display = 'none'
+
+                sandbox_api_url_el.closest('tr').style.display = 'table-row'
+                sandbox_api_url_el.setAttribute('required', true);
+                sandbox_api_token_el.closest('tr').style.display = 'table-row'
+                sandbox_api_token_el.setAttribute('required', true);
+                sandbox_notif_token_el.closest('tr').style.display = 'table-row'
+                sandbox_notif_token_el.setAttribute('required', true);
+                sandbox_public_key_el.closest('tr').style.display = 'table-row'
+
+                if (!sandbox_api_url_el.value) {
+                    sandbox_api_url_el.value = sandbox_api_url;
+                }
+            }
+        }
+JS_SCRIPT;
+
+		wp_add_inline_script( 'tamara-custom-admin-js', $js_script, 'before');
+	}
+
+	protected function get_cart_widget_positions() : array {
 		return [
 			'woocommerce_before_cart' => 'woocommerce_before_cart',
 			'woocommerce_after_cart_table' => 'woocommerce_after_cart_table',

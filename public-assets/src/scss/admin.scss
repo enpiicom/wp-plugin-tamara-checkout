@@ -3,123 +3,120 @@
 * General Tamara admin styles.
 */
 .order-status {
-  &.status-tamara-a-done {
-    background: #c6e1c6;
-    color: #5b841b;
-  }
+	&.status-tamara-a-done {
+		background: #c6e1c6;
+		color: #5b841b;
+	}
 
-  &.status-tamara-a-failed {
-    background: #eba3a3;
-    color: #761919;
-  }
+	&.status-tamara-a-failed {
+		background: #eba3a3;
+		color: #761919;
+	}
 
-  &.status-tamara-p-capture {
-    background: #c8d7e1;
-    color: #2e4453;
-  }
+	&.status-tamara-p-capture {
+		background: #c8d7e1;
+		color: #2e4453;
+	}
 
-  &.status-tamara-c-failed {
-    background: #eba3a3;
-    color: #761919;
-  }
+	&.status-tamara-c-failed {
+		background: #eba3a3;
+		color: #761919;
+	}
 
-  &.status-tamara-p-failed {
-    background: #eba3a3;
-    color: #761919;
-  }
+	&.status-tamara-p-failed {
+		background: #eba3a3;
+		color: #761919;
+	}
 
 }
 
 #tamara-custom-log {
-  width: 99%;
-  background-color: #eee;
-  color: #32373c;
-  overflow: auto;
-  padding: 2px 6px;
-  font-size: 12px;
+	width: 99%;
+	background-color: #eee;
+	color: #32373c;
+	overflow: auto;
+	padding: 2px 6px;
+	font-size: 12px;
 }
 
 #woocommerce_tamara-gateway_custom_log_message, .tamara-settings-help-texts__content {
-  display: none;
+	display: none;
 }
 
 .tamara-paylater-limits, .tamara-paynow-limits {
-  display: inline-grid;
-  padding: 0 1rem;
+	display: inline-grid;
+	padding: 0 1rem;
 }
 
 .tamara-settings-help-texts__content, .tamara-settings-help-texts-description {
-  ul {
-    font-size: 14px;
-    list-style: circle;
-    padding: 0 1.5rem;
-  }
+	ul {
+		font-size: 14px;
+		list-style: circle;
+		padding: 0 1.5rem;
+	}
 
-  li {
-    line-height: 1.5rem;
-  }
+	li {
+		line-height: 1.5rem;
+	}
 }
 
 .tamara-settings-help-texts__content, .tamara-settings-help-texts-description.tamara-widefat {
-  ul {
-    padding: 1.5rem;
-  }
+	ul {
+		padding: 1.5rem;
+	}
 }
 
 
 .tamara-debug-info-table tr td ul, .tamara-debug-info-table tr td h4 {
-  padding: 0;
-  margin: 0;
+	padding: 0;
+	margin: 0;
 }
 
 .tamara-debug-info-table tr td {
-  padding: 10px;
-  margin: 0;
+	padding: 10px;
+	margin: 0;
 }
 
 .tamara-debug-info-table tr td ul {
-  list-style: circle;
+	list-style: circle;
 }
 
 .tamara-toggle-btn {
-  margin-left: 10px;
-}
-
-table.tamara-setting-table th, .tamara-widefat th {
-  padding: 30px 20px;
+	margin-left: 10px;
 }
 
 .tamara-widefat {
-  background: #fff;
-  border: 1px solid #c3c4c7;
-  box-shadow: 0 1px 1px rgb(0 0 0 / 4%);
-  clear: both;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	box-shadow: 0 1px 1px rgb(0 0 0 / 4%);
+	clear: both;
 }
 
 div.tamara-settings-help-texts .tamara-settings-help-texts__content {
-  margin-top: 15px;
+	margin-top: 15px;
 }
 
-.tamara-display-block {
-  display: block;
+.tamara-display-block, .tamara-setting-table tbody {
+	display: block;
+	padding: 1rem;
 }
 
 .tamara-highlight {
-  font-size: 14px;
-  color: #EB6440 !important;
-  font-weight: bold;
+	font-size: 14px;
+	color: #EB6440 !important;
+	font-weight: bold;
 }
 
 .wp-core-ui .button-primary.tamara-opened {
-  background: grey;
-  border-color: grey;
+	background: grey;
+	border-color: grey;
 }
 
 .tamara-settings-help-texts__manage, .tamara-order-statuses-mappings-manage,
 .tamara-order-statuses-trigger-manage, .tamara-advanced-settings-manage, .tamara-custom-settings-manage, .debug-info-manage {
-  i {
-    transition: all 0.25s ease-in;
-  }
+	i {
+		transition: all 0.25s ease-in;
+	}
 }
 
 .form-table.widefat.tamara-setting-table {
@@ -127,7 +124,7 @@ div.tamara-settings-help-texts .tamara-settings-help-texts__content {
 }
 
 .button-primary.tamara-opened i {
-  transform: rotate(-180deg);
+	transform: rotate(-180deg);
 }
 
 @import "../fonts/fontawesome-free/css/all.min.css";

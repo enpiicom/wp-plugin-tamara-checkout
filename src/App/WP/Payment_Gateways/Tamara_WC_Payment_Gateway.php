@@ -161,10 +161,10 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 
 		// Only enqueue the setting scripts on the Tamara Checkout settings screen and shop order screen.
 		if (General_Helper::is_tamara_admin_settings_screen()) {
-			wp_enqueue_script($js_url_handle_id,
-				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/js/admin.js',
-				['jquery'],
-				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(), true);
+//			wp_enqueue_script($js_url_handle_id,
+//				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/js/admin.js',
+//				['jquery'],
+//				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(), true);
 
 			wp_enqueue_style($js_url_handle_id,
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/css/admin.css', [],
