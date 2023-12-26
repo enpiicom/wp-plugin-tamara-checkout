@@ -8,6 +8,7 @@ use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Log;
+use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\WP_Attribute_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -16,8 +17,12 @@ use Tamara_Checkout\Deps\Tamara\Configuration;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
+use Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse;
+use Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderResponse;
 
 /**
  * A wrapper of Tamara Client
@@ -87,6 +92,26 @@ class Tamara_Client {
 		return $create_checkout_response;
 	}
 
+	/**
+	 *
+	 * @param GetOrderRequest $get_order_request
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderResponse
+	 * @throws Exception
+	 */
+	public function get_order( GetOrderRequest $client_request ) {
+		return $this->perform_remote_request( 'getOrder', $client_request );
+	}
+
+	/**
+	 *
+	 * @param AuthoriseOrderRequest $client_request
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse
+	 * @throws Exception
+	 */
+	public function authorise_order( AuthoriseOrderRequest $client_request ) {
+		return $this->perform_remote_request( 'authoriseOrder', $client_request );
+	}
+
 	protected function define_working_mode(): void {
 		if ( strpos( $this->api_url, '-sandbox' ) ) {
 			$this->working_mode = 'sandbox';
@@ -110,6 +135,26 @@ class Tamara_Client {
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
 		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
 		return Client::create( $configuration );
+	}
+
+	protected function perform_remote_request( $remote_action, $client_request ) {
+		try {
+			$client_response = $this->api_client->$remote_action( $client_request );
+		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
+			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
+		} catch ( Exception $tamara_checkout_exception ) {
+			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
+		}
+
+		if ( empty( $client_response ) ) {
+			return $error_message;
+		}
+
+		if ( ! $client_response->isSuccess() ) {
+			return $this->build_client_response_errors( $client_response );
+		}
+
+		return $client_response;
 	}
 
 	protected function build_client_response_errors( ClientResponse $tamara_client_response ): string {
