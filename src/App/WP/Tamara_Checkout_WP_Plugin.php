@@ -70,9 +70,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 		add_action( 'wp_loaded', [ $this, 'cancel_order_uncomplete_payment' ], 21 );
 
-		add_action('wp_enqueue_scripts', [$this, 'enqueue_tamara_general_scripts']);
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
 
-		add_action('admin_enqueue_scripts', [$this, 'enqueue_tamara_admin_scripts']);
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tamara_admin_scripts' ] );
 	}
 
 	public function init_woocommerce() {

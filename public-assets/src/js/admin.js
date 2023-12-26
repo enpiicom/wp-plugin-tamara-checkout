@@ -3,8 +3,10 @@ import createPopper from '@popperjs/core';
 
 (function ($) {
     $('document').ready(function () {
+		let tamara_env_toggle = $('#woocommerce_tamara-gateway_environment');
 		let webhook_enabled = $('#woocommerce_tamara-gateway_webhook_enabled')
 		webhook_enabled.closest('tr').hide()
+
         /*
          Hide Help texts field and show/hide on toggle
         */

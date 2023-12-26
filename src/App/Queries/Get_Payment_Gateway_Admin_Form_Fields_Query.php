@@ -59,7 +59,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 					'value' => Tamara_WC_Payment_Gateway::LIVE_API_URL,
 					'required' => 'required',
 				],
-				'css' => 'width: 300px'
+				'css' => 'width: 300px',
 			],
 			'live_api_token' => [
 				'title' => $this->_t( 'Live API Token (Merchant Token)' ),
@@ -352,28 +352,23 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 		);
 	}
 
-	protected function get_tamara_webhook_url() : string
-	{
-		return wp_app_url('tamara-webhook');
+	protected function get_tamara_webhook_url(): string {
+		return wp_app_url( 'tamara-webhook' );
 	}
 
-	protected function get_tamara_ipn_url() : string
-	{
-		return wp_app_url('tamara-ipn');
+	protected function get_tamara_ipn_url(): string {
+		return wp_app_url( 'tamara-ipn' );
 	}
 
-	protected function get_tamara_failure_url() : string
-	{
-		return wp_app_url('tamara-failure');
+	protected function get_tamara_failure_url(): string {
+		return wp_app_url( 'tamara-failure' );
 	}
 
-	protected function get_tamara_cancel_url() : string
-	{
-		return wp_app_url('tamara-cancel');
+	protected function get_tamara_cancel_url(): string {
+		return wp_app_url( 'tamara-cancel' );
 	}
 
-	protected function get_pdp_widget_positions() : array
-	{
+	protected function get_pdp_widget_positions(): array {
 		return [
 			'woocommerce_single_product_summary' => 'woocommerce_single_product_summary',
 			'woocommerce_after_single_product_summary' => 'woocommerce_after_single_product_summary',
@@ -384,7 +379,13 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	}
 
 	protected function handle_working_mode_fields_display(): void {
-		wp_register_script( 'tamara-custom-admin-js', '',);
+		wp_register_script(
+			'tamara-custom-admin-js',
+			'',
+			[],
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(),
+			true
+		);
 		wp_enqueue_script( 'tamara-custom-admin-js' );
 
 		$js_script = <<<JS_SCRIPT
@@ -453,10 +454,10 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
         }
 JS_SCRIPT;
 
-		wp_add_inline_script( 'tamara-custom-admin-js', $js_script, 'before');
+		wp_add_inline_script( 'tamara-custom-admin-js', $js_script, 'before' );
 	}
 
-	protected function get_cart_widget_positions() : array {
+	protected function get_cart_widget_positions(): array {
 		return [
 			'woocommerce_before_cart' => 'woocommerce_before_cart',
 			'woocommerce_after_cart_table' => 'woocommerce_after_cart_table',

@@ -169,24 +169,29 @@ class General_Helper {
 	}
 
 	/**
-     * Check if current screen is Tamara Admin Settings page
+	 * Check if current screen is Tamara Admin Settings page
 	 *
 	 * @return bool
 	 */
-	public static function is_tamara_admin_settings_screen() : bool {
-		return !! (is_admin() && isset($_GET['page'], $_GET['tab'], $_GET['section'])
-		        && ('wc-settings' === $_GET['page'])
-		        && ('checkout' === $_GET['tab'])
-		        && (Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID === $_GET['section']));
+	public static function is_tamara_admin_settings_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['page'] === 'wc-settings' )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['tab'] === 'checkout' )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['section'] === Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID ) );
 	}
 
 	/**
-     * Check if current screen is WC shop order page
+	 * Check if current screen is WC shop order page
 	 *
 	 * @return bool
 	 */
-	public static function is_shop_order_screen() : bool {
-		return !! (is_admin() && isset($_GET['post_type']) && ('shop_order' === $_GET['post_type']));
+	public static function is_shop_order_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
 	}
 
 	/**

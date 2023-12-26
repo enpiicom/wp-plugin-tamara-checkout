@@ -52,20 +52,13 @@
 	ul {
 		font-size: 14px;
 		list-style: circle;
-		padding: 0 1.5rem;
+		padding: .5rem 1.5rem;
 	}
 
 	li {
 		line-height: 1.5rem;
 	}
 }
-
-.tamara-settings-help-texts__content, .tamara-settings-help-texts-description.tamara-widefat {
-	ul {
-		padding: 1.5rem;
-	}
-}
-
 
 .tamara-debug-info-table tr td ul, .tamara-debug-info-table tr td h4 {
 	padding: 0;
@@ -92,10 +85,6 @@
 	clear: both;
 }
 
-div.tamara-settings-help-texts .tamara-settings-help-texts__content {
-	margin-top: 15px;
-}
-
 .tamara-display-block, .tamara-setting-table tbody {
 	display: block;
 	padding: 1rem;
@@ -117,6 +106,10 @@ div.tamara-settings-help-texts .tamara-settings-help-texts__content {
 	i {
 		transition: all 0.25s ease-in;
 	}
+}
+
+.tamara-settings-help-texts__manage.button-primary {
+	margin-bottom: 1rem;
 }
 
 .form-table.widefat.tamara-setting-table {
