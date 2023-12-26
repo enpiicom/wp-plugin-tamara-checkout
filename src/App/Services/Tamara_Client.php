@@ -6,6 +6,8 @@ namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
+use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Log;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\WP_Attribute_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -34,10 +36,7 @@ class Tamara_Client {
 	protected $api_client;
 
 	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
-		$logger = null;
-		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
-		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
-		$client = Client::create( $configuration );
+		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
 
 		$this->api_token = $api_token;
 		$this->api_url = $api_url;
@@ -96,7 +95,18 @@ class Tamara_Client {
 	}
 
 	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
-		$logger = null;
+		if ( Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->custom_log_message_enabled ) {
+			/** @var \Illuminate\Log\Logger $logger */
+			$logger = Log::build(
+				[
+					'driver' => 'single',
+					'path' => Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->custom_log_message,
+				]
+			);
+		} else {
+			$logger = null;
+		}
+
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
 		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
 		return Client::create( $configuration );

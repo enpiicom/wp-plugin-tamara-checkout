@@ -10,6 +10,7 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
+use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
 use Tamara_Checkout\App\Queries\Build_Tamara_Order_Query;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
@@ -62,6 +63,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		);
 
 		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes' ] );
+		wp_app()->register_routes( [ $this, 'tamara_gateway_register_wp_app_routes' ] );
 
 		// Add Tamara custom statuses to wc order status list
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
@@ -137,6 +139,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function tamara_gateway_register_webhook(): void {
 		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( 'low' );
+	}
+
+	public function tamara_gateway_register_wp_app_routes(): void {
+		Register_Tamara_WP_App_Routes_Job::execute_now();
 	}
 
 	public function tamara_gateway_register_wp_api_routes(): void {

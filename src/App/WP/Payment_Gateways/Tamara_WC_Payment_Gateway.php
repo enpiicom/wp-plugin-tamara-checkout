@@ -54,8 +54,8 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		$this->method_title = $this->_t( 'Tamara Payment Method' );
 		$this->method_description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
 
-		$this->init_form_fields();
 		$this->init_settings();
+		$this->init_form_fields();
 	}
 
 	/**
@@ -86,7 +86,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * Init admin form fields
 	 */
 	public function init_form_fields(): void {
-		$form_fields = Get_Payment_Gateway_Admin_Form_Fields_Query::execute_now();
+		$form_fields = Get_Payment_Gateway_Admin_Form_Fields_Query::execute_now( $this->settings );
 
 		$this->form_fields = $form_fields;
 	}
@@ -106,6 +106,13 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		Validate_Admin_Settings_Job::dispatchSync( $this );
 
 		$saved = parent::process_admin_options();
+		if ( $saved ) {
+			if ( $this->get_option( 'custom_log_message_enabled' ) && empty( $this->update_option( 'custom_log_message' ) ) ) {
+				$this->update_option( 'custom_log_message', wp_app_storage_path( 'logs/tamara-custom' . uniqid() . '.log' ) );
+			} else {
+				$this->update_option( 'custom_log_message', '' );
+			}
+		}
 	}
 
 	/**
