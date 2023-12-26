@@ -1,0 +1,58 @@
+.woocommerce .tamara-view-and-pay-button {
+  & {
+    font-size: 14px;
+    font-family: $global-font-family;
+    border-radius: 12px;
+    width: 275px;
+    margin: 20px auto;
+    background-image: url("https://cdn.tamara.co/assets/svg/icon.svg"), url("../img/view-button-bg.png");
+    background-repeat: no-repeat;
+    background-size: 20%, 100%;
+    background-position: 20px, center;
+    height: 95px;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    height: 100%;
+    justify-content: center;
+    padding: 20px;
+
+    a {
+      display: flex;
+      justify-content: center;
+      text-decoration: none;
+      font-weight: bold;
+      width: 70%;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    &--up {
+      color: $global-dark-color !important;
+    }
+
+    &--down {
+      background-color: $global-dark-color;
+      color: $global-light-color !important;
+      border-radius: 22px;
+      padding: 0 5px;
+    }
+  }
+
+  @media screen and (min-width: 480px) {
+    &__text {
+      font-size: inherit;
+    }
+  }
+}
+
+html[dir='rtl'] body {
+  .woocommerce .tamara-view-and-pay-button {
+    background-position: 200px, center;
+  }
+}

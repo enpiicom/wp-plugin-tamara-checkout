@@ -169,11 +169,31 @@ class General_Helper {
 	}
 
 	/**
+     * Check if current screen is Tamara Admin Settings page
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_admin_settings_screen() : bool {
+		return !! (is_admin() && isset($_GET['page'], $_GET['tab'], $_GET['section'])
+		        && ('wc-settings' === $_GET['page'])
+		        && ('checkout' === $_GET['tab'])
+		        && (Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID === $_GET['section']));
+	}
+
+	/**
+     * Check if current screen is WC shop order page
+	 *
+	 * @return bool
+	 */
+	public static function is_shop_order_screen() : bool {
+		return !! (is_admin() && isset($_GET['post_type']) && ('shop_order' === $_GET['post_type']));
+	}
+
+	/**
 	 * Handle Tamara log message
 	 *
 	 * @param $message
 	 */
-
 	public static function log_message( $message ): void {
 		$tamara_gateway_service = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service();
 		$gateway_settings = $tamara_gateway_service->get_settings( true );

@@ -9,6 +9,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Get_Payment_Gateway_Admin_Form_Fields_Query;
 use Tamara_Checkout\App\Queries\Process_Payment_With_Tamara_Query;
+use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -138,5 +139,41 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 	public function _t( $untranslated_text ): string {
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
+	}
+
+	/**
+	 * Enqueue tamara general scripts on frontend
+	 */
+	public function enqueue_general_scripts(): void {
+		$js_url_handle_id = 'tamara-checkout';
+
+		wp_enqueue_style($js_url_handle_id, Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/css/main.css', [],
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version());
+		wp_enqueue_script($js_url_handle_id, Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/js/main.js', ['jquery'],
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(), true);
+	}
+
+	/**
+	 * Enqueue tamara general scripts in admin
+	 */
+	public function enqueue_admin_scripts(): void {
+		$js_url_handle_id = 'tamara-checkout-admin';
+
+		// Only enqueue the setting scripts on the Tamara Checkout settings screen and shop order screen.
+		if (General_Helper::is_tamara_admin_settings_screen()) {
+			wp_enqueue_script($js_url_handle_id,
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/js/admin.js',
+				['jquery'],
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(), true);
+
+			wp_enqueue_style($js_url_handle_id,
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/css/admin.css', [],
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version());
+
+		} elseif (General_Helper::is_shop_order_screen()) {
+			wp_enqueue_style($js_url_handle_id,
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url().'public-assets/dist/css/admin.css', [],
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version());
+		}
 	}
 }

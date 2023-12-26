@@ -257,8 +257,6 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			],
 			'webhook_enabled' => [
 				'type' => 'checkbox',
-				'description' => $this->_t( 'In you tick on this setting, Tamara will use the webhook to handle the Order Declined and Order Expired.' )
-				. '<p><strong>Webhook ID: </strong>' . $this->get_webhook_id() . '</p>',
 			],
 			'cancel_url' => [
 				'title' => $this->_t( 'Tamara Payment Cancel Url' ),
@@ -280,9 +278,9 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			],
 			'debug_info_text' => [
 				'type' => 'text',
-				'title' => $this->_t( 'Platform & Extensions:' ),
 				'description' =>
-					'<table class="tamara-debug-info-table"><tr><td>' . sprintf( '<strong>PHP Version:</strong> %s', PHP_VERSION ) . '</td></tr>'
+					'<h3>Platform & Extensions:</h3>
+<table class="tamara-debug-info-table"><tr><td>' . sprintf( '<strong>PHP Version:</strong> %s', PHP_VERSION ) . '</td></tr>'
 					. '<tr><td>' . sprintf( '<strong>' . $this->_t( 'PHP loaded extensions' ) . ':</strong> %s', implode( ', ', get_loaded_extensions() ) ) . '</td></tr>'
 					. '<tr><td><h4>Default Merchant URLs:</h4></td></tr>'
 					. '<tr><td><ul><li>' . $this->_t( 'Tamara Success URL: ' ) . $this->_t( 'Default <strong>WooCommerce Order Received</strong> url is used.' ) . '</li>'
@@ -313,7 +311,9 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	 * @return string
 	 */
 	protected function getHelpTextsHtml() {
-		return '<div class="tamara-settings-help-texts-description">
+		return '
+
+<div class="tamara-settings-help-texts-description">
 					<p>' . $this->_t( 'Here you can browse some help texts and find solutions for common issues with our plugin.' ) . '</p>
 					<ul>
 						<li><p class="tamara-highlight">' . $this->_t( 'If there is any issue with your API URL, API Token, Notification Key or Public Key please contact Tamara Team for support at <a href="mailto:merchant.support@tamara.co">merchant.support@tamara.co</a>' ) . '</p></li>
