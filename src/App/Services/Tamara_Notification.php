@@ -16,7 +16,7 @@ class Tamara_Notification {
 
 	protected function __construct( $notification_key, $working_mode = 'live' ) {
 		$this->notification_key = $notification_key;
-		$this->notification_service = $this->build_notification_service( $notification_key );
+		$this->notification_service = $this->build_notification_service( (string) $notification_key );
 	}
 
 	protected function reinit_notification_service( $notification_key ): void {

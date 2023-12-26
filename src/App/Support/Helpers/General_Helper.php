@@ -89,6 +89,20 @@ class General_Helper {
 	}
 
 	/**
+	 * Currency decimal digits mapping
+	 *
+	 * @return array
+	 */
+	public static function get_currency_decimal_digits_mappings(): array {
+		return [
+			'SAR' => 2,
+			'AED' => 2,
+			'KWD' => 4,
+			'BHD' => 4,
+		];
+	}
+
+	/**
 	 * Get store's base country code
 	 *
 	 * @return string
@@ -138,8 +152,9 @@ class General_Helper {
 	 *
 	 * @return float
 	 */
-	public static function format_tamara_number( $amount ): float {
-		return floatval( number_format( floatval( $amount ), 2, '.', '' ) );
+	public static function format_tamara_number( $amount, $currency = 'SAR' ): float {
+		$decimal_digits = static::get_currency_decimal_digits_mappings()[ strtoupper( $currency ) ] ?? 2;
+		return floatval( number_format( floatval( $amount ), $decimal_digits, '.', '' ) );
 	}
 
 	/**

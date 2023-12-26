@@ -12,7 +12,14 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	use Executable_Trait;
 
+	protected $current_settings;
+
+	public function __construct( $settings ) {
+		$this->current_settings = $settings;
+	}
+
 	public function handle() {
+		$custom_log_link = $this->get_debug_log_download_link();
 		$form_fields = [
 			'enabled' => [
 				'title' => $this->_t( 'Enable/Disable' ),
@@ -287,13 +294,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'custom_log_message_enabled' => [
 				'title' => $this->_t( 'Enable Tamara Custom Log Message' ),
 				'type' => 'checkbox',
-				'description' =>
-				$this->_t( 'In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory. The message log download link will be <strong>available below</strong>, after you <strong>enable this setting.</strong>' ),
-			],
-			'custom_log_message' => [
-				'title' => $this->_t( 'Tamara Custom Log Message' ),
-				'type' => 'text',
-				'description' => $this->prepare_debug_log_download_link(),
+				// phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+				'description' => $this->_t( 'In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory. The message log download link will be <strong>available below</strong>, after you <strong>enable this setting.</strong>' ) . '<br />' . '<a href="' . $custom_log_link . '" target="_blank"> ' . $this->_t( 'Download Custom Log file' ) . '</a>',
 			],
 			'plugin_version' => [
 				'type' => 'title',
@@ -341,8 +343,13 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 		return 'webhook_id';
 	}
 
-	protected function prepare_debug_log_download_link() {
-		return 'prepare_debug_log_download_link';
+	protected function get_debug_log_download_link() {
+		return wp_app_route_wp_url(
+			'wp-app::tamara-download-log-file',
+			[
+				'filepath' => $this->current_settings['custom_log_message'],
+			]
+		);
 	}
 
 	protected function get_tamara_webhook_url() {
