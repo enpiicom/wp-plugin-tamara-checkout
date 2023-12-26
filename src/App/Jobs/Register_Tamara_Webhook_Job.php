@@ -34,7 +34,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 		$tamara_client_service->reinit_tamara_client( $gateway_settings->api_token, $gateway_settings->api_url );
 
 		$tamara_register_webhook_api_request = new RegisterWebhookRequest(
-			wp_app_route_wp_url( 'tamara-webhook' ),
+			wp_app_route_wp_url( 'wp-api::tamara-webhook' ),
 			$this->get_tamara_webhook_events()
 		);
 
@@ -53,8 +53,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	 * @param  null  $webhook_id
 	 */
 	protected function update_webhook_id_to_options( Tamara_WC_Payment_Gateway $tamara_gateway_service, $webhook_id = null ): void {
-		$tamara_gateway_service->settings['tamara_webhook_id'] = $webhook_id;
-		$tamara_gateway_service->update_settings_to_options();
+		$tamara_gateway_service->update_option( 'tamara_webhook_id', $webhook_id );
 	}
 
 	/**

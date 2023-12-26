@@ -3,6 +3,7 @@
 namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
+use Tamara_Checkout\App\Queries\Process_Payment_With_Tamara_Query;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
@@ -35,8 +36,8 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 	 * @throws \Exception
 	 */
 	public function process_payment( $wc_order_id ) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->proceed_tamara_checkout_session(
-			$wc_order_id,
+		return Process_Payment_With_Tamara_Query::execute_now(
+			wc_get_order( $wc_order_id ),
 			$this->payment_type,
 			$this->instalment
 		);

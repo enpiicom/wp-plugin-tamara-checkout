@@ -22,10 +22,8 @@ class Tamara_Notification {
 	protected $notification_service;
 
 	protected function __construct( $notification_key, $working_mode = 'live' ) {
-		if ( ! empty( $notification_key ) ) {
-			$this->notification_key = $notification_key;
-			$this->notification_service = $this->build_notification_service( $notification_key );
-		}
+		$this->notification_key = $notification_key;
+		$this->notification_service = $this->build_notification_service( (string) $notification_key );
 	}
 
 	public function handle_webhook_request() {

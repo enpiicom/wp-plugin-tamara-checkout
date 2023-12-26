@@ -168,7 +168,7 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_notification_key(): string {
-		return $this->environment === 'sandbox_mode' ? $this->sandbox_notification_key : $this->live_notification_key;
+		return $this->environment === 'sandbox_mode' ? (string) $this->sandbox_notification_key : (string) $this->live_notification_key;
 	}
 
 	public function get_public_key(): string {
