@@ -62,10 +62,12 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	protected $live_api_token;
 	protected $live_public_key;
 	protected $live_notification_key;
+	protected $live_notification_token;
 	protected $sandbox_api_url;
 	protected $sandbox_api_token;
 	protected $sandbox_public_key;
 	protected $sandbox_notification_key;
+	protected $sandbox_notification_token;
 	protected $tamara_payment_cancel;
 	protected $tamara_payment_failure;
 	protected $tamara_authorise_done;
@@ -92,6 +94,8 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
+		$this->live_notification_key = $this->live_notification_token;
+		$this->sandbox_notification_key = $this->sandbox_notification_token;
 	}
 
 	public function get_enabled(): bool {
@@ -164,7 +168,7 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_notification_key(): string {
-		return $this->environment === 'sandbox_mode' ? $this->sandbox_notification_key : $this->live_notification_key;
+		return $this->environment === 'sandbox_mode' ? (string) $this->sandbox_notification_key : (string) $this->live_notification_key;
 	}
 
 	public function get_public_key(): string {
@@ -197,10 +201,18 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_payment_cancel_status(): string {
-		return $this->tamara_payment_cancel ?? 'wc-tamara-p-canceled';
+		return ! empty( $this->tamara_payment_cancel ) ? $this->tamara_payment_cancel : 'wc-tamara-p-canceled';
 	}
 
 	public function get_payment_failure_status(): string {
-		return $this->tamara_payment_failure ?? 'wc-tamara-p-failed';
+		return ! empty( $this->tamara_payment_failure ) ? $this->tamara_payment_failure : 'wc-tamara-p-failed';
+	}
+
+	public function get_payment_authorised_done_status(): string {
+		return ! empty( $this->tamara_authorise_done ) ? $this->tamara_authorise_done : 'wc-tamara-a-done';
+	}
+
+	public function get_payment_authorised_failed_status(): string {
+		return ! empty( $this->tamara_authorise_failure ) ? $this->tamara_authorise_failure : 'wc-tamara-a-failed';
 	}
 }
