@@ -10,6 +10,8 @@ use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_Job_Failed;
 use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_Job_Success;
 use Tamara_Checkout\App\Support\Helpers\Tamara_Order_Helper;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Notification\Message\AuthoriseMessage;
+use Tamara_Checkout\Deps\Tamara\Notification\Message\WebhookMessage;
 use Tamara_Checkout\Deps\Tamara\Notification\NotificationService;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse;
@@ -21,12 +23,17 @@ class Tamara_Notification {
 
 	protected $notification_service;
 
-	protected function __construct( $notification_key, $working_mode = 'live' ) {
+	protected function __construct( $notification_key ) {
 		$this->notification_key = $notification_key;
 		$this->notification_service = $this->build_notification_service( (string) $notification_key );
 	}
 
-	public function handle_webhook_request() {
+	public function process_webhook_message(): WebhookMessage {
+		return $this->notification_service->processWebhook();
+	}
+
+	public function process_authorise_message(): AuthoriseMessage {
+		return $this->notification_service->processAuthoriseNotification();
 	}
 
 	/**

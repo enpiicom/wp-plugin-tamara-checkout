@@ -5,23 +5,33 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Http\Controllers\Api;
 
 use Enpii_Base\Foundation\Http\Base_Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Tamara_Checkout\App\Jobs\Process_Tamara_Order_Approved_Job;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Http\Client\Exception;
-use Tamara_Checkout\Deps\Tamara\Notification\Exception\ForbiddenException;
-use Tamara_Checkout\Deps\Tamara\Notification\Exception\NotificationException;
 
 class Main_Controller extends Base_Controller {
 	public function handle_tamara_success( Request $request, $wc_order_id ): void {
+		$tamara_order_id = $request->get( 'orderId' );
 		$wc_order = wc_get_order( $wc_order_id );
-		$payment_type = $request->get( 'payment_type' );
+
+		// We do nothing for the exception here,
+		//  just want to catch all the exception to have the redirect work
+		try {
+			Process_Tamara_Order_Approved_Job::dispatchSync(
+				$tamara_order_id,
+				$wc_order_id
+			);
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( Exception $e ) {
+		}
+
+		// Then redirect to the URL we want
 		$order_received_url = ! empty( $wc_order ) ? esc_url_raw( $wc_order->get_checkout_order_received_url() ) : home_url();
 		$success_url_from_tamara = add_query_arg(
 			[
 				'wc_order_id' => $wc_order_id,
-				'payment_method' => Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID,
-				'payment_type' => $payment_type,
+				'tamara_order_id' => $tamara_order_id,
 			],
 			$order_received_url
 		);
@@ -72,26 +82,12 @@ class Main_Controller extends Base_Controller {
 	 * @throws \Exception
 	 */
 	public function handle_tamara_ipn() {
-		$error = false;
-		try {
-			$tamara_notification = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_notification_service();
-			$tamara_notification->handle_ipn_request();
-		} catch ( ForbiddenException $forbidden_exception ) {
-			$error = true;
-		} catch ( NotificationException $notification_exception ) {
-			$error = true;
-		} catch ( Exception $exception ) {
-			$error = true;
-		}
+		$authorise_message = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_notification_service()->process_authorise_message();
 
-		if ( $error ) {
-			wp_app_response()->json(
-				[
-					'message' => 'failure',
-				],
-				400
-			);
-		}
+		Process_Tamara_Order_Approved_Job::dispatchSync(
+			$authorise_message->getOrderId(),
+			$authorise_message->getOrderReferenceId()
+		);
 
 		wp_app_response()->json(
 			[
@@ -100,8 +96,23 @@ class Main_Controller extends Base_Controller {
 		);
 	}
 
-	public function handle_tamara_webhook(): void {
-		//      $tamara_notification = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_notification_service();
-		//      $tamara_notification->handle_webhook_request();
+	public function handle_tamara_webhook( Request $request ): void {
+		$webhook_message = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_notification_service()->process_webhook_message();
+
+		switch ( $webhook_message->getEventType() ) {
+			case 'order_approved':
+				Process_Tamara_Order_Approved_Job::dispatchSync(
+					$webhook_message->getOrderId(),
+					$webhook_message->getOrderReferenceId()
+				);
+				break;
+			default:
+		}
+
+		wp_app_response()->json(
+			[
+				'message' => 'success',
+			]
+		);
 	}
 }
