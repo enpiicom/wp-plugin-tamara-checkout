@@ -6,10 +6,13 @@ namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
+use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Tamara_Widget {
 	use Static_Instance_Trait;
+	use Trans_Trait;
 
 	public const DEFAULT_COUNTRY_CODE = 'sa';
 
@@ -96,5 +99,39 @@ JS_SCRIPT;
 				'widget_amount' => $widget_amount,
 			]
 		);
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function fetch_tamara_checkout_widget() : string {
+		$widget_inline_type = 3;
+		$cart_amount = WC_Order_Helper::define_total_amount_to_calculate(WC()->cart->total);
+		$description = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
+			'blocks/tamara-widget',
+			[
+				'widget_inline_type' => $widget_inline_type,
+				'widget_amount' => $cart_amount,
+			]
+		);
+
+		$description .= $this->populate_default_description_text_on_checkout();
+		return $description;
+	}
+
+	/**
+	 * Populate tamara default description text on checkout
+	 *
+	 * @throws \Exception
+	 */
+	protected function populate_default_description_text_on_checkout(): string {
+		$allowed_countries_text = 'Saudi Arabia, Kuwait, UAE and Qatar only.<br>';
+		$description = $this->_t(sprintf('*Exclusive for shoppers in %s', $allowed_countries_text));
+		if ( ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode) {
+			$description .= '<br/>'.$this->_t(sprintf('SANDBOX ENABLED. See the %s for more details.',
+					'<a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide</a>'));
+		}
+
+		return trim($description);
 	}
 }

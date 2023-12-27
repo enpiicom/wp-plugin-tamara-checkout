@@ -3,6 +3,7 @@
 
 // Tamara Widgets call
 (function ($) {
+
 	// Set new data instalment plan and price to PDP Widget
 	function set_new_PDP_widget_value(new_value) {
 		console.log(new_value)
@@ -13,6 +14,7 @@
 			window.TamaraWidgetV2.refresh();
 		}, 1000);
 	}
+
 	// Trigger when a new variation is selected on FE
 	$(document).ready(function () {
 		$('.variations_form').each(function () {
