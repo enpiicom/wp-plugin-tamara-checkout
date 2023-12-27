@@ -10,13 +10,11 @@ use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
-use Tamara_Checkout\Deps\Tamara\Model\Money;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Address;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Consumer;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Discount;
 use Tamara_Checkout\Deps\Tamara\Model\Order\MerchantUrl;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Order;
-use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItem;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use WC_Order;
@@ -63,12 +61,9 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setLocale( get_locale() );
 		$order->setCurrency( $wc_order->get_currency() );
 		$order->setTotalAmount(
-			new Money(
-				General_Helper::format_tamara_number(
-					$wc_order->get_total(),
-					$order->getCurrency()
-				),
-				$order->getCurrency()
+			General_Helper::buld_tamara_money(
+				$wc_order->get_total(),
+				$wc_order->get_currency()
 			)
 		);
 		$order->setCountryCode(
@@ -87,18 +82,15 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		);
 		$order->setDescription( 'Use Tamara Gateway with WooCommerce' );
 		$order->setTaxAmount(
-			new Money(
-				General_Helper::format_tamara_number(
-					$wc_order->get_total_tax(),
-					$order->getCurrency()
-				),
-				$order->getCurrency()
+			General_Helper::buld_tamara_money(
+				$wc_order->get_total_tax(),
+				$wc_order->get_currency()
 			)
 		);
 		$order->setShippingAmount(
-			new Money(
-				General_Helper::format_tamara_number( $wc_order->get_shipping_total(), $order->getCurrency() ),
-				$order->getCurrency()
+			General_Helper::buld_tamara_money(
+				$wc_order->get_shipping_total(),
+				$wc_order->get_currency()
 			)
 		);
 
@@ -106,12 +98,9 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setDiscount(
 			new Discount(
 				$used_coupons,
-				new Money(
-					General_Helper::format_tamara_number(
-						$wc_order->get_discount_total(),
-						$order->getCurrency()
-					),
-					$order->getCurrency()
+				General_Helper::buld_tamara_money(
+					$wc_order->get_discount_total(),
+					$wc_order->get_currency()
 				)
 			)
 		);
