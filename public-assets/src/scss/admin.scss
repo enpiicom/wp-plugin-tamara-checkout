@@ -52,11 +52,17 @@
 	ul {
 		font-size: 14px;
 		list-style: circle;
-		padding: .5rem 1.5rem;
+		padding: 0 1.5rem;
 	}
 
 	li {
 		line-height: 1.5rem;
+	}
+}
+
+.tamara-settings-help-texts__content .tamara-settings-help-texts__content {
+	ul {
+		padding: .5rem 1.5rem
 	}
 }
 
