@@ -55,7 +55,7 @@ JS_SCRIPT;
 			'//cdn-sandbox.tamara.co/widget-v2/tamara-widget.js';
 	}
 
-	public function get_public_key(): string{
+	public function get_public_key(): string {
 		return $this->public_key;
 	}
 
@@ -63,8 +63,8 @@ JS_SCRIPT;
 		extract( (array) $data );
 		$widget_amount = ! empty( $price ) ? $price : General_Helper::get_displayed_product_price();
 
-		if (is_array($widget_amount)) {
-			foreach ($widget_amount as $amount) {
+		if ( is_array( $widget_amount ) ) {
+			foreach ( $widget_amount as $amount ) {
 				$widget_amount = $amount;
 				break;
 			}
@@ -104,9 +104,9 @@ JS_SCRIPT;
 	/**
 	 * @throws \Exception
 	 */
-	public function fetch_tamara_checkout_widget() : string {
+	public function fetch_tamara_checkout_widget(): string {
 		$widget_inline_type = 3;
-		$cart_amount = WC_Order_Helper::define_total_amount_to_calculate(WC()->cart->total);
+		$cart_amount = WC_Order_Helper::define_total_amount_to_calculate( WC()->cart->total );
 		$description = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 			'blocks/tamara-widget',
 			[
@@ -126,12 +126,16 @@ JS_SCRIPT;
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
 		$allowed_countries_text = 'Saudi Arabia, Kuwait, UAE and Qatar only.<br>';
-		$description = $this->_t(sprintf('*Exclusive for shoppers in %s', $allowed_countries_text));
-		if ( ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode) {
-			$description .= '<br/>'.$this->_t(sprintf('SANDBOX ENABLED. See the %s for more details.',
-					'<a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide</a>'));
+		$description = $this->_t( sprintf( '*Exclusive for shoppers in %s', $allowed_countries_text ) );
+		if ( ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode ) {
+			$description .= '<br/>' . $this->_t(
+				sprintf(
+					'SANDBOX ENABLED. See the %s for more details.',
+					'<a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide</a>'
+				)
+			);
 		}
 
-		return trim($description);
+		return trim( $description );
 	}
 }

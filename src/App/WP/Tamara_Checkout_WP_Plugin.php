@@ -533,7 +533,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
 
-			add_filter('woocommerce_gateway_description', [$this, 'render_payment_types_description_on_checkout'], 9999);
+			add_filter( 'woocommerce_gateway_description', [ $this, 'render_payment_types_description_on_checkout' ], 9999 );
 
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
 		}

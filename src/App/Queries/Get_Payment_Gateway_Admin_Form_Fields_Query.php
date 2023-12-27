@@ -454,7 +454,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
             }
         }
 JS_SCRIPT;
-		if (General_Helper::is_tamara_admin_settings_screen()) {
+		if ( General_Helper::is_tamara_admin_settings_screen() ) {
 			wp_add_inline_script( 'tamara-custom-admin', $js_script, 'before' );
 		}
 	}
