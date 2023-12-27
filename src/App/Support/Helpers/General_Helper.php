@@ -197,6 +197,19 @@ class General_Helper {
 	}
 
 	/**
+	 * @return string|void
+	 */
+	public static function get_tamara_admin_settings_section_url() {
+		if ( version_compare( WC()->version, '2.6', '>=' ) ) {
+			$section_slug = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
+		} else {
+			$section_slug = strtolower( WCTamaraGateway::class );
+		}
+
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
+	}
+
+	/**
 	 * Handle Tamara log message
 	 *
 	 * @param $message

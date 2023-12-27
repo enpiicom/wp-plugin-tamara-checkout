@@ -132,9 +132,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				),
 			];
 			Show_Admin_Notice_And_Disable_Plugin_Job::execute_now( $this, $messages );
-
 			return;
 		}
+		add_filter( 'plugin_action_links_tamara-checkout/tamara-checkout.php', [ $this, 'add_plugin_settings_link' ] );
 	}
 
 	public function tamara_gateway_process_admin_options() {
@@ -489,7 +489,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$this->manipulate_hooks_after_settings();
 	}
 
-
+	/**
+	 * @throws \Exception
+	 */
+	public function add_plugin_settings_link( $plugin_links ) {
+		$settings_link = '<a href="' . General_Helper::get_tamara_admin_settings_section_url() . '">' .
+							$this->_t( 'Settings' ) .
+							'</a>';
+		array_unshift( $plugin_links, $settings_link );
+		return $plugin_links;
+	}
+	
 	/**
 	 * Update phone number on every ajax calls on checkout
 	 *
