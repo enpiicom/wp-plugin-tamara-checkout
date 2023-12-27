@@ -169,11 +169,36 @@ class General_Helper {
 	}
 
 	/**
+	 * Check if current screen is Tamara Admin Settings page
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_admin_settings_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['page'] === 'wc-settings' )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['tab'] === 'checkout' )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['section'] === Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID ) );
+	}
+
+	/**
+	 * Check if current screen is WC shop order page
+	 *
+	 * @return bool
+	 */
+	public static function is_shop_order_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
+	}
+
+	/**
 	 * Handle Tamara log message
 	 *
 	 * @param $message
 	 */
-
 	public static function log_message( $message ): void {
 		$tamara_gateway_service = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service();
 		$gateway_settings = $tamara_gateway_service->get_settings( true );

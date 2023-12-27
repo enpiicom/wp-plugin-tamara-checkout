@@ -1,0 +1,88 @@
+.tamara-success-default {
+  & {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: white;
+    user-select: none;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    z-index: 10001;
+    min-width: 90%;
+  }
+
+  &__heading {
+    display: block;
+    margin: 1rem;
+    text-align: center;
+
+    &__text {
+      font-size: 2rem;
+      line-height: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    &__logo {
+      background-image: url(../img/tamara-logo.svg);
+      animation-name: twinkle;
+      animation-duration: 0.5s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      background-repeat: no-repeat;
+      height: 2.5rem;
+      text-align: center;
+      background-position: center;
+      background-size: contain;
+      padding: 1rem;
+      border: none
+    }
+  }
+
+  &__content {
+    margin: 1rem;
+    text-align: center;
+
+    h4 {
+      color: white;
+    }
+  }
+
+  @media screen and (min-width: 991px) {
+    & {
+      font-size: 150%;
+      min-width: 60%;
+    }
+  }
+
+  @keyframes twinkle {
+    from {
+      opacity: 0.5;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+#tamara-success-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10000;
+  cursor: pointer;
+}
+
+html[dir='rtl'] body {
+  .tamara-success-default {
+    &__heading {
+      &__logo {
+        background-image: url(../img/tamara-logo-ar.svg);
+      }
+    }
+  }
+}

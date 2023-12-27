@@ -68,3 +68,6 @@ config.codekit
 
 #robot file
 /robots.txt
+
+# public assets bundled
+/public-assets/dist/*
