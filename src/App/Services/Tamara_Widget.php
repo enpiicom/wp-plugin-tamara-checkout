@@ -46,19 +46,27 @@ JS_SCRIPT;
 		wp_add_inline_script( $js_url_handle_id, $js_script, 'before' );
 	}
 
-	public function get_widget_js_url() {
+	public function get_widget_js_url(): string {
 		return $this->is_live_mode ?
 			'//cdn.tamara.co/widget-v2/tamara-widget.js' :
 			'//cdn-sandbox.tamara.co/widget-v2/tamara-widget.js';
 	}
 
-	public function get_public_key() {
+	public function get_public_key(): string{
 		return $this->public_key;
 	}
 
 	public function fetch_tamara_pdp_widget( $data = [] ) {
 		extract( (array) $data );
 		$widget_amount = ! empty( $price ) ? $price : General_Helper::get_displayed_product_price();
+
+		if (is_array($widget_amount)) {
+			foreach ($widget_amount as $amount) {
+				$widget_amount = $amount;
+				break;
+			}
+		}
+
 		$widget_inline_type = 2;
 
 		if ( ! $widget_amount ) {

@@ -149,6 +149,7 @@ class General_Helper {
 	 * Format the amount of money for Tamara SDK
 	 *
 	 * @param $amount
+	 * @param  string  $currency
 	 *
 	 * @return float
 	 */
