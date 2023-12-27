@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Support\Helpers;
 
+use DateTimeImmutable;
+use Enpii_Base\App\Exceptions\Simple_Exception;
+use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Support\Traits\Trans_Trait;
+use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Model\ShippingInfo;
+use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse;
+
 class Tamara_Order_Helper {
 
 	/**
@@ -46,5 +55,17 @@ class Tamara_Order_Helper {
 	public static function update_tamara_payment_type_to_wc_order( $wc_order_id ) {
 		$payment_type = '';
 		update_post_meta( $wc_order_id, '_tamara_payment_type', $payment_type );
+	}
+
+	/**
+	 * Get Tamara shipping information
+	 */
+	public static function get_tamara_shipping_info() : ShippingInfo {
+		$shipped_at = new DateTimeImmutable();
+		$shipping_company = 'N/A';
+		$tracking_number = 'N/A';
+		$tracking_url = 'N/A';
+
+		return new ShippingInfo($shipped_at, $shipping_company, $tracking_number, $tracking_url);
 	}
 }

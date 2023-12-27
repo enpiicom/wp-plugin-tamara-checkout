@@ -19,6 +19,7 @@ use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
 use Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse;
@@ -103,6 +104,15 @@ class Tamara_Client {
 	}
 
 	/**
+	 * @param $client_request
+	 *
+	 * @return string | \Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
+	 */
+	public function get_order_by_wc_order_id( $client_request) {
+		return $this->perform_remote_request( 'GetOrderByReferenceIdRequest', $client_request );
+	}
+
+	/**
 	 *
 	 * @param AuthoriseOrderRequest $client_request
 	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse
@@ -110,6 +120,10 @@ class Tamara_Client {
 	 */
 	public function authorise_order( AuthoriseOrderRequest $client_request ) {
 		return $this->perform_remote_request( 'authoriseOrder', $client_request );
+	}
+
+	public function capture_order( CaptureRequest $client_request ) {
+		return $this->perform_remote_request( 'capture', $client_request );
 	}
 
 	protected function define_working_mode(): void {
