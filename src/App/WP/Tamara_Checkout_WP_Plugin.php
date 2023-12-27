@@ -69,6 +69,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
 
 		add_action( 'wp_loaded', [ $this, 'cancel_order_uncomplete_payment' ], 21 );
+
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tamara_admin_scripts' ] );
 	}
 
 	public function init_woocommerce() {
@@ -159,6 +163,14 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$gateways[] = $this->get_tamara_gateway_service();
 
 		return $gateways;
+	}
+
+	public function enqueue_tamara_general_scripts(): void {
+		$this->get_tamara_gateway_service()->enqueue_general_scripts();
+	}
+
+	public function enqueue_tamara_admin_scripts(): void {
+		$this->get_tamara_gateway_service()->enqueue_admin_scripts();
 	}
 
 	public function enqueue_tamara_widget_client_scripts(): void {
