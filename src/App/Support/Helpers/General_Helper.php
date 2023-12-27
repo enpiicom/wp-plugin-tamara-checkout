@@ -50,6 +50,7 @@ class General_Helper {
 			'shipping_address_invalid_phone_number' => 'Invalid Shipping Address Phone Number.',
 			'total_amount_invalid_limit' => 'The grand total of order is over/under limit of Tamara.',
 			'currency_unsupported' => 'We do not support cross currencies. Please select the correct currency for your country.',
+			'not_supported_delivery_country' => 'We do not support your delivery country.',
 		];
 	}
 

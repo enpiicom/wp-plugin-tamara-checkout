@@ -220,17 +220,20 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				? $current_cart_info['country_code']
 				: self::DEFAULT_COUNTRY_CODE;
 			$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
-			$currency_code = $currency_by_country_code[ $country_code ];
-			$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
-
-			return Get_Tamara_Payment_Options_Query::execute_now(
-				[
-					'available_gateways' => $available_gateways,
-					'order_total' => $order_total,
-					'country_code' => $country_code,
-					'customer_phone' => $customer_phone,
-				]
-			);
+			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
+				$currency_code = $currency_by_country_code[ $country_code ];
+				$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
+				return Get_Tamara_Payment_Options_Query::execute_now(
+					[
+						'available_gateways' => $available_gateways,
+						'order_total' => $order_total,
+						'country_code' => $country_code,
+						'customer_phone' => $customer_phone,
+					]
+				);
+			} else {
+				unset( $available_gateways[ static::DEFAULT_TAMARA_GATEWAY_ID ] );
+			}
 		}
 
 		return $available_gateways;
