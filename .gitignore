@@ -70,4 +70,4 @@ config.codekit
 /robots.txt
 
 # public assets bundled
-/public-assets/dist/*
+#/public-assets/dist/*
