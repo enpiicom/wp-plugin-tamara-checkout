@@ -30,6 +30,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property string $tamara_order_cancel
  * @property string $tamara_cancel_order
  * @property string $tamara_payment_capture
+ * @property string $status_to_capture_tamara_payment
  * @property array $excluded_products array or products' Ids that should be excluded
  * @property array $excluded_product_categories array or terms' Ids
  *                  (from 'product_category' taxonomy) that should be excluded
@@ -214,5 +215,9 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 
 	public function get_payment_authorised_failed_status(): string {
 		return ! empty( $this->tamara_authorise_failure ) ? $this->tamara_authorise_failure : 'wc-tamara-a-failed';
+	}
+
+	public function get_status_to_capture_tamara_payment(): string {
+		return ! empty( $this->tamara_payment_capture ) ? $this->tamara_payment_capture : 'wc-completed';
 	}
 }
