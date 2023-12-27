@@ -38,12 +38,12 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 *
 	 * @var int
 	 */
-	protected $instalment_period = 0;
+	protected $instalments = 0;
 
-	public function __construct( WC_Order $wc_order, string $payment_type, int $instalment_period = 0 ) {
+	public function __construct( WC_Order $wc_order, string $payment_type, int $instalments = 0 ) {
 		$this->wc_order = $wc_order;
 		$this->payment_type = $payment_type;
-		$this->instalment_period = $instalment_period;
+		$this->instalments = $instalments;
 
 		if ( empty( $payment_type ) ) {
 			throw new Tamara_Exception( 'Error! No Payment Type specified' );
@@ -67,7 +67,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 				: General_Helper::get_current_country_code()
 			);
 		$order->setPaymentType( $this->payment_type );
-		$order->setInstalments( $this->instalment_period );
+		$order->setInstalments( $this->instalments );
 		$order->setPlatform(
 			sprintf(
 				'WordPress %s, WooCommerce %s, Tamara Checkout %s',

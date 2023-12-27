@@ -31,16 +31,16 @@ class Process_Payment_With_Tamara_Query extends Base_Query {
 	 *
 	 * @var int
 	 */
-	protected $instalment_period = 0;
+	protected $instalments = 0;
 
 	public function __construct(
 		WC_Order $wc_order,
 		string $payment_type,
-		int $instalment_period = 0
+		int $instalments = 0
 	) {
 		$this->wc_order = $wc_order;
 		$this->payment_type = $payment_type;
-		$this->instalment_period = $instalment_period;
+		$this->instalments = $instalments;
 
 		if ( empty( $payment_type ) ) {
 			throw new Tamara_Exception( 'Error! No Payment Type specified' );
@@ -61,7 +61,7 @@ class Process_Payment_With_Tamara_Query extends Base_Query {
 		$create_checkout_request = Build_Tamara_Create_Checkout_Request_Query::execute_now(
 			$this->wc_order,
 			$this->payment_type,
-			$this->instalment_period
+			$this->instalments
 		);
 
 		$create_checkout_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->create_checkout_request( $create_checkout_request );
@@ -81,7 +81,7 @@ class Process_Payment_With_Tamara_Query extends Base_Query {
 			$create_checkout_response->getCheckoutResponse()->getCheckoutId(),
 			$create_checkout_response->getCheckoutResponse()->getCheckoutUrl(),
 			$this->payment_type,
-			$this->instalment_period
+			$this->instalments
 		);
 
 		return [
@@ -92,16 +92,16 @@ class Process_Payment_With_Tamara_Query extends Base_Query {
 		];
 	}
 
-	protected function store_meta_data_from_checkout_response( int $wc_order_id, $checkout_session_id, $checkout_url, $checkout_payment_type, $checkout_instalment_period ): void {
+	protected function store_meta_data_from_checkout_response( int $wc_order_id, $checkout_session_id, $checkout_url, $checkout_payment_type, $checkout_instalments ): void {
 		update_post_meta( $wc_order_id, 'tamara_checkout_session_id', $checkout_session_id );
 		update_post_meta( $wc_order_id, '_tamara_checkout_session_id', $checkout_session_id );
 		update_post_meta( $wc_order_id, 'tamara_checkout_url', $checkout_url );
 		update_post_meta( $wc_order_id, '_tamara_checkout_url', $checkout_url );
 		update_post_meta( $wc_order_id, 'tamara_payment_type', $checkout_payment_type );
 		update_post_meta( $wc_order_id, '_tamara_payment_type', $checkout_payment_type );
-		if ( $checkout_payment_type === 'PAY_BY_INSTALMENTS' && ! empty( $checkout_instalment_period ) ) {
-			update_post_meta( $wc_order_id, 'tamara_instalment_period', $checkout_instalment_period );
-			update_post_meta( $wc_order_id, '_tamara_instalment_period', $checkout_instalment_period );
+		if ( $checkout_payment_type === 'PAY_BY_INSTALMENTS' && ! empty( $checkout_instalments ) ) {
+			update_post_meta( $wc_order_id, 'tamara_instalments', $checkout_instalments );
+			update_post_meta( $wc_order_id, '_tamara_instalments', $checkout_instalments );
 		}
 	}
 }
