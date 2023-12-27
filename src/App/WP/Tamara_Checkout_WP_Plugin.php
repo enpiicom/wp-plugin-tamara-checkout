@@ -499,7 +499,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		array_unshift( $plugin_links, $settings_link );
 		return $plugin_links;
 	}
-	
+
 	/**
 	 * Update phone number on every ajax calls on checkout
 	 *

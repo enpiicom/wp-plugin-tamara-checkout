@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Support\Helpers;
 
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class General_Helper {
@@ -203,7 +204,7 @@ class General_Helper {
 		if ( version_compare( WC()->version, '2.6', '>=' ) ) {
 			$section_slug = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
 		} else {
-			$section_slug = strtolower( WCTamaraGateway::class );
+			$section_slug = strtolower( Tamara_WC_Payment_Gateway::class );
 		}
 
 		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
