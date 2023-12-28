@@ -209,9 +209,9 @@ class General_Helper {
 
 	public static function is_paid_with_tamara( $payment_method ): bool {
 		return strpos(
-			       $payment_method,
-			       Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
-		       ) === 0;
+			$payment_method,
+			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
+		) === 0;
 	}
 
 	public static function is_live_mode(): bool {

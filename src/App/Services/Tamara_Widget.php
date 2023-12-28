@@ -133,7 +133,7 @@ JS_SCRIPT;
 		$payment_method = $wc_order->get_payment_method();
 		$view_and_pay_url = $this->get_view_and_pay_url();
 
-		if ( ! empty( $payment_method ) && General_Helper::is_tamara_gateway( $payment_method ) ) {
+		if ( ! empty( $payment_method ) && General_Helper::is_paid_with_tamara( $payment_method ) ) {
 			$order_note = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 				'blocks/tamara-order-received',
 				[
