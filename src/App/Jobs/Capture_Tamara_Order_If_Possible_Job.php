@@ -34,12 +34,19 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	protected $to_capture_status;
 	protected $tamara_wc_order;
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
 
 		$this->tamara_wc_order = new Tamara_WC_Order( wc_get_order( $this->wc_order_id ) );
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
+	 */
 	public function handle() {
 		if ( ! $this->check_capture_prerequisites() ) {
 			return;
@@ -63,7 +70,6 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * We do needed thing on successful scenario
 	 */
 	protected function process_captured_successfully( CaptureResponse $tamara_client_response ): void {
-		$wc_order_id = $this->wc_order_id;
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$capture_id = $tamara_client_response->getCaptureId();
@@ -97,6 +103,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 	/**
 	 * We want to check if we want to start the capture request or not
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function check_capture_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
