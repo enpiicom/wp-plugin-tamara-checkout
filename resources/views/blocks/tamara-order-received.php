@@ -6,12 +6,8 @@ echo Tamara_Checkout_WP_Plugin::wp_app_instance()->_t('Thank you for choosing Ta
 ?>
 <div class="tamara-view-and-pay-button">
     <div class="tamara-view-and-pay-button__text">
-        <a href="{{ $view_orders_url }}"
-		   class="tamara-view-and-pay-button__link tamara-view-and-pay-button__text--up"
-           target="_blank"><?php echo Tamara_Checkout_WP_Plugin::wp_app_instance()->_t('View Your Orders') ?>
-		</a>
         <a href="{{ $view_and_pay_url }}"
-		   class="tamara-view-and-pay-button__link tamara-view-and-pay-button__text--down"
+		   class="tamara-view-and-pay-button__link"
            target="_blank"><?php echo Tamara_Checkout_WP_Plugin::wp_app_instance()->_t('Go to Tamara and pay') ?>
 		</a>
     </div>

@@ -144,10 +144,6 @@ class General_Helper {
 		return false;
 	}
 
-	public static function get_current_language() {
-		return substr( get_locale(), 0, 2 ) ?? 'en';
-	}
-
 	/**
 	 * Format the amount of money for Tamara SDK
 	 *
@@ -234,6 +230,10 @@ class General_Helper {
 			'tamara-gateway-pay-in-11',
 			'tamara-gateway-pay-in-12',
 		];
+	}
+
+	public static function is_live_mode(): bool {
+		return ! ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode;
 	}
 
 	/**

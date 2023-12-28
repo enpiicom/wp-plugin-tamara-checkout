@@ -27,21 +27,14 @@
 			font-weight: bold;
 			width: 70%;
 			transition: all 0.5s ease-in;
+			background-color: $global-dark-color;
+			color: $global-light-color !important;
+			border-radius: 5px;
+			padding: 5px;
 		}
 
 		a.tamara-view-and-pay-button__link:hover {
 			text-decoration: underline;
-		}
-
-		&--up {
-			color: $global-dark-color !important;
-		}
-
-		&--down {
-			background-color: $global-dark-color;
-			color: $global-light-color !important;
-			border-radius: 22px;
-			padding: 0 5px;
 		}
 	}
 

@@ -119,26 +119,40 @@ JS_SCRIPT;
 		return $description;
 	}
 
+	/**
+	 * @param $order_note
+	 * @param $wc_order
+	 *
+	 * @return \Enpii_Base\App\WP\WP_Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View|mixed
+	 */
 	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
 		if ( empty( $wc_order ) ) {
 			return $order_note;
 		}
 
 		$payment_method = $wc_order->get_payment_method();
-		$view_and_pay_url = $this->_t( 'https://app.tamara.co' );
-		$view_orders_url = $this->_t( 'https://app.tamara.co/orders' );
+		$view_and_pay_url = $this->get_view_and_pay_url();
 
 		if ( ! empty( $payment_method ) && General_Helper::is_tamara_gateway( $payment_method ) ) {
 			$order_note = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 				'blocks/tamara-order-received',
 				[
 					'view_and_pay_url' => $view_and_pay_url,
-					'view_orders_url' => $view_orders_url,
 				]
 			);
 		}
 
 		return $order_note;
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function get_view_and_pay_url(): string {
+		$base_url = General_Helper::is_live_mode() ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
+		$locale_suffix = General_Helper::get_current_language_code() === 'ar' ? '?locale=ar_SA' : '?locale=en_US';
+
+		return $base_url . $locale_suffix;
 	}
 
 
@@ -149,7 +163,7 @@ JS_SCRIPT;
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
 		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
-		if ( ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode ) {
+		if ( ! General_Helper::is_live_mode() ) {
 			$description .= '<br/>' . $this->_t(
 				'SANDBOX ENABLED.
 							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide
