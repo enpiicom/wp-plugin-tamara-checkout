@@ -168,6 +168,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 * @param  WC_Order  $wc_order
 	 *
 	 * @return \Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function populate_tamara_order_items( WC_Order $wc_order ): OrderItemCollection {
 		$tamara_wc_order = new Tamara_WC_Order( $wc_order );

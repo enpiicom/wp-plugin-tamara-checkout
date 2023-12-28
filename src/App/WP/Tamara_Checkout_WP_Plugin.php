@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\WP;
 
+use Enpii_Base\App\Exceptions\Simple_Exception;
 use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
+use Exception;
+use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
@@ -502,21 +505,69 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	/**
 	 * Tamara Capture Payment
 	 *
-	 * @param int $wcOrderId
-	 * @param WC_Order $statusFrom
-	 * @param WC_Order $statusTo
-	 * @param WC_Order $wcOrder
+	 * @param $wc_order_id
+	 * @param $status_from
+	 * @param $status_to
+	 * @param $wc_order
 	 *
+	 * @throws \Exception
 	 */
 	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
+		try {
+			Capture_Tamara_Order_If_Possible_Job::dispatchSync(
+				[
+					'wc_order_id' => $wc_order_id,
+					'status_from' => $status_from,
+					'status_to' => $status_to,
+					'to_capture_status' => $this->get_tamara_gateway_service()->get_settings()->status_to_capture_tamara_payment,
+				]
+			);
+		} catch ( Exception $tamara_capture_exception ) {
+			throw new Exception( wp_kses_post( $tamara_capture_exception->getMessage() ) );
+		}
+
 		Capture_Tamara_Order_If_Possible_Job::dispatch(
 			[
 				'wc_order_id' => $wc_order_id,
 				'status_from' => $status_from,
 				'status_to' => $status_to,
 				'to_capture_status' => $this->get_tamara_gateway_service()->get_settings()->status_to_capture_tamara_payment,
-			] 
-		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_DEFAULT );
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
+	 * Tamara Cancel Order
+	 *
+	 * @param $wc_order_id
+	 * @param $status_from
+	 * @param $status_to
+	 * @param $wc_order
+	 *
+	 * @throws \Exception
+	 */
+	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
+		try {
+			Cancel_Tamara_Order_If_Possible_Job::dispatchSync(
+				[
+					'wc_order_id' => $wc_order_id,
+					'status_from' => $status_from,
+					'status_to' => $status_to,
+					'to_cancel_status' => $this->get_tamara_gateway_service()->get_settings()->status_to_cancel_tamara_payment,
+				]
+			);
+		} catch ( Exception $tamara_cancel_exception ) {
+			throw new Exception( wp_kses_post( $tamara_cancel_exception->getMessage() ) );
+		}
+
+		Cancel_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_order_id'      => $wc_order_id,
+				'status_from'      => $status_from,
+				'status_to'        => $status_to,
+				'to_cancel_status' => $this->get_tamara_gateway_service()->get_settings()->status_to_cancel_tamara_payment,
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
 	}
 
 	/**
@@ -546,6 +597,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
 
 			add_action( 'woocommerce_order_status_changed', [ $this, 'capture_tamara_order_if_possible' ], 10, 4 );
+
+			add_action( 'woocommerce_order_status_changed', [ $this, 'cancel_tamara_order_if_possible' ], 10, 4 );
 		}
 	}
 }

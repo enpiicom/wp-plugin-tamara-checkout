@@ -16,6 +16,7 @@ use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\CancelOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
@@ -128,6 +129,16 @@ class Tamara_Client {
 	 */
 	public function capture( CaptureRequest $client_request ) {
 		return $this->perform_remote_request( 'capture', $client_request );
+	}
+
+	/**
+	 *
+	 * @param CancelOrderRequest $client_request
+	 *
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Payment\CancelResponse
+	 */
+	public function cancel_order( CancelOrderRequest $client_request ) {
+		return $this->perform_remote_request( 'cancelOrder', $client_request );
 	}
 
 	protected function define_working_mode(): void {

@@ -9,10 +9,12 @@ use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Model\Order\CancelItem;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItem;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection;
 use Tamara_Checkout\Deps\Tamara\Model\Payment\Capture;
 use Tamara_Checkout\Deps\Tamara\Model\ShippingInfo;
+use Tamara_Checkout\Deps\Tamara\Request\Order\CancelOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use WC_Order;
 
@@ -43,7 +45,7 @@ class Tamara_WC_Order {
 		return $this->wc_order;
 	}
 
-	public function get_id(){
+	public function get_id() {
 		return $this->wc_order->get_id();
 	}
 
@@ -198,7 +200,7 @@ class Tamara_WC_Order {
 		return new ShippingInfo( $shipped_at, $shipping_company, $tracking_number, $tracking_url );
 	}
 
-	public function build_capture_request() : CaptureRequest {
+	public function build_capture_request(): CaptureRequest {
 		$wc_order_total_amount = General_Helper::build_tamara_money(
 			$this->wc_order->get_total(),
 			$this->wc_order->get_currency()
@@ -226,6 +228,35 @@ class Tamara_WC_Order {
 				$this->build_tamara_order_items(),
 				$this->build_shipping_info()
 			)
+		);
+	}
+
+	public function build_cancel_request(): CancelOrderRequest {
+		$wc_order_total_amount = General_Helper::build_tamara_money(
+			$this->wc_order->get_total(),
+			$this->wc_order->get_currency()
+		);
+		$wc_order_items = $this->build_tamara_order_items();
+		$wc_order_shipping_amount = General_Helper::build_tamara_money(
+			$this->wc_order->get_shipping_total(),
+			$this->wc_order->get_currency()
+		);
+		$wc_order_tax_amount = General_Helper::build_tamara_money(
+			$this->wc_order->get_total_tax(),
+			$this->wc_order->get_currency()
+		);
+		$wc_order_discount_amount = General_Helper::build_tamara_money(
+			$this->wc_order->get_discount_total(),
+			$this->wc_order->get_currency()
+		);
+
+		return new CancelOrderRequest(
+			$this->get_tamara_order_id(),
+			$wc_order_total_amount,
+			$wc_order_items,
+			$wc_order_shipping_amount,
+			$wc_order_tax_amount,
+			$wc_order_discount_amount
 		);
 	}
 }

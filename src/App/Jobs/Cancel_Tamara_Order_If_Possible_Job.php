@@ -18,9 +18,9 @@ use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
-use Tamara_Checkout\Deps\Tamara\Response\Payment\CaptureResponse;
+use Tamara_Checkout\Deps\Tamara\Response\Payment\CancelResponse;
 
-class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
+class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable;
 	use InteractsWithQueue;
 	use Queueable;
@@ -31,7 +31,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	protected $wc_order_id;
 	protected $status_from;
 	protected $status_to;
-	protected $to_capture_status;
+	protected $to_cancel_status;
 	protected $tamara_wc_order;
 
 	/**
@@ -49,37 +49,37 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * @throws \Exception
 	 */
 	public function handle() {
-		if ( ! $this->check_capture_prerequisites() ) {
+		if ( ! $this->check_cancel_prerequisites() ) {
 			return;
 		}
 
-		$capture_request = $this->tamara_wc_order->build_capture_request();
-		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->capture( $capture_request );
+		$cancel_request = $this->tamara_wc_order->build_cancel_request();
+		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->cancel_order( $cancel_request );
 
 		if (
 			! is_object( $tamara_client_response )
 		) {
-			$this->process_captured_failed( $tamara_client_response );
+			$this->process_canceled_failed( $tamara_client_response );
 		}
 
 		if ( $tamara_client_response->isSuccess() ) {
-			$this->process_captured_successfully( $tamara_client_response );
+			$this->process_canceled_successfully( $tamara_client_response );
 		}
 	}
 
 	/**
 	 * We do needed thing on successful scenario
 	 */
-	protected function process_captured_successfully( CaptureResponse $tamara_client_response ): void {
+	protected function process_canceled_successfully( CancelResponse $tamara_client_response ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
-		$capture_id = $tamara_client_response->getCaptureId();
+		$cancel_id = $tamara_client_response->getCancelId();
 		$wc_order_id = $this->wc_order_id;
-		update_post_meta( $wc_order_id, 'tamara_capture_id', $capture_id );
-		update_post_meta( $wc_order_id, '_tamara_capture_id', $capture_id );
+		update_post_meta( $wc_order_id, 'tamara_cancel_id', $cancel_id );
+		update_post_meta( $wc_order_id, '_tamara_cancel_id', $cancel_id );
 
 		$order_note = 'Tamara - ';
-		$order_note .= sprintf( $this->_t( 'Order captured successfully, Tamara Capture Id: %s' ), $capture_id );
+		$order_note .= sprintf( $this->_t( 'Order cancelled successfully, Tamara Cancel Id: %s' ), $cancel_id );
 		$tamara_wc_order->get_wc_order()->add_order_note( $order_note );
 	}
 
@@ -89,10 +89,10 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * @return void
 	 * @throws Exception
 	 */
-	protected function process_captured_failed( string $tamara_error_message ): void {
+	protected function process_canceled_failed( string $tamara_error_message ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
-		$error_message = $this->_t( 'Error when trying to capture order with Tamara.' );
+		$error_message = $this->_t( 'Error when trying to cancel order with Tamara.' );
 		$error_message .= "<br />\n";
 		$error_message .= sprintf(
 			$this->_t( 'Error with Tamara API: %s' ),
@@ -103,19 +103,20 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	}
 
 	/**
-	 * We want to check if we want to start the capture request or not
+	 * We want to check if we want to start the cancel request or not
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 * @throws \Exception
 	 */
-	protected function check_capture_prerequisites(): bool {
+	protected function check_cancel_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
+		$tamara_capture_id = get_post_meta( $wc_order_id, '_tamara_capture_id', true ) ?? null;
 		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
 
 		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
 			return false;
 		}
 
-		if ( $this->to_capture_status !== 'wc-' . $this->status_to ) {
+		if ( $this->to_cancel_status !== 'wc-' . $this->status_to ) {
 			return false;
 		}
 
@@ -125,7 +126,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 		if (
 			! is_object( $tamara_client_response )
 		) {
-			$error_message = $this->_t( 'Error when trying to capture order with Tamara.' );
+			$error_message = $this->_t( 'Error when trying to cancel order with Tamara.' );
 			$error_message .= "<br />\n";
 			$error_message .= sprintf(
 				$this->_t( 'Error with Tamara API: %s' ),
@@ -139,11 +140,16 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 		update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
 		update_post_meta( $wc_order_id, '_tamara_order_id', $tamara_client_response->getOrderId() );
 
-		// We don't want to proceed if the Tamara status is not relevant to the Capture process
-		if (
-			( $tamara_client_response->getStatus() !== General_Helper::TAMARA_ORDER_STATUS_AUTHORISED ) &&
-			( $tamara_client_response->getStatus() !== General_Helper::TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED )
+		// We don't want to proceed if the Tamara status is not relevant to the Cancel process
+		if ( $tamara_client_response->getStatus() === General_Helper::TAMARA_ORDER_STATUS_CANCELED ) {
+			return false;
+		}
+
+		if ( ! empty( $tamara_capture_id ) ||
+			$tamara_client_response->getStatus() !== General_Helper::TAMARA_ORDER_STATUS_AUTHORISED
 		) {
+			$error_message = $this->_t( 'Tamara – The order can not be cancelled because it was captured. Please try "Refund" function instead.' );
+			$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
 			return false;
 		}
 
