@@ -195,6 +195,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		return $this->get_tamara_widget_service()->fetch_tamara_cart_widget( $data );
 	}
 
+	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
+		return $this->get_tamara_widget_service()->fetch_tamara_order_received_note( $order_note, $wc_order );
+	}
+
 	/**
 	 * @throws \Exception
 	 */
@@ -544,11 +548,13 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
+			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
+
 			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
 
 			add_filter( 'woocommerce_gateway_description', [ $this, 'render_payment_types_description_on_checkout' ], 9999 );
 
-			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
+			add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'fetch_tamara_order_received_note' ], 10, 2 );
 		}
 	}
 }

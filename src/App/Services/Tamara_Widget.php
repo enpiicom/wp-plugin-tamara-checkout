@@ -119,20 +119,41 @@ JS_SCRIPT;
 		return $description;
 	}
 
+	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
+		if ( empty( $wc_order ) ) {
+			return $order_note;
+		}
+
+		$payment_method = $wc_order->get_payment_method();
+		$view_and_pay_url = $this->_t( 'https://app.tamara.co' );
+		$view_orders_url = $this->_t( 'https://app.tamara.co/orders' );
+
+		if ( ! empty( $payment_method ) && General_Helper::is_tamara_gateway( $payment_method ) ) {
+			$order_note = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
+				'blocks/tamara-order-received',
+				[
+					'view_and_pay_url' => $view_and_pay_url,
+					'view_orders_url' => $view_orders_url,
+				]
+			);
+		}
+
+		return $order_note;
+	}
+
+
 	/**
 	 * Populate tamara default description text on checkout
 	 *
 	 * @throws \Exception
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
-		$allowed_countries_text = 'Saudi Arabia, Kuwait, UAE and Qatar only.<br>';
-		$description = $this->_t( sprintf( '*Exclusive for shoppers in %s', $allowed_countries_text ) );
+		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
 		if ( ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode ) {
 			$description .= '<br/>' . $this->_t(
-				sprintf(
-					'SANDBOX ENABLED. See the %s for more details.',
-					'<a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide</a>'
-				)
+				'SANDBOX ENABLED.
+							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide
+							</a> for more details.'
 			);
 		}
 
