@@ -13,6 +13,8 @@ class General_Helper {
 	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
 	const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';
 	const TAMARA_ORDER_STATUS_CANCELED = 'canceled';
+	const TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+	const TAMARA_ORDER_STATUS_REFUNDED = 'fully_refunded';
 
 	/**
 	 * Get store's country code

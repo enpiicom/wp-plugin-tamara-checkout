@@ -172,7 +172,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 */
 	protected function populate_tamara_order_items( WC_Order $wc_order ): OrderItemCollection {
 		$tamara_wc_order = new Tamara_WC_Order( $wc_order );
-		return $tamara_wc_order->build_tamara_order_items();
+		return $tamara_wc_order->build_tamara_order_items( $wc_order );
 	}
 
 	/**

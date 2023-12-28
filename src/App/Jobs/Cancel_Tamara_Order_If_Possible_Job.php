@@ -109,8 +109,9 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 */
 	protected function check_cancel_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
-		$tamara_capture_id = get_post_meta( $wc_order_id, '_tamara_capture_id', true ) ?? null;
 		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
+		$tamara_capture_id = $tamara_wc_order->get_tamara_capture_id();
+		$tamara_cancel_id = $tamara_wc_order->get_tamara_cancel_id();
 
 		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
 			return false;
@@ -140,11 +141,12 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
 		update_post_meta( $wc_order_id, '_tamara_order_id', $tamara_client_response->getOrderId() );
 
-		// We don't want to proceed if the Tamara status is not relevant to the Cancel process
-		if ( $tamara_client_response->getStatus() === General_Helper::TAMARA_ORDER_STATUS_CANCELED ) {
+		// We don't want to proceed if the current Tamara status is canceled
+		if ( ! empty( $tamara_cancel_id ) || $tamara_client_response->getStatus() === General_Helper::TAMARA_ORDER_STATUS_CANCELED ) {
 			return false;
 		}
 
+		// We don't want to proceed if the Tamara status is not relevant to the Cancel process
 		if ( ! empty( $tamara_capture_id ) ||
 			$tamara_client_response->getStatus() !== General_Helper::TAMARA_ORDER_STATUS_AUTHORISED
 		) {
