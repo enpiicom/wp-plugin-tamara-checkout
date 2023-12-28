@@ -207,29 +207,11 @@ class General_Helper {
 		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
 	}
 
-	public static function is_tamara_gateway( $payment_method_id ): bool {
-		return ! ! in_array( $payment_method_id, static::get_all_tamara_gateway_ids() );
-	}
-
-	public static function get_all_tamara_gateway_ids(): array {
-		return [
-			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID,
-			'tamara-gateway-pay-later',
-			'tamara-gateway-pay-next-month',
-			'tamara-gateway-pay-now',
-			'tamara-gateway-single-checkout',
-			'tamara-gateway-pay-in-2',
-			'tamara-gateway-pay-in-3',
-			'tamara-gateway-pay-in-4',
-			'tamara-gateway-pay-in-5',
-			'tamara-gateway-pay-in-6',
-			'tamara-gateway-pay-in-7',
-			'tamara-gateway-pay-in-8',
-			'tamara-gateway-pay-in-9',
-			'tamara-gateway-pay-in-10',
-			'tamara-gateway-pay-in-11',
-			'tamara-gateway-pay-in-12',
-		];
+	public static function is_paid_with_tamara( $payment_method ): bool {
+		return strpos(
+			       $payment_method,
+			       Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
+		       ) === 0;
 	}
 
 	public static function is_live_mode(): bool {
