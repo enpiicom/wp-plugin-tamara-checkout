@@ -207,7 +207,7 @@ class General_Helper {
 		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
 	}
 
-	public static function is_paid_with_tamara( $payment_method ): bool {
+	public static function is_tamara_gateway( $payment_method ): bool {
 		return strpos(
 			$payment_method,
 			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
