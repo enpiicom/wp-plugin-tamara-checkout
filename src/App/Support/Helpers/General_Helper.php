@@ -169,7 +169,7 @@ class General_Helper {
 	 * @param string $currency
 	 * @return Money
 	 */
-	public static function buld_tamara_money( $amount, $currency = 'SAR' ): Money {
+	public static function build_tamara_money( $amount, $currency = 'SAR' ): Money {
 		return new Money(
 			static::format_tamara_number(
 				$amount,

@@ -36,6 +36,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
 	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
@@ -54,7 +55,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 		$capture_request = $this->tamara_wc_order->build_capture_request();
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->capture( $capture_request );
-
+		dev_error_log($tamara_client_response);
 		if (
 			! is_object( $tamara_client_response )
 		) {
@@ -104,6 +105,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	/**
 	 * We want to check if we want to start the capture request or not
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
 	 */
 	protected function check_capture_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;

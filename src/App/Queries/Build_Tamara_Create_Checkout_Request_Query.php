@@ -61,7 +61,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setLocale( get_locale() );
 		$order->setCurrency( $wc_order->get_currency() );
 		$order->setTotalAmount(
-			General_Helper::buld_tamara_money(
+			General_Helper::build_tamara_money(
 				$wc_order->get_total(),
 				$wc_order->get_currency()
 			)
@@ -82,13 +82,13 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		);
 		$order->setDescription( 'Use Tamara Gateway with WooCommerce' );
 		$order->setTaxAmount(
-			General_Helper::buld_tamara_money(
+			General_Helper::build_tamara_money(
 				$wc_order->get_total_tax(),
 				$wc_order->get_currency()
 			)
 		);
 		$order->setShippingAmount(
-			General_Helper::buld_tamara_money(
+			General_Helper::build_tamara_money(
 				$wc_order->get_shipping_total(),
 				$wc_order->get_currency()
 			)
@@ -98,7 +98,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setDiscount(
 			new Discount(
 				$used_coupons,
-				General_Helper::buld_tamara_money(
+				General_Helper::build_tamara_money(
 					$wc_order->get_discount_total(),
 					$wc_order->get_currency()
 				)

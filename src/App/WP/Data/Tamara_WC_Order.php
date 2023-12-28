@@ -43,7 +43,7 @@ class Tamara_WC_Order {
 		return $this->wc_order;
 	}
 
-	public function get_id() {
+	public function get_id(){
 		return $this->wc_order->get_id();
 	}
 
@@ -110,7 +110,7 @@ class Tamara_WC_Order {
 				$order_item->setName( $wc_order_item_name );
 				$order_item->setQuantity( $wc_order_item_quantity );
 				$order_item->setUnitPrice(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$item_price,
 						$wc_order->get_currency()
 					)
@@ -118,19 +118,19 @@ class Tamara_WC_Order {
 				$order_item->setType( $wc_order_item_categories );
 				$order_item->setSku( $wc_order_item_sku );
 				$order_item->setTotalAmount(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$wc_order_item_total,
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setTaxAmount(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$wc_order_item_total_tax,
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setDiscountAmount(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$wc_order_item_discount_amount,
 						$wc_order->get_currency()
 					)
@@ -151,7 +151,7 @@ class Tamara_WC_Order {
 				$order_item->setName( $wc_order_item_name );
 				$order_item->setQuantity( $wc_order_item_quantity );
 				$order_item->setUnitPrice(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$item_price,
 						$wc_order->get_currency()
 					)
@@ -159,19 +159,19 @@ class Tamara_WC_Order {
 				$order_item->setType( $wc_order_item_categories );
 				$order_item->setSku( $wc_order_item_sku );
 				$order_item->setTotalAmount(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$wc_order_item_total,
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setTaxAmount(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$wc_order_item_total_tax,
 						$wc_order->get_currency()
 					)
 				);
 				$order_item->setDiscountAmount(
-					General_Helper::buld_tamara_money(
+					General_Helper::build_tamara_money(
 						$wc_order_item_discount_amount,
 						$wc_order->get_currency()
 					)
@@ -198,20 +198,20 @@ class Tamara_WC_Order {
 		return new ShippingInfo( $shipped_at, $shipping_company, $tracking_number, $tracking_url );
 	}
 
-	public function build_capture_request() {
-		$wc_order_total_amount = General_Helper::buld_tamara_money(
+	public function build_capture_request() : CaptureRequest {
+		$wc_order_total_amount = General_Helper::build_tamara_money(
 			$this->wc_order->get_total(),
 			$this->wc_order->get_currency()
 		);
-		$wc_order_shipping_amount = General_Helper::buld_tamara_money(
+		$wc_order_shipping_amount = General_Helper::build_tamara_money(
 			$this->wc_order->get_shipping_total(),
 			$this->wc_order->get_currency()
 		);
-		$wc_order_tax_amount = General_Helper::buld_tamara_money(
+		$wc_order_tax_amount = General_Helper::build_tamara_money(
 			$this->wc_order->get_total_tax(),
 			$this->wc_order->get_currency()
 		);
-		$wc_order_discount_amount = General_Helper::buld_tamara_money(
+		$wc_order_discount_amount = General_Helper::build_tamara_money(
 			$this->wc_order->get_discount_total(),
 			$this->wc_order->get_currency()
 		);
