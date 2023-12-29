@@ -10,6 +10,7 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Force_Authorise_And_Capture_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
@@ -170,6 +171,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function enqueue_tamara_admin_scripts(): void {
 		$this->get_tamara_gateway_service()->enqueue_admin_scripts();
+	}
+
+	public function perform_authorise_and_capture_cron(): void {
+		Force_Authorise_And_Capture_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_DEFAULT );
 	}
 
 	public function enqueue_tamara_widget_client_scripts(): void {
@@ -586,6 +591,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
 				add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
+			}
+
+			if ( $this->get_tamara_gateway_service()->get_settings()->crobjob_enabled ) {
+				add_action( 'admin_head', [ $this, 'perform_authorise_and_capture_cron' ] );
 			}
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );

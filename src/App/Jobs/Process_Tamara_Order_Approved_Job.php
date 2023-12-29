@@ -27,6 +27,10 @@ class Process_Tamara_Order_Approved_Job extends Base_Job {
 		$this->wc_order_id = $wc_order_id;
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \WC_Data_Exception
+	 */
 	public function handle() {
 		$get_order_request = new GetOrderRequest( $this->tamara_order_id );
 		/** @var \Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderResponse $tamara_client_response */
@@ -76,6 +80,9 @@ class Process_Tamara_Order_Approved_Job extends Base_Job {
 		throw new Tamara_Exception( wp_kses_post( $this->_t( 'Order authorised failed.' ) ) );
 	}
 
+	/**
+	 * @throws \WC_Data_Exception
+	 */
 	protected function process_authorise_successfully(): void {
 		$wc_order_id = $this->wc_order_id;
 		$wc_order = wc_get_order( $wc_order_id );
