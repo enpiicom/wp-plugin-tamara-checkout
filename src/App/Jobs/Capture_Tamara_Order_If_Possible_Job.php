@@ -112,7 +112,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 			return false;
 		}
 
-		$tamara_wc_order->reupdate_meta_for_tamara_order_id( $wc_order_id );
+		$tamara_wc_order->reupdate_meta_for_tamara_order_id();
 
 		return true;
 	}

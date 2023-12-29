@@ -103,7 +103,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	protected function check_refund_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
 		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
-		$tamara_capture_id = $tamara_wc_order->get_tamara_capture_id( $wc_order_id );
+		$tamara_capture_id = $tamara_wc_order->get_tamara_capture_id();
 
 		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
 			return false;
@@ -115,7 +115,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 			throw new Tamara_Exception( wp_kses_post( $error_message ) );
 		}
 
-		$tamara_wc_order->reupdate_meta_for_tamara_order_id( $wc_order_id );
+		$tamara_wc_order->reupdate_meta_for_tamara_order_id();
 		return true;
 	}
 }

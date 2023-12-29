@@ -115,7 +115,8 @@ class Tamara_WC_Order {
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	public function reupdate_meta_for_tamara_order_id( $wc_order_id ): void {
+	public function reupdate_meta_for_tamara_order_id(): void {
+		$wc_order_id = $this->wc_order_id;
 		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
 		if ( ! empty( $tamara_client_response ) ) {
 			update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
@@ -345,7 +346,7 @@ class Tamara_WC_Order {
 			$this->wc_refund->get_currency()
 		);
 
-		$capture_id = $this->get_tamara_capture_id( $this->wc_order->get_id() );
+		$capture_id = $this->get_tamara_capture_id();
 		$refund_collection = [];
 
 		$wc_refund_items = $this->build_tamara_order_items( $this->wc_refund );
