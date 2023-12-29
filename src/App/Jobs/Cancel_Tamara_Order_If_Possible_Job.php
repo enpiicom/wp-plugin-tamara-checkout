@@ -13,11 +13,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
-use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Payment\CancelResponse;
 
 class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
@@ -110,50 +108,12 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	protected function check_cancel_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
 		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
-		$tamara_capture_id = $tamara_wc_order->get_tamara_capture_id();
-		$tamara_cancel_id = $tamara_wc_order->get_tamara_cancel_id();
 
 		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
 			return false;
 		}
 
-		if ( $this->to_cancel_status !== 'wc-' . $this->status_to ) {
-			return false;
-		}
-
-		$get_order_by_reference_id_request = new GetOrderByReferenceIdRequest( (string) $this->wc_order_id );
-		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
-
-		if (
-			! is_object( $tamara_client_response )
-		) {
-			$error_message = $this->_t( 'Error when trying to cancel order with Tamara.' );
-			$error_message .= "<br />\n";
-			$error_message .= sprintf(
-				$this->_t( 'Error with Tamara API: %s' ),
-				$tamara_client_response
-			);
-			$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
-			throw new Tamara_Exception( wp_kses_post( $error_message ) );
-		}
-
-		// We may want to reupdate the meta for tamara_order_id if it is deleted
-		update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
-		update_post_meta( $wc_order_id, '_tamara_order_id', $tamara_client_response->getOrderId() );
-
-		// We don't want to proceed if the current Tamara status is canceled
-		if ( ! empty( $tamara_cancel_id ) || $tamara_client_response->getStatus() === General_Helper::TAMARA_ORDER_STATUS_CANCELED ) {
-			return false;
-		}
-
-		// We don't want to proceed if the Tamara status is not relevant to the Cancel process
-		if ( ! empty( $tamara_capture_id ) ||
-			$tamara_client_response->getStatus() !== General_Helper::TAMARA_ORDER_STATUS_AUTHORISED
-		) {
-			$error_message = $this->_t( 'Tamara – The order can not be cancelled because it was captured. Please try "Refund" function instead.' );
-			$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
-			return false;
-		}
+		$tamara_wc_order->reupdate_meta_for_tamara_order_id( $wc_order_id );
 
 		return true;
 	}

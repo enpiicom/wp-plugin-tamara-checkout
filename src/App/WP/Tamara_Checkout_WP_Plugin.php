@@ -520,19 +520,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			return;
 		}
 
-		try {
-			Capture_Tamara_Order_If_Possible_Job::dispatchSync(
-				[
-					'wc_order_id' => $wc_order_id,
-					'status_from' => $status_from,
-					'status_to' => $status_to,
-					'to_capture_status' => $to_capture_status,
-				]
-			);
-		} catch ( Exception $tamara_capture_exception ) {
-			throw new Exception( wp_kses_post( $tamara_capture_exception->getMessage() ) );
-		}
-
 		Capture_Tamara_Order_If_Possible_Job::dispatch(
 			[
 				'wc_order_id' => $wc_order_id,
@@ -560,19 +547,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			return;
 		}
 
-		try {
-			Cancel_Tamara_Order_If_Possible_Job::dispatchSync(
-				[
-					'wc_order_id' => $wc_order_id,
-					'status_from' => $status_from,
-					'status_to' => $status_to,
-					'to_cancel_status' => $to_cancel_status,
-				]
-			);
-		} catch ( Exception $tamara_cancel_exception ) {
-			throw new Exception( wp_kses_post( $tamara_cancel_exception->getMessage() ) );
-		}
-
 		Cancel_Tamara_Order_If_Possible_Job::dispatch(
 			[
 				'wc_order_id'      => $wc_order_id,
@@ -587,12 +561,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function refund_tamara_order_if_possible( $wc_refund, $args ) {
-		Refund_Tamara_Order_If_Possible_Job::dispatchSync(
+		Refund_Tamara_Order_If_Possible_Job::dispatch(
 			[
 				'wc_refund' => $wc_refund,
 				'wc_order_id' => $args['order_id'],
 			]
-		);
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
 	}
 
 	/**

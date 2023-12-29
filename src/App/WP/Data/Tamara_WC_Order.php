@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP\Data;
 
 use DateTimeImmutable;
+use Enpii_Base\App\Exceptions\Simple_Exception;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Trans_Trait;
@@ -15,8 +16,10 @@ use Tamara_Checkout\Deps\Tamara\Model\Payment\Capture;
 use Tamara_Checkout\Deps\Tamara\Model\Payment\Refund;
 use Tamara_Checkout\Deps\Tamara\Model\ShippingInfo;
 use Tamara_Checkout\Deps\Tamara\Request\Order\CancelOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse;
 use WC_Order;
 
 /**
@@ -84,12 +87,52 @@ class Tamara_WC_Order {
 		return $this->tamara_order_id;
 	}
 
-	public function get_tamara_capture_id(): string {
-		return get_post_meta( $this->wc_order->get_id(), '_tamara_capture_id', true );
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function get_tamara_capture_id( $wc_order_id ): ?string {
+		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
+		/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
+		$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
+		if ( ! empty( $capture_item ) ) {
+			return $capture_item->getCaptureId();
+		}
+
+		return null;
 	}
 
-	public function get_tamara_cancel_id(): string {
-		return get_post_meta( $this->wc_order->get_id(), '_tamara_cancel_id', true );
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function reupdate_meta_for_tamara_order_id( $wc_order_id ): void {
+		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
+		if ( ! empty( $tamara_client_response ) ) {
+			update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
+			update_post_meta( $wc_order_id, '_tamara_order_id', $tamara_client_response->getOrderId() );
+		}
+	}
+
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
+	 */
+	public function get_tamara_order_by_reference_id( $wc_order_id ): GetOrderByReferenceIdResponse {
+		$get_order_by_reference_id_request = new GetOrderByReferenceIdRequest( (string) $wc_order_id );
+		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
+
+		if (
+		! is_object( $tamara_client_response )
+		) {
+			$error_message = $this->_t( 'Error when trying to get order from Tamara.' );
+			$error_message .= "<br />\n";
+			$error_message .= sprintf(
+				$this->_t( 'Error with Tamara API: %s' ),
+				$tamara_client_response
+			);
+			throw new Tamara_Exception( wp_kses_post( $error_message ) );
+		}
+
+		return $tamara_client_response;
 	}
 
 	public function build_tamara_order_items( $wc_order ): OrderItemCollection {
@@ -270,6 +313,9 @@ class Tamara_WC_Order {
 		);
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
 	public function build_refund_request(): RefundRequest {
 		$wc_refund_total_amount = General_Helper::build_tamara_money(
 			abs( (int) $this->wc_refund->get_total() ),
@@ -288,7 +334,7 @@ class Tamara_WC_Order {
 			$this->wc_refund->get_currency()
 		);
 
-		$capture_id = $this->get_tamara_capture_id();
+		$capture_id = $this->get_tamara_capture_id( $this->wc_order->get_id() );
 		$refund_collection = [];
 
 		$wc_refund_items = $this->build_tamara_order_items( $this->wc_refund );
