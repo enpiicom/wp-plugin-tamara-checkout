@@ -174,7 +174,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function perform_authorise_and_capture_cron(): void {
-		Force_Authorise_And_Capture_Job::ex;
+		Force_Authorise_And_Capture_Job::execute_now();
 	}
 
 	/**

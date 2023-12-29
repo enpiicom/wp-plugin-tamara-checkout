@@ -31,14 +31,11 @@ class Force_Authorise_And_Capture_Job extends Base_Job {
 
 	/**
 	 * Force pending authorise payments within 180 days to be authorised
-	 *
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function force_authorise_tamara_order() {
 		$customer_orders = $this->build_authorise_orders_query_args();
-
 		$customer_orders_query = new WP_Query( $customer_orders );
-
 		$wc_order_ids = $customer_orders_query->posts;
 
 		foreach ( $wc_order_ids as $wc_order_id ) {
@@ -60,9 +57,7 @@ class Force_Authorise_And_Capture_Job extends Base_Job {
 	 */
 	public function force_capture_tamara_order() {
 		$customer_orders = $this->build_capture_orders_query_args();
-
 		$customer_orders_query = new WP_Query( $customer_orders );
-
 		$wc_order_ids = $customer_orders_query->posts;
 
 		foreach ( $wc_order_ids as $wc_order_id ) {
