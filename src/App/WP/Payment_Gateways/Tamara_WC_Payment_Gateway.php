@@ -194,4 +194,35 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 			);
 		}
 	}
+
+	/**
+	 * Fire an ajax request without waiting for response
+	 *
+	 * @throws \Exception
+	 */
+	public function add_cron_job_trigger_script() {
+		$ajax_cron_job_url = esc_attr(
+			add_query_arg(
+				[
+					'action' => 'tamara_perform_cron',
+				],
+				admin_url( 'admin-ajax.php' )
+			)
+		);
+		$escaped_ajax_cron_job_url = esc_url( $ajax_cron_job_url );
+		echo <<<SCRIPT
+		    <script type="text/javascript">
+		        var data = {
+		            'action': 'tamara_perform_cron'
+		        };
+		        fetch('$escaped_ajax_cron_job_url', {
+		            credentials: 'same-origin',
+		            method: 'GET',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		        });
+		    </script>
+SCRIPT;
+	}
 }

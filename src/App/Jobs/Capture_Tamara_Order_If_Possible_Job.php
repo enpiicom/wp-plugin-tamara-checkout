@@ -43,6 +43,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 	/**
 	 * @throws Tamara_Exception
+	 * @throws \Exception
 	 */
 	public function handle() {
 		if ( ! $this->check_capture_prerequisites() ) {

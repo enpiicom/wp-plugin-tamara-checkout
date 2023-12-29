@@ -174,7 +174,14 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function perform_authorise_and_capture_cron(): void {
-		Force_Authorise_And_Capture_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_DEFAULT );
+		Force_Authorise_And_Capture_Job::ex;
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function add_cron_job_trigger_script() {
+		$this->get_tamara_gateway_service()->add_cron_job_trigger_script();
 	}
 
 	public function enqueue_tamara_widget_client_scripts(): void {
@@ -594,8 +601,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			}
 
 			if ( $this->get_tamara_gateway_service()->get_settings()->crobjob_enabled ) {
-				add_action( 'admin_head', [ $this, 'perform_authorise_and_capture_cron' ] );
+				add_action( 'admin_footer', [ $this, 'add_cron_job_trigger_script' ] );
 			}
+
+			add_action( 'wp_ajax_tamara_perform_cron', [ $this, 'perform_authorise_and_capture_cron' ] );
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
