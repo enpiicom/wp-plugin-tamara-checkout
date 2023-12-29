@@ -99,7 +99,6 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	/**
 	 * We want to check if we want to start the refund request or not
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
-	 * @throws \Exception
 	 */
 	protected function check_refund_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
@@ -113,7 +112,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		if ( empty( $tamara_capture_id ) ) {
 			$error_message = $this->_t( 'Tamara - Unable to create a refund. Capture ID not found.' );
 			$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
-			return false;
+			throw new Tamara_Exception( wp_kses_post( $error_message ) );
 		}
 
 		$tamara_wc_order->reupdate_meta_for_tamara_order_id( $wc_order_id );

@@ -6,18 +6,15 @@ namespace Tamara_Checkout\App\Jobs;
 
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
-use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Payment\CaptureResponse;
 
 class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
@@ -35,7 +32,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	protected $tamara_wc_order;
 
 	/**
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws Tamara_Exception
 	 * @throws \Exception
 	 */
 	public function __construct( array $config ) {
@@ -45,8 +42,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	}
 
 	/**
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
-	 * @throws \Exception
+	 * @throws Tamara_Exception
 	 */
 	public function handle() {
 		if ( ! $this->check_capture_prerequisites() ) {
@@ -85,9 +81,11 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 	/**
 	 * We do needed thing on failed scenario
-	 * @param string $tamara_error_message Error message from Tamara API
+	 *
+	 * @param  string  $tamara_error_message  Error message from Tamara API
+	 *
 	 * @return void
-	 * @throws Exception
+	 * @throws Tamara_Exception
 	 */
 	protected function process_captured_failed( string $tamara_error_message ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
@@ -104,8 +102,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 	/**
 	 * We want to check if we want to start the capture request or not
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
-	 * @throws \Exception
+	 * @throws Tamara_Exception
 	 */
 	protected function check_capture_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
