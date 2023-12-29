@@ -32,6 +32,7 @@ class Tamara_WC_Order {
 	protected $wc_refund;
 	protected $tamara_order_id;
 	protected $payment_method;
+	protected $wc_order_id;
 
 	public function __construct( WC_Order $wc_order, $wc_refund = null ) {
 		if ( empty( $wc_order->get_id() ) ) {
@@ -40,6 +41,7 @@ class Tamara_WC_Order {
 
 		$this->wc_order = $wc_order;
 		$this->wc_refund = $wc_refund;
+		$this->wc_order_id = $wc_order->get_id();
 	}
 
 	/**
@@ -89,7 +91,17 @@ class Tamara_WC_Order {
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	public function get_tamara_capture_id( $wc_order_id ): ?string {
+	public function get_tamara_order_id_by_wc_order_id(): ?string {
+		$wc_order_id = $this->wc_order_id;
+		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
+		return ! empty( $tamara_client_response->getOrderId() ) ? $tamara_client_response->getOrderId() : null;
+	}
+
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function get_tamara_capture_id(): ?string {
+		$wc_order_id = $this->wc_order_id;
 		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
 		/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
 		$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
@@ -103,7 +115,8 @@ class Tamara_WC_Order {
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	public function reupdate_meta_for_tamara_order_id( $wc_order_id ): void {
+	public function reupdate_meta_for_tamara_order_id(): void {
+		$wc_order_id = $this->wc_order_id;
 		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
 		if ( ! empty( $tamara_client_response ) ) {
 			update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
@@ -333,7 +346,7 @@ class Tamara_WC_Order {
 			$this->wc_refund->get_currency()
 		);
 
-		$capture_id = $this->get_tamara_capture_id( $this->wc_order->get_id() );
+		$capture_id = $this->get_tamara_capture_id();
 		$refund_collection = [];
 
 		$wc_refund_items = $this->build_tamara_order_items( $this->wc_refund );
