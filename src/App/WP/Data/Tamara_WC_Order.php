@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP\Data;
 
 use DateTimeImmutable;
-use Enpii_Base\App\Exceptions\Simple_Exception;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Trans_Trait;
