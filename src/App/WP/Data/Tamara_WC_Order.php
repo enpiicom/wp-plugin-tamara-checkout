@@ -92,8 +92,7 @@ class Tamara_WC_Order {
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function get_tamara_order_id_by_wc_order_id(): ?string {
-		$wc_order_id = $this->wc_order_id;
-		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
+		$tamara_client_response = $this->get_tamara_order_by_reference_id();
 		return ! empty( $tamara_client_response->getOrderId() ) ? $tamara_client_response->getOrderId() : null;
 	}
 
@@ -101,8 +100,7 @@ class Tamara_WC_Order {
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function get_tamara_capture_id(): ?string {
-		$wc_order_id = $this->wc_order_id;
-		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
+		$tamara_client_response = $this->get_tamara_order_by_reference_id();
 		/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
 		$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
 		if ( ! empty( $capture_item ) ) {
@@ -117,7 +115,7 @@ class Tamara_WC_Order {
 	 */
 	public function reupdate_meta_for_tamara_order_id(): void {
 		$wc_order_id = $this->wc_order_id;
-		$tamara_client_response = $this->get_tamara_order_by_reference_id( $wc_order_id );
+		$tamara_client_response = $this->get_tamara_order_by_reference_id();
 		if ( ! empty( $tamara_client_response ) ) {
 			update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
 			update_post_meta( $wc_order_id, '_tamara_order_id', $tamara_client_response->getOrderId() );
@@ -128,7 +126,8 @@ class Tamara_WC_Order {
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 * @throws \Exception
 	 */
-	public function get_tamara_order_by_reference_id( $wc_order_id ): GetOrderByReferenceIdResponse {
+	public function get_tamara_order_by_reference_id(): GetOrderByReferenceIdResponse {
+		$wc_order_id = $this->wc_order_id;
 		$get_order_by_reference_id_request = new GetOrderByReferenceIdRequest( (string) $wc_order_id );
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
 
