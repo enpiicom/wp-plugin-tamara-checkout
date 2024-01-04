@@ -7,8 +7,16 @@ namespace Tamara_Checkout\App\Support\Helpers;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class General_Helper {
+
+	const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
+	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
+	const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';
+	const TAMARA_ORDER_STATUS_CANCELED = 'canceled';
+	const TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+	const TAMARA_ORDER_STATUS_REFUNDED = 'fully_refunded';
 
 	/**
 	 * Get store's country code
@@ -31,7 +39,7 @@ class General_Helper {
 	 * @throws \Exception
 	 */
 	public static function convert_message( $tamara_message ): string {
-		return static::get_error_map()[ $tamara_message ] ?
+		return ! empty( static::get_error_map()[ $tamara_message ] ) ?
 			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( static::get_error_map()[ $tamara_message ] ) :
 			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
 	}
@@ -155,6 +163,23 @@ class General_Helper {
 	public static function format_tamara_number( $amount, $currency = 'SAR' ): float {
 		$decimal_digits = static::get_currency_decimal_digits_mappings()[ strtoupper( $currency ) ] ?? 2;
 		return floatval( number_format( floatval( $amount ), $decimal_digits, '.', '' ) );
+	}
+
+	/**
+	 * Build the Money Object for Tamara API
+	 *
+	 * @param mixed $amount
+	 * @param string $currency
+	 * @return Money
+	 */
+	public static function build_tamara_money( $amount, $currency = 'SAR' ): Money {
+		return new Money(
+			static::format_tamara_number(
+				$amount,
+				$currency
+			),
+			$currency
+		);
 	}
 
 	/**
