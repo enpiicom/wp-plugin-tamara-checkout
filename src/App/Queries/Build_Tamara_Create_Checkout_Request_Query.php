@@ -39,6 +39,9 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 */
 	protected $instalments = 0;
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
 	public function __construct( WC_Order $wc_order, string $payment_type, int $instalments = 0 ) {
 		$this->wc_order = $wc_order;
 		$this->payment_type = $payment_type;
@@ -49,11 +52,18 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		}
 	}
 
-	public function handle() {
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function handle(): CreateCheckoutRequest {
 		$tamara_order = $this->build_tamara_order();
 		return new CreateCheckoutRequest( $tamara_order );
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
+	 */
 	public function build_tamara_order(): Order {
 		$wc_order = $this->wc_order;
 		$order = new Order();
@@ -142,6 +152,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 * @param $wc_order
 	 *
 	 * @return Consumer
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function populate_tamara_consumer( $wc_order ): Consumer {
 		$wc_billing_address = $wc_order->get_address( 'billing' );

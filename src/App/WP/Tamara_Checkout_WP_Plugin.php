@@ -131,9 +131,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				),
 			];
 			Show_Admin_Notice_And_Disable_Plugin_Job::execute_now( $this, $messages );
-
 			return;
 		}
+		add_filter( 'plugin_action_links_tamara-checkout/tamara-checkout.php', [ $this, 'add_plugin_settings_link' ] );
 	}
 
 	public function tamara_gateway_process_admin_options() {
@@ -194,6 +194,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		return $this->get_tamara_widget_service()->fetch_tamara_cart_widget( $data );
 	}
 
+	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
+		return $this->get_tamara_widget_service()->fetch_tamara_order_received_note( $order_note, $wc_order );
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function render_payment_types_description_on_checkout(): string {
+		return $this->get_tamara_widget_service()->fetch_tamara_checkout_widget();
+	}
+
 	public function show_tamara_footprint(): void {
 		echo '<meta name="generator" content="Tamara Checkout ' . esc_attr( $this->get_version() ) . '" />';
 	}
@@ -212,17 +223,20 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				? $current_cart_info['country_code']
 				: self::DEFAULT_COUNTRY_CODE;
 			$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
-			$currency_code = $currency_by_country_code[ $country_code ];
-			$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
-
-			return Get_Tamara_Payment_Options_Query::execute_now(
-				[
-					'available_gateways' => $available_gateways,
-					'order_total' => $order_total,
-					'country_code' => $country_code,
-					'customer_phone' => $customer_phone,
-				]
-			);
+			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
+				$currency_code = $currency_by_country_code[ $country_code ];
+				$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
+				return Get_Tamara_Payment_Options_Query::execute_now(
+					[
+						'available_gateways' => $available_gateways,
+						'order_total' => $order_total,
+						'country_code' => $country_code,
+						'customer_phone' => $customer_phone,
+					]
+				);
+			} else {
+				unset( $available_gateways[ static::DEFAULT_TAMARA_GATEWAY_ID ] );
+			}
 		}
 
 		return $available_gateways;
@@ -478,6 +492,16 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$this->manipulate_hooks_after_settings();
 	}
 
+	/**
+	 * @throws \Exception
+	 */
+	public function add_plugin_settings_link( $plugin_links ) {
+		$settings_link = '<a href="' . General_Helper::get_tamara_admin_settings_section_url() . '">' .
+							$this->_t( 'Settings' ) .
+							'</a>';
+		array_unshift( $plugin_links, $settings_link );
+		return $plugin_links;
+	}
 
 	/**
 	 * Update phone number on every ajax calls on checkout
@@ -590,7 +614,13 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
+			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
+
 			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
+
+			add_filter( 'woocommerce_gateway_description', [ $this, 'render_payment_types_description_on_checkout' ], 9999 );
+
+			add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'fetch_tamara_order_received_note' ], 10, 2 );
 
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
 

@@ -20,7 +20,7 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
-		$current_language = General_Helper::get_current_language();
+		$current_language = General_Helper::get_current_language_code();
 		$this->title = $current_language === 'ar' ? $this->description_ar : $this->description_en;
 		$this->title = ! empty( $this->title ) ? $this->title : $this->_t( 'Tamara Pay In 3' );
 

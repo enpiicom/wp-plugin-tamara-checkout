@@ -99,15 +99,16 @@ class WC_Order_Helper {
 	public static function get_current_cart_info(): array {
 		$current_cart_total = ! empty( WC()->cart->total ) ? WC()->cart->total : 0;
 		$billing_customer_phone = ! empty( WC()->customer->get_billing_phone() ) ? WC()->customer->get_billing_phone() : '';
-		$cart_total     = static::define_total_amount_to_calculate( $current_cart_total );
-		$country_code   = General_Helper::get_currency_country_mappings()[ get_woocommerce_currency() ];
+		$cart_total = static::define_total_amount_to_calculate( $current_cart_total );
+		$country_mapping = General_Helper::get_currency_country_mappings()[ get_woocommerce_currency() ];
+		$country_code = WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : $country_mapping;
 		$customer_phone = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_customer_phone_number() ??
 							$billing_customer_phone;
 
 		return [
-			'cart_total'     => $cart_total,
+			'cart_total' => $cart_total,
 			'customer_phone' => $customer_phone,
-			'country_code'   => $country_code,
+			'country_code' => $country_code,
 		];
 	}
 
