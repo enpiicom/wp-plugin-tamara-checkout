@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
-use Enpii_Base\Foundation\Bus\Dispatchable_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -13,7 +13,7 @@ use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 
 class Process_Tamara_Order_Approved_Job extends Base_Job {
-	use Dispatchable_Trait;
+	use Dispatchable;
 	use Trans_Trait;
 
 	protected $wc_order_id;

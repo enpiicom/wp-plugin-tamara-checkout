@@ -7,11 +7,13 @@ namespace Tamara_Checkout\App\Queries;
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Traits\Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	use Executable_Trait;
+	use Trans_Trait;
 
 	protected $current_settings;
 	protected $working_mode;
@@ -54,6 +56,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_api_url' => [
 				'title' => $this->_t( 'Live API URL' ),
 				'type' => 'text',
+				'class' => 'live-field',
 				'description' => $this->_t( 'The Tamara Live API URL <span class="tamara-highlight">(https://api.tamara.co)</span>' ),
 				'default' => Tamara_WC_Payment_Gateway::LIVE_API_URL,
 				'custom_attributes' => [
@@ -65,6 +68,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_api_token' => [
 				'title' => $this->_t( 'Live API Token (Merchant Token)' ),
 				'type' => 'textarea',
+				'class' => 'live-field',
+				'css' => 'height: 200px;',
 				'description' => $this->_t( 'Get your API token from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -73,6 +78,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_notification_token' => [
 				'title' => $this->_t( 'Live Notification Key' ),
 				'type' => 'text',
+				'class' => 'live-field',
 				'description' => $this->_t( 'Get your Notification key from Tamara.' ),
 				'default' => '',
 				'custom_attributes' => [
@@ -82,6 +88,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_public_key' => [
 				'title' => $this->_t( 'Live Public Key' ),
 				'type' => 'text',
+				'class' => 'live-field',
 				'description' => $this->_t( 'Get your Public key from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -90,6 +97,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_api_url' => [
 				'title' => $this->_t( 'Sandbox API URL' ),
 				'type' => 'text',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'The Tamara Sandbox API URL <span class="tamara-highlight">(https://api-sandbox.tamara.co)</span>' ),
 				'default' => Tamara_WC_Payment_Gateway::SANDBOX_API_URL,
 				'custom_attributes' => [
@@ -100,6 +108,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_api_token' => [
 				'title' => $this->_t( 'Sandbox API Token (Merchant Token)' ),
 				'type' => 'textarea',
+				'css' => 'height: 200px;',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'Get your API token for testing from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -108,6 +118,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_notification_token' => [
 				'title' => $this->_t( 'Sandbox Notification Key' ),
 				'type' => 'text',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'Get your Notification key for testing from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -116,6 +127,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_public_key' => [
 				'title' => $this->_t( 'Sandbox Public Key' ),
 				'type' => 'text',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'Get your Public key for testing from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -333,11 +345,6 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                         </ul>
                     </div>
                 </div>';
-	}
-
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	protected function _t( $untranslated_text ) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 
 	protected function get_webhook_id(): string {

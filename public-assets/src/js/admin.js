@@ -4,8 +4,8 @@ import createPopper from '@popperjs/core';
 (function ($) {
     $('document').ready(function () {
 		let tamara_env_toggle = $('#woocommerce_tamara-gateway_environment');
-		let webhook_enabled = $('#woocommerce_tamara-gateway_webhook_enabled')
-		webhook_enabled.closest('tr').hide()
+		let webhook_enabled = $('#woocommerce_tamara-gateway_webhook_enabled');
+		webhook_enabled.closest('tr').hide();
 
         /*
          Hide Help texts field and show/hide on toggle
@@ -29,7 +29,7 @@ import createPopper from '@popperjs/core';
         trigger_manage_button('tamara-advanced-settings-manage');
         trigger_manage_button('tamara-custom-settings-manage');
         trigger_debug_button('debug-info-manage');
-        tamara_env_toggle.closest('table').addClass('widefat tamara-setting-table')
+        tamara_env_toggle.closest('table').addClass('widefat tamara-setting-table');
         $('.tamara-settings-help-texts__manage').parent().find('.tamara-settings-help-texts__content').addClass('tamara-widefat');
     });
 

@@ -14,10 +14,11 @@
 // 	for easier including on other section e.g. unit test
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'tamara-checkout-bootstrap.php';
 
-// We register Enpii_Base plugin as a Service Provider
-wp_app()->register_plugin(
-	\Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin::class,
-	TAMARA_CHECKOUT_PLUGIN_SLUG,
-	__DIR__,
-	plugin_dir_url( __FILE__ )
-);
+// We register Tamara_Checkout_WP_Plugin as a Service Provider
+add_action( \Enpii_Base\App\Support\App_Const::ACTION_WP_APP_LOADED, function() {
+	\Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin::init_with_wp_app(
+		TAMARA_CHECKOUT_PLUGIN_SLUG,
+		__DIR__,
+		plugin_dir_url( __FILE__ )
+	);
+});
