@@ -103,6 +103,15 @@ class Tamara_Client {
 	}
 
 	/**
+	 * @param $client_request
+	 *
+	 * @return string | \Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
+	 */
+	public function get_order_by_wc_order_id( $client_request) {
+		return $this->perform_remote_request( 'GetOrderByReferenceIdRequest', $client_request );
+	}
+
+	/**
 	 *
 	 * @param GetOrderByReferenceIdRequest $client_request
 	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
@@ -120,6 +129,10 @@ class Tamara_Client {
 	 */
 	public function authorise_order( AuthoriseOrderRequest $client_request ) {
 		return $this->perform_remote_request( 'authoriseOrder', $client_request );
+	}
+
+	public function capture_order( CaptureRequest $client_request ) {
+		return $this->perform_remote_request( 'capture', $client_request );
 	}
 
 	/**
