@@ -8,19 +8,19 @@ use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
+use Tamara_Checkout\App\Jobs\Process_Tamara_Capture_Job;
+use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
-use Tamara_Checkout\App\Queries\Build_Tamara_Order_Query;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
@@ -35,6 +35,13 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
 	public const DEFAULT_COUNTRY_CODE = 'SA';
 	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
+
+	public const TAMARA_AUTHORISED_STATUS = 'authorised',
+				TAMARA_CANCELED_STATUS = 'canceled',
+				TAMARA_PARTIALLY_CAPTURED_STATUS = 'partially_captured',
+				TAMARA_FULLY_CAPTURED_STATUS = 'fully_captured',
+				TAMARA_PARTIALLY_REFUNDED_STATUS = 'partially_refunded',
+				TAMARA_FULLY_REFUNDED_STATUS = 'fully_refunded';
 
 	const TAMARA_CHECKOUT = 'tamara-checkout';
 
@@ -132,9 +139,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				),
 			];
 			Show_Admin_Notice_And_Disable_Plugin_Job::execute_now( $this, $messages );
-
 			return;
 		}
+		add_filter( 'plugin_action_links_tamara-checkout/tamara-checkout.php', [ $this, 'add_plugin_settings_link' ] );
 	}
 
 	public function tamara_gateway_process_admin_options() {
@@ -142,7 +149,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function tamara_gateway_register_webhook(): void {
-		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( 'low' );
+		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
 	}
 
 	public function tamara_gateway_register_wp_app_routes(): void {
@@ -151,6 +158,15 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function tamara_gateway_register_wp_api_routes(): void {
 		Register_Tamara_WP_Api_Routes_Job::execute_now();
+	}
+
+	public function tamara_capture_payment( $wc_order_id, $from_status, $to_status, $wc_order ): void {
+		Process_Tamara_Capture_Job::dispatch(
+			$wc_order_id,
+			$from_status,
+			$to_status,
+			$wc_order
+		);
 	}
 
 	/**
@@ -195,6 +211,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		return $this->get_tamara_widget_service()->fetch_tamara_cart_widget( $data );
 	}
 
+	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
+		return $this->get_tamara_widget_service()->fetch_tamara_order_received_note( $order_note, $wc_order );
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function render_payment_types_description_on_checkout(): string {
+		return $this->get_tamara_widget_service()->fetch_tamara_checkout_widget();
+	}
+
 	public function show_tamara_footprint(): void {
 		echo '<meta name="generator" content="Tamara Checkout ' . esc_attr( $this->get_version() ) . '" />';
 	}
@@ -213,17 +240,20 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				? $current_cart_info['country_code']
 				: self::DEFAULT_COUNTRY_CODE;
 			$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
-			$currency_code = $currency_by_country_code[ $country_code ];
-			$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
-
-			return Get_Tamara_Payment_Options_Query::execute_now(
-				[
-					'available_gateways' => $available_gateways,
-					'order_total' => $order_total,
-					'country_code' => $country_code,
-					'customer_phone' => $customer_phone,
-				]
-			);
+			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
+				$currency_code = $currency_by_country_code[ $country_code ];
+				$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
+				return Get_Tamara_Payment_Options_Query::execute_now(
+					[
+						'available_gateways' => $available_gateways,
+						'order_total' => $order_total,
+						'country_code' => $country_code,
+						'customer_phone' => $customer_phone,
+					]
+				);
+			} else {
+				unset( $available_gateways[ static::DEFAULT_TAMARA_GATEWAY_ID ] );
+			}
 		}
 
 		return $available_gateways;
@@ -479,6 +509,16 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$this->manipulate_hooks_after_settings();
 	}
 
+	/**
+	 * @throws \Exception
+	 */
+	public function add_plugin_settings_link( $plugin_links ) {
+		$settings_link = '<a href="' . General_Helper::get_tamara_admin_settings_section_url() . '">' .
+							$this->_t( 'Settings' ) .
+							'</a>';
+		array_unshift( $plugin_links, $settings_link );
+		return $plugin_links;
+	}
 
 	/**
 	 * Update phone number on every ajax calls on checkout
@@ -503,6 +543,73 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
+	 * Tamara Capture Payment
+	 *
+	 * @param $wc_order_id
+	 * @param $status_from
+	 * @param $status_to
+	 * @param $wc_order
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
+		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->status_to_capture_tamara_payment;
+
+		if ( $to_capture_status !== 'wc-' . $status_to ) {
+			return;
+		}
+
+		Capture_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_order_id' => $wc_order_id,
+				'status_from' => $status_from,
+				'status_to' => $status_to,
+				'to_capture_status' => $to_capture_status,
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
+	 * Tamara Cancel Order
+	 *
+	 * @param $wc_order_id
+	 * @param $status_from
+	 * @param $status_to
+	 * @param $wc_order
+	 *
+	 * @throws \Exception
+	 */
+	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
+		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->status_to_cancel_tamara_payment;
+
+		if ( $to_cancel_status !== 'wc-' . $status_to ) {
+			return;
+		}
+
+		Cancel_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_order_id'      => $wc_order_id,
+				'status_from'      => $status_from,
+				'status_to'        => $status_to,
+				'to_cancel_status' => $to_cancel_status,
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function refund_tamara_order_if_possible( $wc_refund, $args ) {
+		Refund_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_refund' => $wc_refund,
+				'wc_order_id' => $args['order_id'],
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
 	 *
 	 * @return void
 	 */
@@ -524,9 +631,23 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
 
+			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
+
 			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
 
+			add_filter( 'woocommerce_gateway_description', [ $this, 'render_payment_types_description_on_checkout' ], 9999 );
+
+			add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'fetch_tamara_order_received_note' ], 10, 2 );
+
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
+
+			add_action( 'woocommerce_order_status_changed', [ $this, 'tamara_capture_payment' ], 10, 4 );
+
+			add_action( 'woocommerce_order_status_changed', [ $this, 'capture_tamara_order_if_possible' ], 10, 4 );
+
+			add_action( 'woocommerce_order_status_changed', [ $this, 'cancel_tamara_order_if_possible' ], 10, 4 );
+
+			add_action( 'woocommerce_create_refund', [ $this, 'refund_tamara_order_if_possible' ], 10, 2 );
 		}
 	}
 }

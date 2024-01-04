@@ -49,6 +49,9 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 */
 	protected $settings_vo;
 
+	/**
+	 * @throws \Illuminate\Contracts\Container\BindingResolutionException
+	 */
 	public function __construct() {
 		$this->title = $this->_t( 'Tamara - Buy Now Pay Later' );
 		$this->description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
