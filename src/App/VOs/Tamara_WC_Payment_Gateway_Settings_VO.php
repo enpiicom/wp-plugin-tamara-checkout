@@ -31,6 +31,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property string $tamara_cancel_order
  * @property string $tamara_payment_capture
  * @property string $status_to_capture_tamara_payment
+ * @property string $status_to_cancel_tamara_payment
  * @property array $excluded_products array or products' Ids that should be excluded
  * @property array $excluded_product_categories array or terms' Ids
  *                  (from 'product_category' taxonomy) that should be excluded
@@ -219,5 +220,9 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 
 	public function get_status_to_capture_tamara_payment(): string {
 		return ! empty( $this->tamara_payment_capture ) ? $this->tamara_payment_capture : 'wc-completed';
+	}
+
+	public function get_status_to_cancel_tamara_payment(): string {
+		return ! empty( $this->tamara_cancel_order ) ? $this->tamara_cancel_order : 'wc-cancelled';
 	}
 }

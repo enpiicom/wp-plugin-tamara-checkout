@@ -15,7 +15,7 @@ use WC_Order;
 class Tamara_WC_Order {
 	use Static_Instance_Trait;
 
-	public function is_paid_with_tamara(WC_Order $wc_order): bool {
+	public function is_paid_with_tamara( WC_Order $wc_order ): bool {
 		$payment_method = $wc_order->get_payment_method();
 
 		return strpos(
@@ -24,12 +24,12 @@ class Tamara_WC_Order {
 		) === 0;
 	}
 
-	public function get_tamara_order_id(WC_Order $wc_order): bool {
+	public function get_tamara_order_id( WC_Order $wc_order ): bool {
 		$tamara_order_id = get_post_meta( $wc_order->get_id(), '_tamara_order_id' );
 		if ( ! $tamara_order_id ) {
 			$tamara_order_id = get_post_meta( $wc_order->get_id(), 'tamara_order_id' );
 		}
 
-		return get_post_meta( $wc_order->get_id(), '_tamara_order_id' );;
+		return get_post_meta( $wc_order->get_id(), '_tamara_order_id' );
 	}
 }

@@ -39,6 +39,9 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 */
 	protected $instalments = 0;
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
 	public function __construct( WC_Order $wc_order, string $payment_type, int $instalments = 0 ) {
 		$this->wc_order = $wc_order;
 		$this->payment_type = $payment_type;
@@ -49,11 +52,18 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		}
 	}
 
-	public function handle() {
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function handle(): CreateCheckoutRequest {
 		$tamara_order = $this->build_tamara_order();
 		return new CreateCheckoutRequest( $tamara_order );
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
+	 */
 	public function build_tamara_order(): Order {
 		$wc_order = $this->wc_order;
 		$order = new Order();
@@ -61,7 +71,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setLocale( get_locale() );
 		$order->setCurrency( $wc_order->get_currency() );
 		$order->setTotalAmount(
-			General_Helper::buld_tamara_money(
+			General_Helper::build_tamara_money(
 				$wc_order->get_total(),
 				$wc_order->get_currency()
 			)
@@ -82,13 +92,13 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		);
 		$order->setDescription( 'Use Tamara Gateway with WooCommerce' );
 		$order->setTaxAmount(
-			General_Helper::buld_tamara_money(
+			General_Helper::build_tamara_money(
 				$wc_order->get_total_tax(),
 				$wc_order->get_currency()
 			)
 		);
 		$order->setShippingAmount(
-			General_Helper::buld_tamara_money(
+			General_Helper::build_tamara_money(
 				$wc_order->get_shipping_total(),
 				$wc_order->get_currency()
 			)
@@ -98,7 +108,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setDiscount(
 			new Discount(
 				$used_coupons,
-				General_Helper::buld_tamara_money(
+				General_Helper::build_tamara_money(
 					$wc_order->get_discount_total(),
 					$wc_order->get_currency()
 				)
@@ -142,6 +152,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 * @param $wc_order
 	 *
 	 * @return Consumer
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function populate_tamara_consumer( $wc_order ): Consumer {
 		$wc_billing_address = $wc_order->get_address( 'billing' );
@@ -168,10 +179,11 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 * @param  WC_Order  $wc_order
 	 *
 	 * @return \Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function populate_tamara_order_items( WC_Order $wc_order ): OrderItemCollection {
 		$tamara_wc_order = new Tamara_WC_Order( $wc_order );
-		return $tamara_wc_order->build_tamara_order_items();
+		return $tamara_wc_order->build_tamara_order_items( $wc_order );
 	}
 
 	/**
