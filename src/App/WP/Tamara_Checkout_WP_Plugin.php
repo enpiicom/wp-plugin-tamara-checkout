@@ -8,19 +8,18 @@ use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
+use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
-use Tamara_Checkout\App\Queries\Build_Tamara_Order_Query;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Payment_Gateways\Single_Checkout_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
@@ -142,7 +141,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function tamara_gateway_register_webhook(): void {
-		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( 'low' );
+		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
 	}
 
 	public function tamara_gateway_register_wp_app_routes(): void {
@@ -503,6 +502,73 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
+	 * Tamara Capture Payment
+	 *
+	 * @param $wc_order_id
+	 * @param $status_from
+	 * @param $status_to
+	 * @param $wc_order
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
+		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->status_to_capture_tamara_payment;
+
+		if ( $to_capture_status !== 'wc-' . $status_to ) {
+			return;
+		}
+
+		Capture_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_order_id' => $wc_order_id,
+				'status_from' => $status_from,
+				'status_to' => $status_to,
+				'to_capture_status' => $to_capture_status,
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
+	 * Tamara Cancel Order
+	 *
+	 * @param $wc_order_id
+	 * @param $status_from
+	 * @param $status_to
+	 * @param $wc_order
+	 *
+	 * @throws \Exception
+	 */
+	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
+		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->status_to_cancel_tamara_payment;
+
+		if ( $to_cancel_status !== 'wc-' . $status_to ) {
+			return;
+		}
+
+		Cancel_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_order_id'      => $wc_order_id,
+				'status_from'      => $status_from,
+				'status_to'        => $status_to,
+				'to_cancel_status' => $to_cancel_status,
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function refund_tamara_order_if_possible( $wc_refund, $args ) {
+		Refund_Tamara_Order_If_Possible_Job::dispatch(
+			[
+				'wc_refund' => $wc_refund,
+				'wc_order_id' => $args['order_id'],
+			]
+		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+	}
+
+	/**
 	 *
 	 * @return void
 	 */
@@ -527,6 +593,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
 
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
+
+			add_action( 'woocommerce_order_status_changed', [ $this, 'capture_tamara_order_if_possible' ], 10, 4 );
+
+			add_action( 'woocommerce_order_status_changed', [ $this, 'cancel_tamara_order_if_possible' ], 10, 4 );
+
+			add_action( 'woocommerce_create_refund', [ $this, 'refund_tamara_order_if_possible' ], 10, 2 );
 		}
 	}
 }
