@@ -6,9 +6,7 @@ namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Log;
-use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\WP_Attribute_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -18,12 +16,13 @@ use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\CancelOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
-use Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse;
-use Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderResponse;
 
 /**
  * A wrapper of Tamara Client
@@ -95,7 +94,7 @@ class Tamara_Client {
 
 	/**
 	 *
-	 * @param GetOrderRequest $get_order_request
+	 * @param GetOrderRequest $client_request
 	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderResponse
 	 * @throws Exception
 	 */
@@ -114,6 +113,16 @@ class Tamara_Client {
 
 	/**
 	 *
+	 * @param GetOrderByReferenceIdRequest $client_request
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
+	 * @throws Exception
+	 */
+	public function get_order_by_reference_id( GetOrderByReferenceIdRequest $client_request ) {
+		return $this->perform_remote_request( 'getOrderByReferenceId', $client_request );
+	}
+
+	/**
+	 *
 	 * @param AuthoriseOrderRequest $client_request
 	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse
 	 * @throws Exception
@@ -124,6 +133,36 @@ class Tamara_Client {
 
 	public function capture_order( CaptureRequest $client_request ) {
 		return $this->perform_remote_request( 'capture', $client_request );
+	}
+
+	/**
+	 *
+	 * @param CaptureRequest $client_request
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Payment\CaptureResponse
+	 * @throws Exception
+	 */
+	public function capture( CaptureRequest $client_request ) {
+		return $this->perform_remote_request( 'capture', $client_request );
+	}
+
+	/**
+	 *
+	 * @param CancelOrderRequest $client_request
+	 *
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Payment\CancelResponse
+	 */
+	public function cancel_order( CancelOrderRequest $client_request ) {
+		return $this->perform_remote_request( 'cancelOrder', $client_request );
+	}
+
+	/**
+	 *
+	 * @param  \Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest  $client_request
+	 *
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Payment\RefundResponse
+	 */
+	public function refund( RefundRequest $client_request ) {
+		return $this->perform_remote_request( 'refund', $client_request );
 	}
 
 	protected function define_working_mode(): void {

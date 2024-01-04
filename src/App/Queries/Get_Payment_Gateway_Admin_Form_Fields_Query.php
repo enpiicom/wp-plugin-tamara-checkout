@@ -6,6 +6,7 @@ namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
+use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
@@ -380,13 +381,13 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 
 	protected function handle_working_mode_fields_display(): void {
 		wp_register_script(
-			'tamara-custom-admin-js',
+			'tamara-custom-admin',
 			'',
 			[],
 			Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(),
 			true
 		);
-		wp_enqueue_script( 'tamara-custom-admin-js' );
+		wp_enqueue_script( 'tamara-custom-admin' );
 
 		$js_script = <<<JS_SCRIPT
 			window.addEventListener('load', function() {
@@ -453,8 +454,9 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
             }
         }
 JS_SCRIPT;
-
-		wp_add_inline_script( 'tamara-custom-admin-js', $js_script, 'before' );
+		if ( General_Helper::is_tamara_admin_settings_screen() ) {
+			wp_add_inline_script( 'tamara-custom-admin', $js_script, 'before' );
+		}
 	}
 
 	protected function get_cart_widget_positions(): array {

@@ -8,14 +8,13 @@ use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
-use Tamara_Checkout\Deps\Tamara\Model\Money;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Address;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Consumer;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Discount;
 use Tamara_Checkout\Deps\Tamara\Model\Order\MerchantUrl;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Order;
-use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItem;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use WC_Order;
@@ -40,6 +39,9 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 */
 	protected $instalments = 0;
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
 	public function __construct( WC_Order $wc_order, string $payment_type, int $instalments = 0 ) {
 		$this->wc_order = $wc_order;
 		$this->payment_type = $payment_type;
@@ -50,22 +52,34 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		}
 	}
 
-	public function handle() {
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function handle(): CreateCheckoutRequest {
 		$tamara_order = $this->build_tamara_order();
 		return new CreateCheckoutRequest( $tamara_order );
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws \Exception
+	 */
 	public function build_tamara_order(): Order {
 		$wc_order = $this->wc_order;
 		$order = new Order();
 		$order->setOrderReferenceId( (string) $wc_order->get_id() );
 		$order->setLocale( get_locale() );
 		$order->setCurrency( $wc_order->get_currency() );
-		$order->setTotalAmount( new Money( General_Helper::format_tamara_number( $wc_order->get_total(), $order->getCurrency() ), $order->getCurrency() ) );
-			$order->setCountryCode(
-				! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
-				: General_Helper::get_current_country_code()
-			);
+		$order->setTotalAmount(
+			General_Helper::build_tamara_money(
+				$wc_order->get_total(),
+				$wc_order->get_currency()
+			)
+		);
+		$order->setCountryCode(
+			! empty( $wc_order->get_billing_country() ) ? $wc_order->get_billing_country()
+			: General_Helper::get_current_country_code()
+		);
 		$order->setPaymentType( $this->payment_type );
 		$order->setInstalments( $this->instalments );
 		$order->setPlatform(
@@ -78,18 +92,15 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		);
 		$order->setDescription( 'Use Tamara Gateway with WooCommerce' );
 		$order->setTaxAmount(
-			new Money(
-				General_Helper::format_tamara_number(
-					$wc_order->get_total_tax(),
-					$order->getCurrency()
-				),
-				$order->getCurrency()
+			General_Helper::build_tamara_money(
+				$wc_order->get_total_tax(),
+				$wc_order->get_currency()
 			)
 		);
 		$order->setShippingAmount(
-			new Money(
-				General_Helper::format_tamara_number( $wc_order->get_shipping_total(), $order->getCurrency() ),
-				$order->getCurrency()
+			General_Helper::build_tamara_money(
+				$wc_order->get_shipping_total(),
+				$wc_order->get_currency()
 			)
 		);
 
@@ -97,12 +108,9 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 		$order->setDiscount(
 			new Discount(
 				$used_coupons,
-				new Money(
-					General_Helper::format_tamara_number(
-						$wc_order->get_discount_total(),
-						$order->getCurrency()
-					),
-					$order->getCurrency()
+				General_Helper::build_tamara_money(
+					$wc_order->get_discount_total(),
+					$wc_order->get_currency()
 				)
 			)
 		);
@@ -144,6 +152,7 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 * @param $wc_order
 	 *
 	 * @return Consumer
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function populate_tamara_consumer( $wc_order ): Consumer {
 		$wc_billing_address = $wc_order->get_address( 'billing' );
@@ -170,135 +179,11 @@ class Build_Tamara_Create_Checkout_Request_Query extends Base_Query {
 	 * @param  WC_Order  $wc_order
 	 *
 	 * @return \Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	protected function populate_tamara_order_items( WC_Order $wc_order ): OrderItemCollection {
-		$wc_order_items = $wc_order->get_items();
-		$order_item_collection = new OrderItemCollection();
-
-		foreach ( $wc_order_items as $item_id => $wc_order_item ) {
-			$order_item = new OrderItem();
-			/** @var \WC_Order_Item_Product $wc_order_item */
-			/** @var \WC_Product_Simple $wc_order_item_product */
-			$wc_order_item_product = $wc_order_item->get_product();
-
-			if ( $wc_order_item_product ) {
-				$wc_order_item_name = wp_strip_all_tags( $wc_order_item->get_name() );
-				$wc_order_item_quantity = $wc_order_item->get_quantity();
-				$wc_order_item_sku = empty( $wc_order_item_product->get_sku() ) ? (string) $item_id : $wc_order_item_product->get_sku();
-				$wc_order_item_total_tax = $wc_order_item->get_total_tax();
-				$wc_order_item_total = $wc_order_item->get_total() + $wc_order_item_total_tax;
-
-				$wc_order_item_categories = wp_strip_all_tags(
-					wc_get_product_category_list( $wc_order_item_product->get_id() )
-				);
-				$wc_order_item_categories = empty( $wc_order_item_categories ) ? 'N/A' : $wc_order_item_categories;
-
-				$wc_order_item_regular_price = $wc_order_item_product->get_regular_price();
-				$wc_order_item_sale_price = $wc_order_item_product->get_sale_price();
-				$item_price = $wc_order_item_sale_price ?? $wc_order_item_regular_price;
-				$wc_order_item_discount_amount = (int) $item_price * $wc_order_item_quantity
-												- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
-				$order_item->setName( $wc_order_item_name );
-				$order_item->setQuantity( $wc_order_item_quantity );
-				$order_item->setUnitPrice(
-					new Money(
-						General_Helper::format_tamara_number(
-							$item_price,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setType( $wc_order_item_categories );
-				$order_item->setSku( $wc_order_item_sku );
-				$order_item->setTotalAmount(
-					new Money(
-						General_Helper::format_tamara_number(
-							$wc_order_item_total,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setTaxAmount(
-					new Money(
-						General_Helper::format_tamara_number(
-							$wc_order_item_total_tax,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setDiscountAmount(
-					new Money(
-						General_Helper::format_tamara_number(
-							$wc_order_item_discount_amount,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setReferenceId( (string) $item_id );
-				$order_item->setImageUrl( wp_get_attachment_url( $wc_order_item_product->get_image_id() ) );
-			} else {
-				$wc_order_item_product = $wc_order_item->get_data();
-				$wc_order_item_name = ! empty( $wc_order_item_product['name'] ) ? wp_strip_all_tags( $wc_order_item_product['name'] ) : 'N/A';
-				$wc_order_item_quantity = $wc_order_item_product['quantity'] ?? 1;
-				$wc_order_item_sku = empty( $wc_order_item_product['sku'] ) ? (string) $item_id : $wc_order_item_product['sku'];
-				$wc_order_item_total_tax = $wc_order_item_product['total_tax'] ?? 0;
-				$wc_order_item_total = $wc_order_item_product['total'] ?? 0;
-				$wc_order_item_categories = $wc_order_item_product['category'] ?? 'N/A';
-				$item_price = $wc_order_item_product['subtotal'] ?? 0;
-				$wc_order_item_discount_amount = (int) $item_price * $wc_order_item_quantity
-												- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
-				$order_item->setName( $wc_order_item_name );
-				$order_item->setQuantity( $wc_order_item_quantity );
-				$order_item->setUnitPrice(
-					new Money(
-						General_Helper::format_tamara_number(
-							$item_price,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setType( $wc_order_item_categories );
-				$order_item->setSku( $wc_order_item_sku );
-				$order_item->setTotalAmount(
-					new Money(
-						General_Helper::format_tamara_number(
-							$wc_order_item_total,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setTaxAmount(
-					new Money(
-						General_Helper::format_tamara_number(
-							$wc_order_item_total_tax,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setDiscountAmount(
-					new Money(
-						General_Helper::format_tamara_number(
-							$wc_order_item_discount_amount,
-							$wc_order->get_currency()
-						),
-						$wc_order->get_currency()
-					)
-				);
-				$order_item->setReferenceId( $item_id );
-				$order_item->setImageUrl( 'N/A' );
-			}
-
-			$order_item_collection->append( $order_item );
-		}
-
-		return $order_item_collection;
+		$tamara_wc_order = new Tamara_WC_Order( $wc_order );
+		return $tamara_wc_order->build_tamara_order_items( $wc_order );
 	}
 
 	/**
