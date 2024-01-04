@@ -33,7 +33,6 @@ class Process_Tamara_Order_Approved_Job extends Base_Job {
 	 * @throws \Exception
 	 */
 	public function handle() {
-		$tamara_order_id =
 		$get_order_request = new GetOrderRequest( $this->tamara_order_id );
 		/** @var \Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderResponse $tamara_client_response */
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order( $get_order_request );

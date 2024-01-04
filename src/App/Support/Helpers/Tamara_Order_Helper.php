@@ -60,12 +60,12 @@ class Tamara_Order_Helper {
 	/**
 	 * Get Tamara shipping information
 	 */
-	public static function get_tamara_shipping_info() : ShippingInfo {
+	public static function get_tamara_shipping_info(): ShippingInfo {
 		$shipped_at = new DateTimeImmutable();
 		$shipping_company = 'N/A';
 		$tracking_number = 'N/A';
 		$tracking_url = 'N/A';
 
-		return new ShippingInfo($shipped_at, $shipping_company, $tracking_number, $tracking_url);
+		return new ShippingInfo( $shipped_at, $shipping_company, $tracking_number, $tracking_url );
 	}
 }

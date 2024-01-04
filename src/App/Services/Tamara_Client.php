@@ -107,7 +107,7 @@ class Tamara_Client {
 	 *
 	 * @return string | \Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
 	 */
-	public function get_order_by_wc_order_id( $client_request) {
+	public function get_order_by_wc_order_id( $client_request ) {
 		return $this->perform_remote_request( 'GetOrderByReferenceIdRequest', $client_request );
 	}
 

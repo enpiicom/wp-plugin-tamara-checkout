@@ -37,11 +37,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
 
 	public const TAMARA_AUTHORISED_STATUS = 'authorised',
-				 TAMARA_CANCELED_STATUS = 'canceled',
-				 TAMARA_PARTIALLY_CAPTURED_STATUS = 'partially_captured',
-				 TAMARA_FULLY_CAPTURED_STATUS = 'fully_captured',
-				 TAMARA_PARTIALLY_REFUNDED_STATUS = 'partially_refunded',
-				 TAMARA_FULLY_REFUNDED_STATUS = 'fully_refunded';
+				TAMARA_CANCELED_STATUS = 'canceled',
+				TAMARA_PARTIALLY_CAPTURED_STATUS = 'partially_captured',
+				TAMARA_FULLY_CAPTURED_STATUS = 'fully_captured',
+				TAMARA_PARTIALLY_REFUNDED_STATUS = 'partially_refunded',
+				TAMARA_FULLY_REFUNDED_STATUS = 'fully_refunded';
 
 	const TAMARA_CHECKOUT = 'tamara-checkout';
 
@@ -160,7 +160,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		Register_Tamara_WP_Api_Routes_Job::execute_now();
 	}
 
-	public function tamara_capture_payment($wc_order_id, $from_status, $to_status, $wc_order): void {
+	public function tamara_capture_payment( $wc_order_id, $from_status, $to_status, $wc_order ): void {
 		Process_Tamara_Capture_Job::dispatch(
 			$wc_order_id,
 			$from_status,
@@ -641,7 +641,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
 
-			add_action( 'woocommerce_order_status_changed', [$this, 'tamara_capture_payment'], 10, 4);
+			add_action( 'woocommerce_order_status_changed', [ $this, 'tamara_capture_payment' ], 10, 4 );
 
 			add_action( 'woocommerce_order_status_changed', [ $this, 'capture_tamara_order_if_possible' ], 10, 4 );
 

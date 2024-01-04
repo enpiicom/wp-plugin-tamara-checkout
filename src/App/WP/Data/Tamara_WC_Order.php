@@ -146,7 +146,8 @@ class Tamara_WC_Order {
 		return $tamara_client_response;
 	}
 
-	public function build_tamara_order_items( $wc_order ): OrderItemCollection {
+	public function build_tamara_order_items( $wc_order = null ): OrderItemCollection {
+		$wc_order = empty( $wc_order ) ? $this->wc_order : $wc_order;
 		$wc_order_items = $wc_order->get_items();
 		$order_item_collection = new OrderItemCollection();
 
@@ -207,7 +208,7 @@ class Tamara_WC_Order {
 				$wc_order_item_product = $wc_order_item->get_data();
 				$wc_order_item_name = ! empty( $wc_order_item_product['name'] ) ? wp_strip_all_tags( $wc_order_item_product['name'] ) : 'N/A';
 				$wc_order_item_quantity = $wc_order_item_product['quantity'] ?? 1;
-				$wc_order_item_sku = ! empty( $wc_order_item_product['sku'] ) ? $wc_order_item_product['sku'] : (string) $item_id;
+				$wc_order_item_sku = empty( $wc_order_item_product['sku'] ) ? (string) $item_id : $wc_order_item_product['sku'];
 				$wc_order_item_total_tax = $wc_order_item_product['total_tax'] ?? 0;
 				$wc_order_item_total = $wc_order_item_product['total'] ?? 0;
 				$wc_order_item_categories = $wc_order_item_product['category'] ?? 'N/A';
@@ -289,7 +290,7 @@ class Tamara_WC_Order {
 				$wc_order_shipping_amount,
 				$wc_order_tax_amount,
 				$wc_order_discount_amount,
-				$this->build_tamara_order_items( $this->wc_order ),
+				$this->build_tamara_order_items(),
 				$this->build_shipping_info()
 			)
 		);
@@ -300,7 +301,7 @@ class Tamara_WC_Order {
 			$this->wc_order->get_total(),
 			$this->wc_order->get_currency()
 		);
-		$wc_order_items = $this->build_tamara_order_items( $this->wc_order );
+		$wc_order_items = $this->build_tamara_order_items();
 		$wc_order_shipping_amount = General_Helper::build_tamara_money(
 			$this->wc_order->get_shipping_total(),
 			$this->wc_order->get_currency()
