@@ -8,7 +8,6 @@ use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Traits\WP_Attribute_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
@@ -33,7 +32,6 @@ use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
  */
 class Tamara_Client {
 	use Static_Instance_Trait;
-	use WP_Attribute_Trait;
 
 	protected $working_mode;
 	protected $api_url;

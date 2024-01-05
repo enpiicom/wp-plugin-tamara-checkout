@@ -20,7 +20,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 
 	public function __construct( $settings ) {
 		$this->current_settings = $settings;
-		$this->working_mode = $this->current_settings['environment'] ?? 'live_mode';
+		$this->working_mode = !empty( $this->current_settings['environment'] ) ? $this->current_settings['environment'] : 'live_mode';
 	}
 
 	public function handle(): array {
@@ -337,11 +337,11 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                     <div class="tamara-settings-help-texts__content">
                         <ul>
                             <li>' . $this->_t( 'Please make sure the Tamara payment status of the order is <strong>captured</strong> before making a refund.' ) . '</li>
-                            <li>' . $this->_t( 'You can use the shortcode with attributes to show Tamara product widget on custom pages e.g. <strong>[tamara_show_popup price="99" currency="SAR" language="en"].</strong>' ) . '</li>
+                            <li>' . $this->_t( 'You can use the shortcode with attributes to show Tamara product widget on custom pages e.g. <strong>[tamara_show_popup price="600" currency="SAR" language="en"].</strong>' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment success URL, you can use action <strong>after_tamara_success</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions.' ) . '</li>
-                            <li>' . $this->_t( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file in your upload directory.' ) . '</li>
+                            <li>' . $this->_t( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>
                         </ul>
                     </div>
                 </div>';
