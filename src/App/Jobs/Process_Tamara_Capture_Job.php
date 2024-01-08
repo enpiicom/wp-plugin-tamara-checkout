@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\Tamara_Order_Helper;
-use Tamara_Checkout\App\Support\Traits\Trans_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 use Tamara_Checkout\Deps\Tamara\Model\Payment\Capture;
@@ -18,7 +18,7 @@ use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 
 class Process_Tamara_Capture_Job extends Base_Job {
 	use Dispatchable;
-	use Trans_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $wc_order_id;
 	protected $from_status;

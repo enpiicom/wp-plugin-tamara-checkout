@@ -8,6 +8,7 @@ use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
@@ -32,6 +33,7 @@ use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
  */
 class Tamara_Client {
 	use Static_Instance_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $working_mode;
 	protected $api_url;
@@ -254,16 +256,5 @@ class Tamara_Client {
 		}
 
 		return $logger;
-	}
-
-	/**
-	 * @param $untranslated_text
-	 *
-	 * @return string
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	protected function _t( $untranslated_text ): string {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 }

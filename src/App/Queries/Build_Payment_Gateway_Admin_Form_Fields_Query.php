@@ -7,13 +7,13 @@ namespace Tamara_Checkout\App\Queries;
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Traits\Trans_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
-class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
+class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	use Executable_Trait;
-	use Trans_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $current_settings;
 	protected $working_mode;
@@ -190,7 +190,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'tamara_cancel_order' => [
 				'title' => $this->_t( 'Order status that trigger Tamara cancel process for an order' ),
 				'type' => 'select',
-				'options' => wc_get_order_statuses()['wc-cancelled'],
+				'options' => wc_get_order_statuses(),
 				'description' => $this->_t( 'When you update an order to this status it would connect to Tamara API to trigger the Cancel payment process on Tamara.' ),
 			],
 			'tamara_payment_capture' => [
