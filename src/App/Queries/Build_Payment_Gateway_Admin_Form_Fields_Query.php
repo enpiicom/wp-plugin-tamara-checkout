@@ -20,7 +20,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 
 	public function __construct( $settings ) {
 		$this->current_settings = $settings;
-		$this->working_mode = !empty( $this->current_settings['environment'] ) ? $this->current_settings['environment'] : 'live_mode';
+		$this->working_mode = ! empty( $this->current_settings['environment'] ) ? $this->current_settings['environment'] : 'live_mode';
 	}
 
 	public function handle(): array {

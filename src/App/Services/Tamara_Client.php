@@ -53,7 +53,7 @@ class Tamara_Client {
 		$settings = [],
 		$api_request_timeout = 30
 	) {
-		$this->init_tamara_client($api_token, $api_url, $settings, $api_request_timeout);
+		$this->init_tamara_client( $api_token, $api_url, $settings, $api_request_timeout );
 	}
 
 	public function get_working_mode(): string {
@@ -73,7 +73,7 @@ class Tamara_Client {
 		$this->api_token = $api_token;
 		$this->api_url = $api_url;
 		$this->api_request_timeout = $api_request_timeout;
-		$this->settings = empty($settings) ? null : ( $settings instanceof Tamara_WC_Payment_Gateway_Settings_VO ? $settings : new Tamara_WC_Payment_Gateway_Settings_VO( $settings ) );
+		$this->settings = empty( $settings ) ? null : ( $settings instanceof Tamara_WC_Payment_Gateway_Settings_VO ? $settings : new Tamara_WC_Payment_Gateway_Settings_VO( $settings ) );
 
 		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
 		$this->api_client = $client;
@@ -241,7 +241,7 @@ class Tamara_Client {
 	}
 
 	protected function build_logger() {
-		$settings = empty($this->settings) ? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings() : $this->settings;
+		$settings = empty( $this->settings ) ? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings() : $this->settings;
 
 		if ( $settings->custom_log_message_enabled ) {
 			/** @var \Illuminate\Log\Logger $logger */

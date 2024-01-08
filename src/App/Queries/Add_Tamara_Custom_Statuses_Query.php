@@ -14,8 +14,7 @@ class Add_Tamara_Custom_Statuses_Query extends Base_Query {
 
 	protected $order_statuses;
 
-	public function __construct(array $order_statuses)
-	{
+	public function __construct( array $order_statuses ) {
 		$this->order_statuses = $order_statuses;
 	}
 
