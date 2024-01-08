@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
-use Enpii_Base\Foundation\Bus\Dispatchable_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -13,9 +13,10 @@ use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use WC_Payment_Gateway;
 
 class Validate_Admin_Settings_Job extends Base_Job {
-	use Dispatchable_Trait;
+	use Dispatchable;
 
 	protected $plugin;
+	protected $processed_post_data;
 
 	public function __construct( WC_Payment_Gateway $plugin ) {
 		$this->plugin = $plugin;
@@ -27,7 +28,8 @@ class Validate_Admin_Settings_Job extends Base_Job {
 
 		$post_data = $this_plugin->get_post_data();
 		$field_prefix = $this_plugin->plugin_id . $this_plugin->id . '_';
-		$processed_post_data = $this->process_post_data( $post_data );
+		$this->processed_post_data = $this->process_post_data( $post_data );
+		$processed_post_data = $this->processed_post_data;
 
 		// We want to use Laravel validation here instead of using function mentioned in
 		//  parent::get_field_value() to validate
@@ -122,13 +124,13 @@ class Validate_Admin_Settings_Job extends Base_Job {
 		$api_token = $value;
 
 		$tamara_checkout_plugin = Tamara_Checkout_WP_Plugin::wp_app_instance();
-		$tamara_checkout_plugin->get_tamara_client_service()->reinit_tamara_client( $api_token, $api_url );
+		$tamara_checkout_plugin->get_tamara_client_service()->init_tamara_client( $api_token, $api_url, $this->processed_post_data );
 
-		$get_merchant_public_configs_request = new GetPublicConfigsRequest();
-		$get_merchant_public_configs_response = $tamara_checkout_plugin
-			->get_tamara_client_service()->get_api_client()->getMerchantPublicConfigs( $get_merchant_public_configs_request );
+		$tamara_client_response = $tamara_checkout_plugin->get_tamara_client_service()->get_merchant_public_configs( new GetPublicConfigsRequest() );
 
-		if ( ! $get_merchant_public_configs_response->isSuccess() ) {
+		if (
+			! is_object( $tamara_client_response )
+		) {
 			return $fail_callback( sprintf( $tamara_checkout_plugin->_t( '%s is incorrect.' ), ':attribute' ) );
 		}
 

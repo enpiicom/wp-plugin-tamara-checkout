@@ -8,13 +8,15 @@ use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Traits\WP_Attribute_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\CancelOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
@@ -31,23 +33,27 @@ use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
  */
 class Tamara_Client {
 	use Static_Instance_Trait;
-	use WP_Attribute_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $working_mode;
 	protected $api_url;
 	protected $api_token;
 	protected $api_request_timeout;
 
+	/**
+	 * @var null|Tamara_WC_Payment_Gateway_Settings_VO
+	 */
+	protected $settings;
+
 	protected $api_client;
 
-	protected function __construct( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ) {
-		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
-
-		$this->api_token = $api_token;
-		$this->api_url = $api_url;
-		$this->api_request_timeout = $api_request_timeout;
-		$this->api_client = $client;
-		$this->define_working_mode();
+	protected function __construct(
+		$api_token,
+		$api_url = 'https://api.tamara.co',
+		$settings = [],
+		$api_request_timeout = 30
+	) {
+		$this->init_tamara_client( $api_token, $api_url, $settings, $api_request_timeout );
 	}
 
 	public function get_working_mode(): string {
@@ -58,12 +64,20 @@ class Tamara_Client {
 		return $this->api_client;
 	}
 
-	public function reinit_tamara_client( $api_token, $api_url = 'https://api.tamara.co', $api_request_timeout = 30 ): void {
+	public function init_tamara_client(
+		$api_token,
+		$api_url = 'https://api.tamara.co',
+		$settings = [],
+		$api_request_timeout = 30
+	): void {
 		$this->api_token = $api_token;
 		$this->api_url = $api_url;
 		$this->api_request_timeout = $api_request_timeout;
+		$this->settings = empty( $settings ) ? null : ( $settings instanceof Tamara_WC_Payment_Gateway_Settings_VO ? $settings : new Tamara_WC_Payment_Gateway_Settings_VO( $settings ) );
+
 		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
-		static::$instance->api_client = $client;
+		$this->api_client = $client;
+		$this->define_working_mode();
 	}
 
 	/**
@@ -90,6 +104,16 @@ class Tamara_Client {
 		}
 
 		return $create_checkout_response;
+	}
+
+	/**
+	 *
+	 * @param GetPublicConfigsRequest $client_request
+	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Merchant\GetPublicConfigsResponse
+	 * @throws Exception
+	 */
+	public function get_merchant_public_configs( GetPublicConfigsRequest $client_request ) {
+		return $this->perform_remote_request( 'getMerchantPublicConfigs', $client_request );
 	}
 
 	/**
@@ -173,18 +197,7 @@ class Tamara_Client {
 	}
 
 	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
-		if ( Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->custom_log_message_enabled ) {
-			/** @var \Illuminate\Log\Logger $logger */
-			$logger = Log::build(
-				[
-					'driver' => 'single',
-					'path' => Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->custom_log_message,
-				]
-			);
-		} else {
-			$logger = null;
-		}
-
+		$logger = $this->build_logger();
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
 		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
 		return Client::create( $configuration );
@@ -227,14 +240,21 @@ class Tamara_Client {
 		return $error_message;
 	}
 
-	/**
-	 * @param $untranslated_text
-	 *
-	 * @return string
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	protected function _t( $untranslated_text ): string {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
+	protected function build_logger() {
+		$settings = empty( $this->settings ) ? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings() : $this->settings;
+
+		if ( $settings->custom_log_message_enabled ) {
+			/** @var \Illuminate\Log\Logger $logger */
+			$logger = Log::build(
+				[
+					'driver' => 'single',
+					'path' => $settings->custom_log_message,
+				]
+			);
+		} else {
+			$logger = null;
+		}
+
+		return $logger;
 	}
 }

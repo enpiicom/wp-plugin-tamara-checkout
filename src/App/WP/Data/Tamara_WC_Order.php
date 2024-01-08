@@ -7,7 +7,7 @@ namespace Tamara_Checkout\App\WP\Data;
 use DateTimeImmutable;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Traits\Trans_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItem;
 use Tamara_Checkout\Deps\Tamara\Model\Order\OrderItemCollection;
@@ -26,7 +26,7 @@ use WC_Order;
  * @package Tamara_Checkout\App\Services
  */
 class Tamara_WC_Order {
-	use Trans_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $wc_order;
 	protected $wc_refund;

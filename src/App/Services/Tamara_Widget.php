@@ -7,12 +7,12 @@ namespace Tamara_Checkout\App\Services;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
-use Tamara_Checkout\App\Support\Traits\Trans_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Tamara_Widget {
 	use Static_Instance_Trait;
-	use Trans_Trait;
+	use Tamara_Trans_Trait;
 
 	public const DEFAULT_COUNTRY_CODE = 'sa';
 

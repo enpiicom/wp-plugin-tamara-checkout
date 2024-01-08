@@ -5,6 +5,7 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Tamara_Checkout\App\Queries\Process_Payment_With_Tamara_Query;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
@@ -14,6 +15,7 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 	protected $description_ar;
 
 	use Config_Trait;
+	use Tamara_Trans_Trait;
 
 	/**
 	 * @throws \Exception
@@ -41,16 +43,5 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 			$this->payment_type,
 			$this->instalment
 		);
-	}
-
-	/**
-	 * @param $untranslated_text
-	 *
-	 * @return string
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	protected function _t( $untranslated_text ): string {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
-use Enpii_Base\Foundation\Bus\Dispatchable_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Services\Tamara_Client;
@@ -17,7 +17,7 @@ use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse;
 
 class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
-	use Dispatchable_Trait;
+	use Dispatchable;
 	use InteractsWithQueue;
 	use Queueable;
 	use SerializesModels;
@@ -31,7 +31,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	public function handle( Tamara_WC_Payment_Gateway $tamara_gateway_service, Tamara_Client $tamara_client_service ) {
 		// We need to get a refreshed settings from the Payment Gateway
 		$gateway_settings = $tamara_gateway_service->get_settings( true );
-		$tamara_client_service->reinit_tamara_client( $gateway_settings->api_token, $gateway_settings->api_url );
+		$tamara_client_service->init_tamara_client( $gateway_settings->api_token, $gateway_settings->api_url, $gateway_settings );
 
 		$tamara_register_webhook_api_request = new RegisterWebhookRequest(
 			wp_app_route_wp_url( 'wp-api::tamara-webhook' ),
@@ -105,6 +105,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	}
 
 	/**
+	 * webhook_already_registered
 	 * @throws \Exception
 	 */
 	protected function throw_tamara_register_webhook_exception(

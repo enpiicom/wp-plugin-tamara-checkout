@@ -14,7 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
-use Tamara_Checkout\App\Support\Traits\Trans_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
@@ -24,7 +24,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	use Queueable;
 	use SerializesModels;
 	use Config_Trait;
-	use Trans_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $wc_refund;
 	protected $wc_order_id;

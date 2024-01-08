@@ -7,18 +7,20 @@ namespace Tamara_Checkout\App\Queries;
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
-class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
+class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	use Executable_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $current_settings;
 	protected $working_mode;
 
 	public function __construct( $settings ) {
 		$this->current_settings = $settings;
-		$this->working_mode = $this->current_settings['environment'] ?? 'live_mode';
+		$this->working_mode = ! empty( $this->current_settings['environment'] ) ? $this->current_settings['environment'] : 'live_mode';
 	}
 
 	public function handle(): array {
@@ -54,6 +56,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_api_url' => [
 				'title' => $this->_t( 'Live API URL' ),
 				'type' => 'text',
+				'class' => 'live-field',
 				'description' => $this->_t( 'The Tamara Live API URL <span class="tamara-highlight">(https://api.tamara.co)</span>' ),
 				'default' => Tamara_WC_Payment_Gateway::LIVE_API_URL,
 				'custom_attributes' => [
@@ -65,6 +68,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_api_token' => [
 				'title' => $this->_t( 'Live API Token (Merchant Token)' ),
 				'type' => 'textarea',
+				'class' => 'live-field',
+				'css' => 'height: 200px;',
 				'description' => $this->_t( 'Get your API token from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -73,6 +78,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_notification_token' => [
 				'title' => $this->_t( 'Live Notification Key' ),
 				'type' => 'text',
+				'class' => 'live-field',
 				'description' => $this->_t( 'Get your Notification key from Tamara.' ),
 				'default' => '',
 				'custom_attributes' => [
@@ -82,6 +88,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'live_public_key' => [
 				'title' => $this->_t( 'Live Public Key' ),
 				'type' => 'text',
+				'class' => 'live-field',
 				'description' => $this->_t( 'Get your Public key from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -90,6 +97,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_api_url' => [
 				'title' => $this->_t( 'Sandbox API URL' ),
 				'type' => 'text',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'The Tamara Sandbox API URL <span class="tamara-highlight">(https://api-sandbox.tamara.co)</span>' ),
 				'default' => Tamara_WC_Payment_Gateway::SANDBOX_API_URL,
 				'custom_attributes' => [
@@ -100,6 +108,8 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_api_token' => [
 				'title' => $this->_t( 'Sandbox API Token (Merchant Token)' ),
 				'type' => 'textarea',
+				'css' => 'height: 200px;',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'Get your API token for testing from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -108,6 +118,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_notification_token' => [
 				'title' => $this->_t( 'Sandbox Notification Key' ),
 				'type' => 'text',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'Get your Notification key for testing from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -116,6 +127,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'sandbox_public_key' => [
 				'title' => $this->_t( 'Sandbox Public Key' ),
 				'type' => 'text',
+				'class' => 'sandbox-field',
 				'description' => $this->_t( 'Get your Public key for testing from Tamara.' ),
 				'custom_attributes' => [
 					'required' => 'required',
@@ -178,7 +190,7 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'tamara_cancel_order' => [
 				'title' => $this->_t( 'Order status that trigger Tamara cancel process for an order' ),
 				'type' => 'select',
-				'options' => wc_get_order_statuses()['wc-cancelled'],
+				'options' => wc_get_order_statuses(),
 				'description' => $this->_t( 'When you update an order to this status it would connect to Tamara API to trigger the Cancel payment process on Tamara.' ),
 			],
 			'tamara_payment_capture' => [
@@ -325,19 +337,14 @@ class Get_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                     <div class="tamara-settings-help-texts__content">
                         <ul>
                             <li>' . $this->_t( 'Please make sure the Tamara payment status of the order is <strong>captured</strong> before making a refund.' ) . '</li>
-                            <li>' . $this->_t( 'You can use the shortcode with attributes to show Tamara product widget on custom pages e.g. <strong>[tamara_show_popup price="99" currency="SAR" language="en"].</strong>' ) . '</li>
+                            <li>' . $this->_t( 'You can use the shortcode with attributes to show Tamara product widget on custom pages e.g. <strong>[tamara_show_popup price="600" currency="SAR" language="en"].</strong>' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment success URL, you can use action <strong>after_tamara_success</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions.' ) . '</li>
-                            <li>' . $this->_t( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file in your upload directory.' ) . '</li>
+                            <li>' . $this->_t( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>
                         </ul>
                     </div>
                 </div>';
-	}
-
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	protected function _t( $untranslated_text ) {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
 	}
 
 	protected function get_webhook_id(): string {
