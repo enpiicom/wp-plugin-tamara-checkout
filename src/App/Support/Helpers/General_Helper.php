@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Support\Helpers;
 
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class General_Helper {
+
+	const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
+	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
+	const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';
+	const TAMARA_ORDER_STATUS_CANCELED = 'canceled';
+	const TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+	const TAMARA_ORDER_STATUS_REFUNDED = 'fully_refunded';
 
 	/**
 	 * Get store's country code
@@ -29,7 +39,7 @@ class General_Helper {
 	 * @throws \Exception
 	 */
 	public static function convert_message( $tamara_message ): string {
-		return static::get_error_map()[ $tamara_message ] ?
+		return ! empty( static::get_error_map()[ $tamara_message ] ) ?
 			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( static::get_error_map()[ $tamara_message ] ) :
 			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
 	}
@@ -50,6 +60,7 @@ class General_Helper {
 			'shipping_address_invalid_phone_number' => 'Invalid Shipping Address Phone Number.',
 			'total_amount_invalid_limit' => 'The grand total of order is over/under limit of Tamara.',
 			'currency_unsupported' => 'We do not support cross currencies. Please select the correct currency for your country.',
+			'not_supported_delivery_country' => 'We do not support your delivery country.',
 		];
 	}
 
@@ -141,20 +152,34 @@ class General_Helper {
 		return false;
 	}
 
-	public static function get_current_language() {
-		return substr( get_locale(), 0, 2 ) ?? 'en';
-	}
-
 	/**
 	 * Format the amount of money for Tamara SDK
 	 *
 	 * @param $amount
+	 * @param  string  $currency
 	 *
 	 * @return float
 	 */
 	public static function format_tamara_number( $amount, $currency = 'SAR' ): float {
 		$decimal_digits = static::get_currency_decimal_digits_mappings()[ strtoupper( $currency ) ] ?? 2;
 		return floatval( number_format( floatval( $amount ), $decimal_digits, '.', '' ) );
+	}
+
+	/**
+	 * Build the Money Object for Tamara API
+	 *
+	 * @param mixed $amount
+	 * @param string $currency
+	 * @return Money
+	 */
+	public static function build_tamara_money( $amount, $currency = 'SAR' ): Money {
+		return new Money(
+			static::format_tamara_number(
+				$amount,
+				$currency
+			),
+			$currency
+		);
 	}
 
 	/**
@@ -169,11 +194,60 @@ class General_Helper {
 	}
 
 	/**
+	 * Check if current screen is Tamara Admin Settings page
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_admin_settings_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['page'] === 'wc-settings' )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['tab'] === 'checkout' )
+	             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& ( $_GET['section'] === Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID ) );
+	}
+
+	/**
+	 * Check if current screen is WC shop order page
+	 *
+	 * @return bool
+	 */
+	public static function is_shop_order_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
+	}
+
+	/**
+	 * @return string|void
+	 */
+	public static function get_tamara_admin_settings_section_url() {
+		if ( version_compare( WC()->version, '2.6', '>=' ) ) {
+			$section_slug = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
+		} else {
+			$section_slug = strtolower( Tamara_WC_Payment_Gateway::class );
+		}
+
+		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
+	}
+
+	public static function is_tamara_gateway( $payment_method ): bool {
+		return strpos(
+			$payment_method,
+			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
+		) === 0;
+	}
+
+	public static function is_live_mode(): bool {
+		return ! ! Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings()->is_live_mode;
+	}
+
+	/**
 	 * Handle Tamara log message
 	 *
 	 * @param $message
 	 */
-
 	public static function log_message( $message ): void {
 		$tamara_gateway_service = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service();
 		$gateway_settings = $tamara_gateway_service->get_settings( true );

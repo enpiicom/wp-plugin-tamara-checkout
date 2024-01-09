@@ -1,0 +1,79 @@
+.tamara-gateway-description, .woocommerce-checkout #payment .tamara-gateway-description, .woocommerce-checkout #payment div.payment_box {
+  overflow: auto;
+
+  p.tamara-gateway-description__default {
+    text-align: left;
+    margin: 10px 0;
+  }
+
+  &__table {
+    &__head td span {
+      font-weight: bold;
+    }
+
+    &__icon--first, &__icon--second, &__icon--third {
+      background-size: auto;
+      background-repeat: no-repeat;
+      background-position: left;
+      background-origin: content-box;
+    }
+
+    &__icon--first {
+      background-image: url('../img/id-card.svg');
+    }
+
+    &__icon--second {
+      background-image: url('../img/order-box.svg');
+    }
+
+    &__icon--third {
+      background-image: url('../img/phone.svg');
+    }
+  }
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+    margin: 0.75rem 0;
+    padding: 0.5rem;
+    border: none;
+
+    td {
+      font-size: 11px;
+      padding: 0.5rem;
+      border: none;
+      text-align: left;
+      line-height: 18px;
+      vertical-align: top;
+    }
+
+    td.tamara-gateway-description__table__icon--first,
+    td.tamara-gateway-description__table__icon--second,
+    td.tamara-gateway-description__table__icon--third {
+      padding: 1.5rem 0.5rem;
+    }
+  }
+}
+
+.woocommerce-checkout #payment ul.payment_methods > li > label[for=payment_method_tamara-gateway-pay-by-instalments],
+.woocommerce-checkout #payment ul.payment_methods > li > label[for=payment_method_tamara-gateway] {
+  flex-wrap: nowrap;
+}
+
+html[dir='rtl'] body {
+  .tamara-gateway-description, .woocommerce-checkout #payment .tamara-gateway-description {
+    &__table {
+      &__icon--first, &__icon--second, &__icon--third {
+        background-position: right !important;
+      }
+    }
+
+    table td {
+      text-align: right !important;
+    }
+  }
+
+  .tamara-gateway-description p.tamara-gateway-description__default, .woocommerce-checkout #payment .tamara-gateway-description p.tamara-gateway-description__default {
+    text-align: right;
+  }
+}

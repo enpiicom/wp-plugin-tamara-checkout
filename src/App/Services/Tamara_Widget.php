@@ -6,10 +6,13 @@ namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Tamara_Widget {
 	use Static_Instance_Trait;
+	use Tamara_Trans_Trait;
 
 	public const DEFAULT_COUNTRY_CODE = 'sa';
 
@@ -46,19 +49,27 @@ JS_SCRIPT;
 		wp_add_inline_script( $js_url_handle_id, $js_script, 'before' );
 	}
 
-	public function get_widget_js_url() {
+	public function get_widget_js_url(): string {
 		return $this->is_live_mode ?
 			'//cdn.tamara.co/widget-v2/tamara-widget.js' :
 			'//cdn-sandbox.tamara.co/widget-v2/tamara-widget.js';
 	}
 
-	public function get_public_key() {
+	public function get_public_key(): string {
 		return $this->public_key;
 	}
 
 	public function fetch_tamara_pdp_widget( $data = [] ) {
 		extract( (array) $data );
 		$widget_amount = ! empty( $price ) ? $price : General_Helper::get_displayed_product_price();
+
+		if ( is_array( $widget_amount ) ) {
+			foreach ( $widget_amount as $amount ) {
+				$widget_amount = $amount;
+				break;
+			}
+		}
+
 		$widget_inline_type = 2;
 
 		if ( ! $widget_amount ) {
@@ -88,5 +99,78 @@ JS_SCRIPT;
 				'widget_amount' => $widget_amount,
 			]
 		);
+	}
+
+	/**
+	 * @throws \Exception
+	 */
+	public function fetch_tamara_checkout_widget(): string {
+		$widget_inline_type = 3;
+		$cart_amount = WC_Order_Helper::define_total_amount_to_calculate( WC()->cart->total );
+		$description = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
+			'blocks/tamara-widget',
+			[
+				'widget_inline_type' => $widget_inline_type,
+				'widget_amount' => $cart_amount,
+			]
+		);
+
+		$description .= $this->populate_default_description_text_on_checkout();
+		return $description;
+	}
+
+	/**
+	 * @param $order_note
+	 * @param $wc_order
+	 *
+	 * @return \Enpii_Base\App\WP\WP_Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View|mixed
+	 */
+	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
+		if ( empty( $wc_order ) ) {
+			return $order_note;
+		}
+
+		$payment_method = $wc_order->get_payment_method();
+		$view_and_pay_url = $this->get_view_and_pay_url();
+
+		if ( ! empty( $payment_method ) && General_Helper::is_tamara_gateway( $payment_method ) ) {
+			$order_note = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
+				'blocks/tamara-order-received',
+				[
+					'view_and_pay_url' => $view_and_pay_url,
+				]
+			);
+		}
+
+		return $order_note;
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function get_view_and_pay_url(): string {
+		$base_url = General_Helper::is_live_mode() ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
+		$locale_suffix = General_Helper::get_current_language_code() === 'ar' ? '?locale=ar_SA' : '?locale=en_US';
+
+		return $base_url . $locale_suffix;
+	}
+
+
+	/**
+	 * Populate tamara default description text on checkout
+	 *
+	 * @throws \Exception
+	 */
+	protected function populate_default_description_text_on_checkout(): string {
+		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
+		if ( ! General_Helper::is_live_mode() ) {
+			$description .= '<br/>' . $this->_t(
+				'SANDBOX ENABLED.
+							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide
+							</a> for more details.'
+			);
+		}
+
+		return trim( $description );
 	}
 }
