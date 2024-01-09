@@ -8,12 +8,14 @@ use Enpii_Base\Foundation\Shared\Base_Job;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use WC_Payment_Gateway;
 
 class Validate_Admin_Settings_Job extends Base_Job {
 	use Dispatchable;
+	use Tamara_Trans_Trait;
 
 	protected $plugin;
 	protected $processed_post_data;
@@ -55,11 +57,11 @@ class Validate_Admin_Settings_Job extends Base_Job {
 				],
 			],
 			[
-				'required' => sprintf( $this_plugin->_t( '%s: required.' ), ':attribute' ),
+				'required' => sprintf( $this->_t( '%s: required.' ), ':attribute' ),
 			],
 			[
-				'sandbox_api_token' => $this_plugin->_t( 'Sandbox API Token' ),
-				'live_api_token' => $this_plugin->_t( 'Live API Token' ),
+				'sandbox_api_token' => $this->_t( 'Sandbox API Token' ),
+				'live_api_token' => $this->_t( 'Live API Token' ),
 			]
 		);
 
@@ -131,7 +133,7 @@ class Validate_Admin_Settings_Job extends Base_Job {
 		if (
 			! is_object( $tamara_client_response )
 		) {
-			return $fail_callback( sprintf( $tamara_checkout_plugin->_t( '%s is incorrect.' ), ':attribute' ) );
+			return $fail_callback( sprintf( $this->_t( '%s is incorrect.' ), ':attribute' ) );
 		}
 
 		return true;
