@@ -40,18 +40,18 @@ add_action( 'plugins_loaded', function() {
 	$error_message = '';
 	if (! Tamara_Checkout_Helper::check_enpii_base_plugin()) {
 		$error_message .= $error_message ? '<br />' : '';
-		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', TAMARA_TEXT_DOMAIN ), 'Enpii Base');
+		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', \Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin::TEXT_DOMAIN ), 'Enpii Base');
 	}
 
 	if (! Tamara_Checkout_Helper::check_woocommerce_plugin()) {
 		$error_message .= $error_message ? '<br />' : '';
-		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', TAMARA_TEXT_DOMAIN ), 'WooCommerce');
+		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', \Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin::TEXT_DOMAIN ), 'WooCommerce');
 	}
 
 	if ($error_message) {
 		wp_admin_notice(
 			sprintf(
-				__( 'Plugin <strong>%s</strong> is disabled.', TAMARA_TEXT_DOMAIN ),
+				__( 'Plugin <strong>%s</strong> is disabled.', \Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin::TEXT_DOMAIN ),
 				'Tamara Checkout'
 			) . '<br />' . $error_message,
 			[

@@ -117,7 +117,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			add_filter(
 				'woocommerce_gateway_description',
 				[ $this, 'render_payment_types_description_on_checkout' ],
-				9999
+				9999,
+				2
 			);
 			add_filter(
 				'woocommerce_thankyou_order_received_text',
@@ -179,6 +180,15 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function get_text_domain(): string {
 		return static::TEXT_DOMAIN;
+	}
+
+	public function provides() {
+		return [
+			Tamara_Client::class,
+			Tamara_Notification::class,
+			Tamara_Widget::class,
+			Tamara_WC_Payment_Gateway::class,
+		];
 	}
 
 	public function get_tamara_client_service(): Tamara_Client {
@@ -275,8 +285,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	/**
 	 * @throws \Exception
 	 */
-	public function render_payment_types_description_on_checkout(): string {
-		return $this->get_tamara_widget_service()->fetch_tamara_checkout_widget();
+	public function render_payment_types_description_on_checkout( $description, $id ): string {
+		return $this->get_tamara_widget_service()->fetch_tamara_checkout_widget( $description, $id );
 	}
 
 	public function show_tamara_footprint(): void {

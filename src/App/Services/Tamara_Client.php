@@ -82,28 +82,12 @@ class Tamara_Client {
 
 	/**
 	 *
-	 * @param CreateCheckoutRequest $create_checkout_request
-	 * @return string|CreateCheckoutResponse return a string if error faced
+	 * @param CreateCheckoutRequest $client_request
+	 * @return string|CreateCheckoutResponse
 	 * @throws Exception
 	 */
-	public function create_checkout_request( CreateCheckoutRequest $create_checkout_request ) {
-		try {
-			$create_checkout_response = $this->api_client->createCheckout( $create_checkout_request );
-		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
-		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
-		}
-
-		if ( empty( $create_checkout_response ) ) {
-			return $error_message;
-		}
-
-		if ( ! $create_checkout_response->isSuccess() ) {
-			return $this->build_client_response_errors( $create_checkout_response );
-		}
-
-		return $create_checkout_response;
+	public function create_checkout( CreateCheckoutRequest $client_request ) {
+		return $this->perform_remote_request( 'createCheckout', $client_request );
 	}
 
 	/**

@@ -6,6 +6,7 @@ namespace Tamara_Checkout\App\Support;
 
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class Tamara_Checkout_Helper {
 	const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
@@ -28,6 +29,42 @@ class Tamara_Checkout_Helper {
 	}
 
 	/**
+	 * Get country code based on its currency
+	 *
+	 * @return array
+	 */
+	public static function get_currency_country_mappings(): array {
+		return [
+			'SAR' => 'SA',
+			'AED' => 'AE',
+			'KWD' => 'KW',
+			'BHD' => 'BH',
+		];
+	}
+
+	/**
+	 * Get store's country code, upper case
+	 *
+	 * @return string
+	 */
+	public static function get_current_country_code(): string {
+		$store_base_country = ! empty( WC()->countries->get_base_country() ) ? WC()->countries->get_base_country() : Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+		$currency_country_mapping = static::get_currency_country_mappings();
+
+		return $currency_country_mapping[ strtoupper( get_woocommerce_currency() ) ] ?? $store_base_country;
+	}
+
+	/**
+	 * Get store's current language code, lower case
+	 *
+	 * @return string
+	 */
+	public static function get_current_language_code(): string {
+		$lang = substr( get_locale(), 0, 2 ) ?? 'en';
+		return strtolower( $lang );
+	}
+
+	/**
 	 * @return string
 	 */
 	public static function get_admin_settings_section_url() {
@@ -38,5 +75,53 @@ class Tamara_Checkout_Helper {
 		}
 
 		return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
+	}
+
+	public static function is_tamara_payment_option( $payment_option_id ): bool {
+		return strpos( $payment_option_id, 'tamara-gateway' ) === 0;
+	}
+
+	/**
+	 * Currency decimal digits mapping
+	 *
+	 * @return array
+	 */
+	public static function get_currency_decimal_digits_mappings(): array {
+		return [
+			'SAR' => 2,
+			'AED' => 2,
+			'KWD' => 4,
+			'BHD' => 4,
+		];
+	}
+
+	/**
+	 * Format the amount of money for Tamara SDK
+	 *
+	 * @param $amount
+	 * @param  string  $currency
+	 *
+	 * @return float
+	 */
+	public static function format_price_number( $amount, $currency = 'SAR' ): float {
+		$decimal_digits = static::get_currency_decimal_digits_mappings()[ strtoupper( $currency ) ] ?? 2;
+		return floatval( number_format( floatval( $amount ), $decimal_digits, '.', '' ) );
+	}
+
+	/**
+	 * Build the Money Object for Tamara API
+	 *
+	 * @param mixed $amount
+	 * @param string $currency
+	 * @return Money
+	 */
+	public static function build_money_object( $amount, $currency = 'SAR' ): Money {
+		return new Money(
+			static::format_price_number(
+				$amount,
+				$currency
+			),
+			$currency
+		);
 	}
 }

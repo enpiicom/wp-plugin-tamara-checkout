@@ -355,10 +355,6 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                 </div>';
 	}
 
-	protected function get_webhook_id(): string {
-		return 'webhook_id';
-	}
-
 	protected function get_debug_log_download_link(): string {
 		return ! empty( $this->current_settings['custom_log_message'] ) ?
 			wp_app_route_wp_url(
