@@ -10,7 +10,9 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use InvalidArgumentException;
 use Exception;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use WC_Order;
 
 class Process_Payment_With_Tamara_Query extends Base_Query {
@@ -58,13 +60,10 @@ class Process_Payment_With_Tamara_Query extends Base_Query {
 	 * @throws Exception
 	 */
 	public function handle() {
-		$create_checkout_request = Build_Tamara_Create_Checkout_Request_Query::execute_now(
-			$this->wc_order,
-			$this->payment_type,
-			$this->instalments
-		);
+		$tamara_wc_order = new Tamara_WC_Order( $this->wc_order );
+		$create_checkout_request = new CreateCheckoutRequest( $tamara_wc_order->build_tamara_order( $this->payment_type, $this->instalments ) );
 
-		$create_checkout_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->create_checkout_request( $create_checkout_request );
+		$create_checkout_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->create_checkout( $create_checkout_request );
 
 		if ( ! is_object( $create_checkout_response ) ) {
 			if ( function_exists( 'wc_add_notice' ) ) {
