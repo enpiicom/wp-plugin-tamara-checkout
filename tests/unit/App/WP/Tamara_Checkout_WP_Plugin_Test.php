@@ -17,7 +17,6 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 												->disableOriginalConstructor()
 												->onlyMethods(
 													[
-														'check_prerequisites',
 														'add_payment_gateways',
 														'init_woocommerce',
 														'tamara_gateway_process_admin_options',
@@ -27,7 +26,6 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 												->getMock();
 
 		// Expectations for actions and filters to be added
-		WP_Mock::expectActionAdded( 'init', [ $tamara_checkout_wp_plugin_mock, 'check_prerequisites' ], -100 );
 		WP_Mock::expectFilterAdded( 'woocommerce_payment_gateways', [ $tamara_checkout_wp_plugin_mock, 'add_payment_gateways' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_init', [ $tamara_checkout_wp_plugin_mock, 'init_woocommerce' ] );
 		WP_Mock::expectActionAdded(
@@ -157,9 +155,6 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 		$plugin->expects( $this->any() )
 				->method( 'get_version' )
 				->willReturn( '1.0.0' );
-
-		// Todo: We need to global function wp_app() and have it called within a mock class Show_Admin_Notice_And_Disable_Plugin
-		// $plugin->check_prerequisites();
 	}
 
 	public function test_tamara_gateway_process_admin_options(): void {

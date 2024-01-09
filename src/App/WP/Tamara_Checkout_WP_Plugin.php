@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\WP;
 
-use Enpii_Base\App\Jobs\Show_Admin_Notice_And_Disable_Plugin_Job;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
@@ -23,6 +22,7 @@ use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
@@ -50,33 +50,110 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	protected $customer_phone_number;
 
 	public function manipulate_hooks(): void {
-		// We want to use the check prerequisites within the init action
-		//  because we need to detect if WooCommerce is loaded or not
-		add_action( 'init', [ $this, 'check_prerequisites' ], -100 );
 		add_action( 'init', [ $this, 'register_tamara_custom_order_statuses' ] );
 
 		/** For WooCommerce */
 		// Add more payment gateways
+		add_filter( 'plugin_action_links_' . $this->get_plugin_basename(), [ $this, 'add_plugin_settings_link' ] );
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'add_payment_gateways' ] );
 		add_action( 'woocommerce_init', [ $this, 'init_woocommerce' ] );
 
 		add_action(
 			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
-			[ $this, 'tamara_gateway_process_admin_options' ]
+			[ $this, 'tamara_gateway_process_admin_options' ],
+			10
 		);
 		add_action(
 			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
-			[ $this, 'tamara_gateway_register_webhook' ]
+			[ $this, 'tamara_gateway_register_webhook' ],
+			11
 		);
-
-		add_action( App_Const::ACTION_WP_API_REGISTER_ROUTES, [ $this, 'tamara_gateway_register_wp_api_routes' ] );
-		wp_app()->register_routes( [ $this, 'tamara_gateway_register_wp_app_routes' ] );
 
 		// Add Tamara custom statuses to wc order status list
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
 		add_action( 'wp_loaded', [ $this, 'cancel_order_uncomplete_payment' ], 21 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tamara_admin_scripts' ] );
+
+		// For WP App
+		wp_app()->register_api_routes( [ $this, 'tamara_gateway_register_wp_api_routes' ] );
+		wp_app()->register_routes( [ $this, 'tamara_gateway_register_wp_app_routes' ] );
+	}
+
+	/**
+	 * We register/d
+	 * @return void
+	 */
+	public function manipulate_hooks_after_settings(): void {
+		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
+			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
+				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
+
+				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
+				add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
+			}
+
+			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
+				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
+
+				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
+				add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
+			}
+
+			add_action(
+				'wp_head',
+				[ $this, 'show_tamara_footprint' ]
+			);
+			add_action(
+				'woocommerce_checkout_update_order_review',
+				[ $this, 'get_updated_phone_number_on_checkout' ]
+			);
+			add_filter(
+				'woocommerce_available_payment_gateways',
+				[ $this, 'adjust_tamara_payment_types_on_checkout' ],
+				9998,
+				1
+			);
+			add_filter(
+				'woocommerce_gateway_description',
+				[ $this, 'render_payment_types_description_on_checkout' ],
+				9999
+			);
+			add_filter(
+				'woocommerce_thankyou_order_received_text',
+				[ $this, 'fetch_tamara_order_received_note' ],
+				10,
+				2
+			);
+			add_action(
+				'woocommerce_checkout_update_order_review',
+				[ $this, 'get_updated_phone_number_on_checkout' ]
+			);
+			add_action(
+				'woocommerce_order_status_changed',
+				[ $this, 'tamara_capture_payment' ],
+				10,
+				4
+			);
+			add_action(
+				'woocommerce_order_status_changed',
+				[ $this, 'capture_tamara_order_if_possible' ],
+				10,
+				4
+			);
+			add_action(
+				'woocommerce_order_status_changed',
+				[ $this, 'cancel_tamara_order_if_possible' ],
+				10,
+				4
+			);
+			add_action(
+				'woocommerce_create_refund',
+				[ $this, 'refund_tamara_order_if_possible' ],
+				10,
+				2
+			);
+		}
 	}
 
 	public function init_woocommerce() {
@@ -122,23 +199,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function get_customer_phone_number() {
 		return $this->customer_phone_number;
-	}
-
-	/**
-	 * We want to check the needed dependency for this plugin to work
-	 */
-	public function check_prerequisites() {
-		if ( ! class_exists( \WooCommerce::class ) ) {
-			$messages = [
-				sprintf(
-					$this->_t( 'Plugin <strong>%s</strong> needs WooCommerce to work, please install and activate WooCommerce as well.' ),
-					$this->get_name() . ' ' . $this->get_version()
-				),
-			];
-			Show_Admin_Notice_And_Disable_Plugin_Job::execute_now( $this, $messages );
-			return;
-		}
-		add_filter( 'plugin_action_links_tamara-checkout/tamara-checkout.php', [ $this, 'add_plugin_settings_link' ] );
 	}
 
 	public function tamara_gateway_process_admin_options() {
@@ -378,8 +438,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function add_plugin_settings_link( $plugin_links ) {
-		$settings_link = '<a href="' . General_Helper::get_tamara_admin_settings_section_url() . '">' . $this->_t( 'Settings' ) . '</a>';
+		$settings_link = '<a href="' . Tamara_Checkout_Helper::get_admin_settings_section_url() . '">' . $this->_t( 'Settings' ) . '</a>';
 		array_unshift( $plugin_links, $settings_link );
+
 		return $plugin_links;
 	}
 
@@ -470,47 +531,5 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				'wc_order_id' => $args['order_id'],
 			]
 		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
-	}
-
-	/**
-	 *
-	 * @return void
-	 */
-	protected function manipulate_hooks_after_settings(): void {
-		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
-				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
-
-				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
-				add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
-			}
-
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
-				add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
-
-				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
-				add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
-			}
-
-			add_action( 'wp_head', [ $this, 'show_tamara_footprint' ] );
-
-			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
-
-			add_filter( 'woocommerce_available_payment_gateways', [ $this, 'adjust_tamara_payment_types_on_checkout' ], 9998, 1 );
-
-			add_filter( 'woocommerce_gateway_description', [ $this, 'render_payment_types_description_on_checkout' ], 9999 );
-
-			add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'fetch_tamara_order_received_note' ], 10, 2 );
-
-			add_action( 'woocommerce_checkout_update_order_review', [ $this, 'get_updated_phone_number_on_checkout' ] );
-
-			add_action( 'woocommerce_order_status_changed', [ $this, 'tamara_capture_payment' ], 10, 4 );
-
-			add_action( 'woocommerce_order_status_changed', [ $this, 'capture_tamara_order_if_possible' ], 10, 4 );
-
-			add_action( 'woocommerce_order_status_changed', [ $this, 'cancel_tamara_order_if_possible' ], 10, 4 );
-
-			add_action( 'woocommerce_create_refund', [ $this, 'refund_tamara_order_if_possible' ], 10, 2 );
-		}
 	}
 }

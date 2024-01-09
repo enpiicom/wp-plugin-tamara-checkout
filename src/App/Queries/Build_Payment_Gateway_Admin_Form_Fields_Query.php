@@ -190,6 +190,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'tamara_cancel_order' => [
 				'title' => $this->_t( 'Order status that trigger Tamara cancel process for an order' ),
 				'type' => 'select',
+				'default' => 'wc-cancelled',
 				'options' => wc_get_order_statuses(),
 				'description' => $this->_t( 'When you update an order to this status it would connect to Tamara API to trigger the Cancel payment process on Tamara.' ),
 			],
@@ -275,16 +276,22 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'webhook_enabled' => [
 				'type' => 'checkbox',
 			],
+			'success_url' => [
+				'title' => $this->_t( 'Tamara Payment Success Url' ),
+				'type' => 'text',
+				'description' => $this->_t( 'Enter the custom SUCCESS url for customers to be redirected to after PAYMENT is SUCCESSFUL (leave it blank to use the default one).' ),
+				'default' => null,
+			],
 			'cancel_url' => [
 				'title' => $this->_t( 'Tamara Payment Cancel Url' ),
 				'type' => 'text',
-				'description' => $this->_t( 'Enter the custom CANCEL url for customers to be redirected to after PAYMENT is CANCELLED (leave it blank to use the default one). You can use action `after_tamara_cancel` to handle further actions.' ),
+				'description' => $this->_t( 'Enter the custom CANCEL url for customers to be redirected to after PAYMENT is CANCELLED (leave it blank to use the default one).' ),
 				'default' => null,
 			],
 			'failure_url' => [
 				'title' => $this->_t( 'Tamara Payment Failure Url' ),
 				'type' => 'text',
-				'description' => $this->_t( 'Enter the custom FAILURE url for customers to be redirected to after PAYMENT is FAILED (leave it blank to use the default one). You can use action `after_tamara_failure` to handle further actions.' ),
+				'description' => $this->_t( 'Enter the custom FAILURE url for customers to be redirected to after PAYMENT is FAILED (leave it blank to use the default one).' ),
 				'default' => null,
 			],
 			'debug_info' => [
@@ -300,17 +307,18 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 					'<table class="tamara-debug-info-table"><tr><td>' . sprintf( '<strong>PHP Version:</strong> %s', PHP_VERSION ) . '</td></tr>'
 					. '<tr><td>' . sprintf( '<strong>' . $this->_t( 'PHP loaded extensions' ) . ':</strong> %s', implode( ', ', get_loaded_extensions() ) ) . '</td></tr>'
 					. '<tr><td><h4>Default Merchant URLs:</h4></td></tr>'
-					. '<tr><td><ul><li>' . $this->_t( 'Tamara Success URL: ' ) . $this->_t( 'Default <strong>WooCommerce Order Received</strong> url is used.' ) . '</li>'
-					. '<li>' . $this->_t( 'Tamara Cancel URL: ' ) . ( $this->get_tamara_cancel_url() ?? 'N/A' ) . '</li>'
-					. '<li>' . $this->_t( 'Tamara Failure URL: ' ) . ( $this->get_tamara_failure_url() ?? 'N/A' ) . '</li>'
-					. '<li>' . $this->_t( 'Tamara Notification URL: ' ) . ( $this->get_tamara_ipn_url() ?? 'N/A' ) . '</li>'
-					. '<li>' . $this->_t( 'Tamara Webhook URL: ' ) . ( $this->get_tamara_webhook_url() ?? 'N/A' ) . '</li></ul></td></tr></table>',
+					. '<tr><td><ul><li>' . $this->_t( 'Tamara Success URL: ' ) . $this->get_tamara_success_url() . '</li>'
+					. '<li>' . $this->_t( 'Tamara Cancel URL: ' ) . ( $this->get_tamara_cancel_url() ? $this->get_tamara_cancel_url() : 'N/A' ) . '</li>'
+					. '<li>' . $this->_t( 'Tamara Failure URL: ' ) . ( $this->get_tamara_failure_url() ? $this->get_tamara_failure_url() : 'N/A' ) . '</li>'
+					. '<li>' . $this->_t( 'Tamara Notification URL: ' ) . ( $this->get_tamara_ipn_url() ? $this->get_tamara_ipn_url() : 'N/A' ) . '</li>'
+					. '<li>' . $this->_t( 'Tamara Webhook Id: ' ) . ( $this->get_tamara_webhook_id() ? $this->get_tamara_webhook_id() : 'N/A' ) . '</li>'
+					. '<li>' . $this->_t( 'Tamara Webhook URL: ' ) . ( $this->get_tamara_webhook_url() ? $this->get_tamara_webhook_url() : 'N/A' ) . '</li></ul></td></tr></table>',
 			],
 			'custom_log_message_enabled' => [
 				'title' => $this->_t( 'Enable Tamara Custom Log Message' ),
 				'type' => 'checkbox',
 				// phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
-				'description' => $this->_t( 'In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory. The message log download link will be <strong>available below</strong>, after you <strong>enable this setting.</strong>' ) . '<br />' . '<a href="' . $custom_log_link . '" target="_blank"> ' . $this->_t( 'Download Custom Log file' ) . '</a>',
+				'description' => $this->_t( 'In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory. The message log download link will be <strong>available below</strong>, after you <strong>enable this setting.</strong>' ) . '<br />' . $this->build_debug_log_download_link(),
 			],
 			'plugin_version' => [
 				'type' => 'title',
@@ -352,28 +360,62 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	}
 
 	protected function get_debug_log_download_link(): string {
+		return ! empty( $this->current_settings['custom_log_message'] ) ?
+			wp_app_route_wp_url(
+				'wp-app::tamara-download-log-file',
+				[
+					'filepath' => $this->current_settings['custom_log_message'],
+				]
+			) :
+			'';
+	}
+
+	protected function build_debug_log_download_link(): string {
+		return $this->get_debug_log_download_link() ? '<a href="' . $this->get_debug_log_download_link() . '" target="_blank"> ' . $this->_t( 'Download Custom Log file' ) . '</a>' : '';
+	}
+
+	protected function get_tamara_webhook_url(): string {
+		return wp_app_route_wp_url( 'wp-api::tamara-webhook' );
+	}
+
+	protected function get_tamara_webhook_id(): string {
+		return ! empty( $this->current_settings['tamara_webhook_id'] ) ? $this->current_settings['tamara_webhook_id'] : '';
+	}
+
+	protected function get_tamara_ipn_url(): string {
 		return wp_app_route_wp_url(
-			'wp-app::tamara-download-log-file',
+			'wp-api::tamara-ipn',
 			[
-				'filepath' => $this->current_settings['custom_log_message'],
+				'wc_order_id' => 1,
 			]
 		);
 	}
 
-	protected function get_tamara_webhook_url(): string {
-		return wp_app_url( 'tamara-webhook' );
-	}
-
-	protected function get_tamara_ipn_url(): string {
-		return wp_app_url( 'tamara-ipn' );
-	}
-
 	protected function get_tamara_failure_url(): string {
-		return wp_app_url( 'tamara-failure' );
+		return wp_app_route_wp_url(
+			'wp-api::tamara-failure',
+			[
+				'wc_order_id' => 1,
+			]
+		);
 	}
 
 	protected function get_tamara_cancel_url(): string {
-		return wp_app_url( 'tamara-cancel' );
+		return wp_app_route_wp_url(
+			'wp-api::tamara-cancel',
+			[
+				'wc_order_id' => 1,
+			]
+		);
+	}
+
+	protected function get_tamara_success_url(): string {
+		return wp_app_route_wp_url(
+			'wp-api::tamara-success',
+			[
+				'wc_order_id' => 1,
+			]
+		);
 	}
 
 	protected function get_pdp_widget_positions(): array {
@@ -418,42 +460,57 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
             value_selected = tamara_env_toggle.value;
 
             if ('live_mode' === value_selected) {
+				sandbox_api_url_el.removeAttribute('required');
                 sandbox_api_url_el.closest('tr').style.display = 'none'
-                sandbox_api_url_el.setAttribute('required', false);
+
+				sandbox_api_token_el.removeAttribute('required');
                 sandbox_api_token_el.closest('tr').style.display = 'none'
-                sandbox_api_token_el.setAttribute('required', false);
+
+				sandbox_notif_token_el.removeAttribute('required');
                 sandbox_notif_token_el.closest('tr').style.display = 'none'
-                sandbox_notif_token_el.setAttribute('required', false);
+
+				sandbox_public_key_el.removeAttribute('required');
                 sandbox_public_key_el.closest('tr').style.display = 'none'
 
                 live_api_url_el.closest('tr').style.display = 'table-row'
                 live_api_url_el.setAttribute('required', true);
+
                 live_api_token_el.closest('tr').style.display = 'table-row'
                 live_api_token_el.setAttribute('required', true);
+
                 live_notif_token_el.closest('tr').style.display = 'table-row'
                 live_notif_token_el.setAttribute('required', true);
+
                 live_public_key_el.closest('tr').style.display = 'table-row'
+				live_public_key_el.setAttribute('required', true);
 
                 if (!live_api_url_el.value) {
                     live_api_url_el.value = live_api_url;
                 }
-
             } else if ('sandbox_mode' === value_selected) {
-                live_api_url_el.closest('tr').style.display = 'none'
-                live_api_url_el.setAttribute('required', false);
-                live_api_token_el.closest('tr').style.display = 'none'
-                live_api_token_el.setAttribute('required', false);
-                live_notif_token_el.closest('tr').style.display = 'none'
-                live_notif_token_el.setAttribute('required', false);
-                live_public_key_el.closest('tr').style.display = 'none'
+				live_api_url_el.removeAttribute('required');
+                live_api_url_el.closest('tr').style.display = 'none';
 
-                sandbox_api_url_el.closest('tr').style.display = 'table-row'
+				live_api_token_el.removeAttribute('required');
+                live_api_token_el.closest('tr').style.display = 'none';
+
+				live_notif_token_el.removeAttribute('required');
+                live_notif_token_el.closest('tr').style.display = 'none';
+
+				live_public_key_el.removeAttribute('required');
+                live_public_key_el.closest('tr').style.display = 'none';
+
+                sandbox_api_url_el.closest('tr').style.display = 'table-row';
                 sandbox_api_url_el.setAttribute('required', true);
-                sandbox_api_token_el.closest('tr').style.display = 'table-row'
+
+                sandbox_api_token_el.closest('tr').style.display = 'table-row';
                 sandbox_api_token_el.setAttribute('required', true);
-                sandbox_notif_token_el.closest('tr').style.display = 'table-row'
+
+                sandbox_notif_token_el.closest('tr').style.display = 'table-row';
                 sandbox_notif_token_el.setAttribute('required', true);
-                sandbox_public_key_el.closest('tr').style.display = 'table-row'
+
+                sandbox_public_key_el.closest('tr').style.display = 'table-row';
+				sandbox_public_key_el.setAttribute('required', true);
 
                 if (!sandbox_api_url_el.value) {
                     sandbox_api_url_el.value = sandbox_api_url;
