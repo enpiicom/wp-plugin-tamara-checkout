@@ -9,6 +9,7 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class Tamara_Checkout_Helper {
+	const TAMARA_ORDER_STATUS_APPROVED = 'approved';
 	const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
 	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
 	const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';

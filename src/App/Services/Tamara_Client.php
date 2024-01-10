@@ -15,6 +15,7 @@ use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
+use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
@@ -23,6 +24,7 @@ use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Checkout\CheckPaymentOptionsAvailabilityResponse;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
 
@@ -78,6 +80,16 @@ class Tamara_Client {
 		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
 		$this->api_client = $client;
 		$this->define_working_mode();
+	}
+
+	/**
+	 *
+	 * @param CheckPaymentOptionsAvailabilityRequest $client_request
+	 * @return string|CheckPaymentOptionsAvailabilityResponse
+	 * @throws Exception
+	 */
+	public function check_payment_options_availability( CheckPaymentOptionsAvailabilityRequest $client_request ) {
+		return $this->perform_remote_request( 'checkPaymentOptionsAvailability', $client_request );
 	}
 
 	/**

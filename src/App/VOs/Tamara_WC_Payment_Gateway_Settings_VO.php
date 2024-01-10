@@ -44,6 +44,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property string $cart_popup_widget_position
  * @property bool $webhook_enabled
  * @property string $tamara_webhook_id
+ * @property string $success_url
  * @property string $cancel_url
  * @property string $failure_url
  * @property bool $custom_log_message_enabled
@@ -89,6 +90,7 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	protected $cart_popup_widget_position;
 	protected $webhook_enabled;
 	protected $tamara_webhook_id;
+	protected $success_url;
 	protected $cancel_url;
 	protected $failure_url;
 	protected $custom_log_message_enabled;
