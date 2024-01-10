@@ -21,14 +21,11 @@ class Main_Controller extends Base_Controller {
 
 		// We do nothing for the exception here,
 		//  just want to catch all the exception to have the redirect work
-		try {
-			Process_Tamara_Order_Approved_Job::execute_now(
-				$tamara_order_id,
-				$wc_order_id
-			);
-		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-		} catch ( Exception $e ) {
-		}
+		Process_Tamara_Order_Approved_Job::dispatchSync(
+			$tamara_order_id,
+			$wc_order_id,
+			true
+		);
 
 		// Then redirect to the URL we want
 		$order_received_url = ! empty( $wc_order ) ? esc_url_raw( $wc_order->get_checkout_order_received_url() ) : home_url();
@@ -96,7 +93,7 @@ class Main_Controller extends Base_Controller {
 	public function handle_tamara_ipn() {
 		$authorise_message = $this->tamara_notification()->process_authorise_message();
 
-		Process_Tamara_Order_Approved_Job::execute_now(
+		Process_Tamara_Order_Approved_Job::dispatchSync(
 			$authorise_message->getOrderId(),
 			$authorise_message->getOrderReferenceId()
 		);
@@ -113,7 +110,7 @@ class Main_Controller extends Base_Controller {
 
 		switch ( $webhook_message->getEventType() ) {
 			case 'order_approved':
-				Process_Tamara_Order_Approved_Job::execute_now(
+				Process_Tamara_Order_Approved_Job::dispatchSync(
 					$webhook_message->getOrderId(),
 					$webhook_message->getOrderReferenceId()
 				);
