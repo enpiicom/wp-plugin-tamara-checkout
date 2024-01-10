@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP\Data;
 
 use DateTimeImmutable;
+use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment_Query;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
@@ -41,9 +42,14 @@ class Tamara_WC_Order {
 	 */
 	protected $wc_order;
 	protected $wc_refund;
-	protected $tamara_order_id;
-	protected $payment_method;
+
 	protected $wc_order_id;
+	protected $payment_method;
+
+	/**
+	 * @var WC_Order_Tamara_Meta_DTO
+	 */
+	protected $tamara_meta_dto;
 
 	public function __construct( WC_Order $wc_order, $wc_refund = null ) {
 		if ( empty( $wc_order->get_id() ) ) {
@@ -53,6 +59,7 @@ class Tamara_WC_Order {
 		$this->wc_order = $wc_order;
 		$this->wc_refund = $wc_refund;
 		$this->wc_order_id = $wc_order->get_id();
+		$this->tamara_meta_dto = new WC_Order_Tamara_Meta_DTO();
 	}
 
 	/**
@@ -86,17 +93,36 @@ class Tamara_WC_Order {
 	}
 
 	public function get_tamara_order_id(): string {
-		if ( ! empty( $this->tamara_order_id ) ) {
-			return $this->tamara_order_id;
+		return (string) $this->get_tamara_meta( 'tamara_order_id' );
+	}
+
+	public function get_tamara_order_number(): string {
+		return (string) $this->get_tamara_meta( 'tamara_order_number' );
+	}
+
+	public function get_tamara_payment_type(): string {
+		return (string) $this->get_tamara_meta( 'tamara_payment_type' );
+	}
+
+	public function get_tamara_instalments(): string {
+		return (string) $this->get_tamara_meta( 'tamara_instalments' );
+	}
+
+	public function get_tamara_payment_status(): string {
+		return (string) $this->get_tamara_meta( 'tamara_payment_status' );
+	}
+
+	public function get_tamara_meta( $meta_key ) {
+		if ( ! empty( $this->tamara_meta_dto->$meta_key ) ) {
+			return $this->tamara_meta_dto->$meta_key;
 		}
 
-		$this->tamara_order_id = get_post_meta( $this->wc_order->get_id(), '_tamara_order_id', true );
-		if ( empty( $this->tamara_order_id ) ) {
-			$this->tamara_order_id = get_post_meta( $this->wc_order->get_id(), 'tamara_order_id', true );
+		$this->tamara_meta_dto->$meta_key = get_post_meta( $this->wc_order->get_id(), '_' . $meta_key, true );
+		if ( empty( $this->tamara_meta_dto->$meta_key ) ) {
+			$this->tamara_meta_dto->$meta_key = get_post_meta( $this->wc_order->get_id(), $meta_key, true );
 		}
-		$this->tamara_order_id = (string) $this->tamara_order_id;
 
-		return $this->tamara_order_id;
+		return $this->tamara_meta_dto->$meta_key;
 	}
 
 	/**
