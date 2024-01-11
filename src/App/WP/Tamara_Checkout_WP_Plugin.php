@@ -7,6 +7,8 @@ namespace Tamara_Checkout\App\WP;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
+use Exception;
+use RuntimeException;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
@@ -429,7 +431,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * @throws \Exception
+	 * Add the Tamara Settings links to plugin links
+	 * @param mixed $plugin_links
+	 * @return array
+	 * @throws Exception
 	 */
 	public function add_plugin_settings_link( $plugin_links ) {
 		$settings_link = '<a href="' . Tamara_Checkout_Helper::get_admin_settings_section_url() . '">' . $this->_t( 'Settings' ) . '</a>';
@@ -469,7 +474,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @param $wc_order
 	 *
 	 * @return void
-	 * @throws \Exception
+	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
 		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->status_to_capture_tamara_payment;
@@ -496,7 +501,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @param $status_to
 	 * @param $wc_order
 	 *
-	 * @throws \Exception
+	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
 		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->status_to_cancel_tamara_payment;
@@ -516,13 +521,19 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * @throws \Exception
+	 * Process the Tamara Refund
+	 * @param \WC_Order_Refund $wc_order_refund
+	 * @param array $refund_args
+	 * @return void
+	 * @throws RuntimeException
 	 */
-	public function refund_tamara_order_if_possible( $wc_refund, $args ) {
+	public function refund_tamara_order_if_possible( $wc_order_refund, $refund_args ): void {
+		dev_error_log( 'wc_order_refund', $wc_order_refund, 'refund_args', $refund_args );
 		Refund_Tamara_Order_If_Possible_Job::dispatch(
 			[
-				'wc_refund' => $wc_refund,
-				'wc_order_id' => $args['order_id'],
+				'wc_order_refund' => $wc_order_refund,
+				'wc_order_id' => $refund_args['order_id'],
+				'refund_args' => $refund_args,
 			]
 		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
 	}

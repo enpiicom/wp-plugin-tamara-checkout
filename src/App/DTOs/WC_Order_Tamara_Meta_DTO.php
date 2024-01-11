@@ -29,6 +29,8 @@ class WC_Order_Tamara_Meta_DTO extends Base_DTO {
 	protected $tamara_payment_status;
 	protected $tamara_cancel_id;
 
+	protected $tamara_refunds;
+
 	public function __construct( array $config = [] ) {
 		if ( ! empty( $config ) ) {
 			$this->bind_config( $config );

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP\Data;
 
 use DateTimeImmutable;
+use Exception;
 use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment_Query;
@@ -41,7 +42,6 @@ class Tamara_WC_Order {
 	 * @var WC_Order
 	 */
 	protected $wc_order;
-	protected $wc_refund;
 
 	protected $wc_order_id;
 	protected $payment_method;
@@ -51,13 +51,19 @@ class Tamara_WC_Order {
 	 */
 	protected $tamara_meta_dto;
 
-	public function __construct( WC_Order $wc_order, $wc_refund = null ) {
+	/**
+	 *
+	 * @param WC_Order $wc_order
+	 * @return void
+	 * @throws Exception
+	 * @throws Tamara_Exception
+	 */
+	public function __construct( WC_Order $wc_order ) {
 		if ( empty( $wc_order->get_id() ) ) {
 			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Invalid WC_Order' ) ) );
 		}
 
 		$this->wc_order = $wc_order;
-		$this->wc_refund = $wc_refund;
 		$this->wc_order_id = $wc_order->get_id();
 		$this->tamara_meta_dto = new WC_Order_Tamara_Meta_DTO();
 	}
@@ -153,6 +159,26 @@ class Tamara_WC_Order {
 		return false;
 	}
 
+	public function add_tamara_refund_meta( $refund_id, $capture_id ) {
+		if ( empty( $this->tamara_meta_dto->tamara_refunds ) ) {
+			$tamara_refunds = [];
+		} else {
+			$tamara_refunds = (array) $this->tamara_meta_dto->tamara_refunds;
+		}
+		$tamara_refunds[] = [
+			'refund_id' => $refund_id,
+			'capture_id' => $capture_id,
+		];
+
+		if ( update_post_meta( $this->wc_order_id, '_tamara_refunds', $tamara_refunds ) ) {
+			$this->tamara_meta_dto->tamara_refunds = $tamara_refunds;
+
+			return true;
+		}
+
+		return false;
+	}
+
 	public function add_tamara_order_note( $order_note ) {
 		$order_note = 'Tamara - ' . $order_note;
 		$this->get_wc_order()->add_order_note( $order_note );
@@ -208,6 +234,12 @@ class Tamara_WC_Order {
 		return $tamara_client_response;
 	}
 
+	/**
+	 *
+	 * @param \WC_Order|\WC_Order_Refund $wc_order
+	 * @return OrderItemCollection
+	 * @throws Exception
+	 */
 	public function build_tamara_order_items( $wc_order = null ): OrderItemCollection {
 		$wc_order = empty( $wc_order ) ? $this->wc_order : $wc_order;
 		$wc_order_items = $wc_order->get_items();
@@ -219,9 +251,9 @@ class Tamara_WC_Order {
 			$wc_order_item_product_simple = $wc_order_item->get_product();
 
 			if ( $wc_order_item_product_simple ) {
-				$order_item = $this->build_tamara_order_item_from_object( $wc_order_item, $wc_order, $item_id );
+				$order_item = $this->build_tamara_order_item_from_object( $wc_order_item, $wc_order->get_currency(), $item_id );
 			} else {
-				$order_item = $this->build_tamara_order_item_from_data( $wc_order_item->get_data(), $wc_order, $item_id );
+				$order_item = $this->build_tamara_order_item_from_data( $wc_order_item->get_data(), $wc_order->get_currency(), $item_id );
 			}
 
 			$order_item_collection->append( $order_item );
@@ -299,49 +331,6 @@ class Tamara_WC_Order {
 			$wc_order_shipping_amount,
 			$wc_order_tax_amount,
 			$wc_order_discount_amount
-		);
-	}
-
-	/**
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
-	 */
-	public function build_refund_request(): RefundRequest {
-		$wc_refund_total_amount = Tamara_Checkout_Helper::build_money_object(
-			abs( (int) $this->wc_refund->get_total() ),
-			$this->wc_refund->get_currency()
-		);
-		$wc_refund_shipping_amount = Tamara_Checkout_Helper::build_money_object(
-			abs( (int) $this->wc_refund->get_shipping_total() ),
-			$this->wc_refund->get_currency()
-		);
-		$wc_refund_tax_amount = Tamara_Checkout_Helper::build_money_object(
-			abs( (int) $this->wc_refund->get_total_tax() ),
-			$this->wc_refund->get_currency()
-		);
-		$wc_refund_discount_amount = Tamara_Checkout_Helper::build_money_object(
-			$this->wc_refund->get_discount_total(),
-			$this->wc_refund->get_currency()
-		);
-
-		$capture_id = $this->get_tamara_capture_id();
-		$refund_collection = [];
-
-		$wc_refund_items = $this->build_tamara_order_items( $this->wc_refund );
-
-		$refund_item = new Refund(
-			$capture_id,
-			$wc_refund_total_amount,
-			$wc_refund_shipping_amount,
-			$wc_refund_tax_amount,
-			$wc_refund_discount_amount,
-			$wc_refund_items
-		);
-
-		array_push( $refund_collection, $refund_item );
-
-		return new RefundRequest(
-			$this->get_tamara_order_id(),
-			$refund_collection
 		);
 	}
 
@@ -551,7 +540,7 @@ class Tamara_WC_Order {
 		return $tamara_address;
 	}
 
-	protected function build_tamara_order_item_from_object( WC_Order_Item_Product $wc_order_item, WC_Order $wc_order, $item_id ): OrderItem {
+	protected function build_tamara_order_item_from_object( WC_Order_Item_Product $wc_order_item, $currency, $item_id ): OrderItem {
 		$order_item = new OrderItem();
 		$wc_order_item_product = $wc_order_item->get_product();
 
@@ -576,7 +565,7 @@ class Tamara_WC_Order {
 		$order_item->setUnitPrice(
 			Tamara_Checkout_Helper::build_money_object(
 				$item_price,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setType( $wc_order_item_categories );
@@ -584,19 +573,19 @@ class Tamara_WC_Order {
 		$order_item->setTotalAmount(
 			Tamara_Checkout_Helper::build_money_object(
 				$wc_order_item_total,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setTaxAmount(
 			Tamara_Checkout_Helper::build_money_object(
 				$wc_order_item_total_tax,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setDiscountAmount(
 			Tamara_Checkout_Helper::build_money_object(
 				$wc_order_item_discount_amount,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setReferenceId( (string) $item_id );
@@ -605,7 +594,7 @@ class Tamara_WC_Order {
 		return $order_item;
 	}
 
-	protected function build_tamara_order_item_from_data( array $wc_order_item_product, WC_Order $wc_order, $item_id ): OrderItem {
+	protected function build_tamara_order_item_from_data( array $wc_order_item_product, $currency, $item_id ): OrderItem {
 		$order_item = new OrderItem();
 
 		$wc_order_item_name = ! empty( $wc_order_item_product['name'] ) ? wp_strip_all_tags( $wc_order_item_product['name'] ) : 'N/A';
@@ -622,7 +611,7 @@ class Tamara_WC_Order {
 		$order_item->setUnitPrice(
 			Tamara_Checkout_Helper::build_money_object(
 				$item_price,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setType( $wc_order_item_categories );
@@ -630,19 +619,19 @@ class Tamara_WC_Order {
 		$order_item->setTotalAmount(
 			Tamara_Checkout_Helper::build_money_object(
 				$wc_order_item_total,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setTaxAmount(
 			Tamara_Checkout_Helper::build_money_object(
 				$wc_order_item_total_tax,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setDiscountAmount(
 			Tamara_Checkout_Helper::build_money_object(
 				$wc_order_item_discount_amount,
-				$wc_order->get_currency()
+				$currency
 			)
 		);
 		$order_item->setReferenceId( $item_id );

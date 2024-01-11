@@ -73,7 +73,7 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		$cancel_id = $tamara_client_response->getCancelId();
 		if ( $cancel_id ) {
 			$tamara_wc_order->update_tamara_meta( 'tamara_cancel_id', $cancel_id );
-			$order_note = sprintf( $this->_t( 'Order cancelled successfully, Tamara Cancel Id: %s' ), $cancel_id );
+			$order_note = sprintf( $this->_t( 'Order cancelled successfully. Cancel Id: %s.' ), $cancel_id );
 			$tamara_wc_order->add_tamara_order_note( $order_note );
 		}
 	}
@@ -103,7 +103,10 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 * @throws Tamara_Exception
 	 */
 	protected function check_prerequisites(): bool {
-		if ( ! $this->tamara_wc_order->is_paid_with_tamara() ) {
+		if (
+			! $this->tamara_wc_order->is_paid_with_tamara() ||
+			empty( $this->tamara_wc_order->get_tamara_order_id() )
+		) {
 			return false;
 		}
 

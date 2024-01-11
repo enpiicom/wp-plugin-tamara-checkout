@@ -12,9 +12,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Payment\CaptureResponse;
 
 class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
@@ -24,12 +26,22 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	use SerializesModels;
 	use Config_Trait;
 	use Tamara_Trans_Trait;
+	use Tamara_Checkout_Trait;
 
 	protected $wc_order_id;
 	protected $status_from;
 	protected $status_to;
 	protected $to_capture_status;
+
+	/**
+	 * @var Tamara_WC_Order
+	 */
 	protected $tamara_wc_order;
+
+	/**
+	 * @var CaptureRequest
+	 */
+	protected $tamara_capture_request;
 
 	/**
 	 * @throws Tamara_Exception
@@ -37,7 +49,6 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
-
 		$this->tamara_wc_order = new Tamara_WC_Order( wc_get_order( $this->wc_order_id ) );
 	}
 
@@ -45,38 +56,33 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * @throws Tamara_Exception
 	 */
 	public function handle() {
-		if ( ! $this->check_capture_prerequisites() ) {
+		if ( ! $this->check_prerequisites() ) {
 			return;
 		}
 
-		$capture_request = $this->tamara_wc_order->build_capture_request();
-		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->capture( $capture_request );
+		$this->tamara_capture_request = $this->tamara_wc_order->build_capture_request();
+		$tamara_client_response = $this->tamara_client()->capture( $this->tamara_capture_request );
 
 		if (
 			! is_object( $tamara_client_response )
 		) {
-			$this->process_captured_failed( $tamara_client_response );
+			$this->process_failed_action( $tamara_client_response );
 		}
 
-		if ( $tamara_client_response->isSuccess() ) {
-			$this->process_captured_successfully( $tamara_client_response );
-		}
+		// If Tamara Client returns an object, that would be a successful object
+		$this->process_successful_action( $tamara_client_response );
 	}
 
 	/**
 	 * We do needed thing on successful scenario
 	 */
-	protected function process_captured_successfully( CaptureResponse $tamara_client_response ): void {
+	protected function process_successful_action( CaptureResponse $tamara_client_response ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$capture_id = $tamara_client_response->getCaptureId();
-		$wc_order_id = $this->wc_order_id;
-		update_post_meta( $wc_order_id, 'tamara_capture_id', $capture_id );
-		update_post_meta( $wc_order_id, '_tamara_capture_id', $capture_id );
+		$tamara_wc_order->update_tamara_meta( 'tamara_capture_id', $tamara_client_response->getCaptureId() );
 
-		$order_note = 'Tamara - ';
-		$order_note .= sprintf( $this->_t( 'Order captured successfully, Tamara Capture Id: %s' ), $capture_id );
-		$tamara_wc_order->get_wc_order()->add_order_note( $order_note );
+		$tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Order fully captured successfully. Capture Id: %s, Captured Amount %s.' ), $this->tamara_capture_request->getCapture()->getTotalAmount()->getAmount(), $capture_id ) );
 	}
 
 	/**
@@ -87,7 +93,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * @return void
 	 * @throws Tamara_Exception
 	 */
-	protected function process_captured_failed( string $tamara_error_message ): void {
+	protected function process_failed_action( string $tamara_error_message ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$error_message = $this->_t( 'Error when trying to capture order with Tamara.' );
@@ -104,15 +110,13 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * We want to check if we want to start the capture request or not
 	 * @throws Tamara_Exception
 	 */
-	protected function check_capture_prerequisites(): bool {
-		$wc_order_id = $this->wc_order_id;
-		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
-
-		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
+	protected function check_prerequisites(): bool {
+		if (
+			! $this->tamara_wc_order->is_paid_with_tamara() ||
+			empty( $this->tamara_wc_order->get_tamara_order_id() )
+		) {
 			return false;
 		}
-
-		$tamara_wc_order->reupdate_meta_for_tamara_order_id();
 
 		return true;
 	}
