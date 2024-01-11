@@ -211,7 +211,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function tamara_gateway_register_webhook(): void {
-		Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+		try {
+			Register_Tamara_Webhook_Job::dispatchSync();
+		} catch (Exception $e) {
+			// We want to re-perform this job 7 mins later
+			Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW )->delay(now()->addMinutes(7));
+		}
 	}
 
 	public function tamara_gateway_register_wp_app_routes(): void {

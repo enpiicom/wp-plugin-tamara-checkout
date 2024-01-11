@@ -11,7 +11,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
 /**
  * Value Object for Tamara_WC_Payment_Gateway object setting
  *  to be able to use auto-complete faster
- * @package Tamara_Checkout\App\DTOs
+ * @package Tamara_Checkout\App\VOs
  * @property bool $enabled
  * @property string $environment live_mode|sandbox_mode
  * @property string $live_api_url

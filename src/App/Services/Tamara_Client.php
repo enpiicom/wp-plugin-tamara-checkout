@@ -9,6 +9,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
+use Tamara_Checkout\App\VOs\Tamara_Api_Response_VO;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
@@ -24,9 +26,11 @@ use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CheckPaymentOptionsAvailabilityResponse;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
+use Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse;
 
 /**
  * A wrapper of Tamara Client
@@ -84,6 +88,16 @@ class Tamara_Client {
 		$client = $this->build_tamara_client( $api_token, $api_url, $api_request_timeout );
 		$this->api_client = $client;
 		$this->define_working_mode();
+	}
+
+	/**
+	 *
+	 * @param RegisterWebhookRequest $client_request
+	 * @return string|RegisterWebhookResponse
+	 * @throws Exception
+	 */
+	public function register_webhook( RegisterWebhookRequest $client_request ) {
+		return $this->perform_remote_request_tmp( 'registerWebhook', $client_request );
 	}
 
 	/**
@@ -188,6 +202,40 @@ class Tamara_Client {
 		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
 		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
 		return Client::create( $configuration );
+	}
+
+	/**
+	 *
+	 * @param mixed $remote_action
+	 * @param mixed $client_request
+	 * @return Tamara_Api_Response_VO|mixed
+	 * @throws Exception
+	 */
+	protected function perform_remote_request_tmp( $remote_action, $client_request ) {
+		try {
+			$api_response = $this->api_client->$remote_action( $client_request );
+		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
+			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
+		} catch ( Exception $tamara_checkout_exception ) {
+			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
+		}
+
+		if ( empty( $api_response ) ) {
+			return new Tamara_Api_Error_VO( [
+				'error_message' => $error_message,
+			] );
+		}
+
+		if ( ! $api_response->isSuccess() ) {
+			return new Tamara_Api_Error_VO( [
+				'error_message' => $this->build_client_response_errors( $api_response ),
+				'message' => $api_response->getMessage(),
+				'errors' => $api_response->getErrors(),
+				'status_code' => $api_response->getStatusCode(),
+			] );
+		}
+
+		return $api_response;
 	}
 
 	protected function perform_remote_request( $remote_action, $client_request ) {

@@ -8,14 +8,15 @@ use Enpii_Base\Foundation\Shared\Base_Job;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
-use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use WC_Payment_Gateway;
 
 class Validate_Admin_Settings_Job extends Base_Job {
 	use Dispatchable;
 	use Tamara_Trans_Trait;
+	use Tamara_Checkout_Trait;
 
 	protected $plugin;
 	protected $processed_post_data;
@@ -125,10 +126,9 @@ class Validate_Admin_Settings_Job extends Base_Job {
 		// We validate the attribute `sandbox_api_token` and `live_api_token`
 		$api_token = $value;
 
-		$tamara_checkout_plugin = Tamara_Checkout_WP_Plugin::wp_app_instance();
-		$tamara_checkout_plugin->get_tamara_client_service()->init_tamara_client( $api_token, $api_url, $this->processed_post_data );
+		$this->tamara_client()->init_tamara_client( $api_token, $api_url, $this->processed_post_data );
 
-		$tamara_client_response = $tamara_checkout_plugin->get_tamara_client_service()->get_merchant_public_configs( new GetPublicConfigsRequest() );
+		$tamara_client_response = $this->tamara_client()->get_merchant_public_configs( new GetPublicConfigsRequest() );
 
 		if (
 			! is_object( $tamara_client_response )
