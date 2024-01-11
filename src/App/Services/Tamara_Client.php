@@ -47,6 +47,10 @@ class Tamara_Client {
 	 */
 	protected $settings;
 
+	/**
+	 *
+	 * @var Client
+	 */
 	protected $api_client;
 
 	protected function __construct(

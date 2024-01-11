@@ -93,7 +93,14 @@ class Tamara_WC_Order {
 	}
 
 	public function get_tamara_order_id(): string {
-		return (string) $this->get_tamara_meta( 'tamara_order_id' );
+		$tamara_order_id = (string) $this->get_tamara_meta( 'tamara_order_id' );
+		if ( empty( $tamara_order_id ) ) {
+			$tamara_order = $this->get_tamara_order_by_reference_id();
+			$tamara_order_id = $tamara_order->getOrderId();
+			$this->update_tamara_meta( 'tamara_order_id', $tamara_order_id );
+		}
+
+		return $tamara_order_id;
 	}
 
 	public function get_tamara_order_number(): string {
@@ -112,6 +119,10 @@ class Tamara_WC_Order {
 		return (string) $this->get_tamara_meta( 'tamara_payment_status' );
 	}
 
+	public function get_tamara_cancel_id(): string {
+		return (string) $this->get_tamara_meta( 'tamara_cancel_id' );
+	}
+
 	public function get_tamara_meta( $meta_key ) {
 		if ( ! empty( $this->tamara_meta_dto->$meta_key ) ) {
 			return $this->tamara_meta_dto->$meta_key;
@@ -123,6 +134,28 @@ class Tamara_WC_Order {
 		}
 
 		return $this->tamara_meta_dto->$meta_key;
+	}
+
+	/**
+	 * Update Tamara meta data for orders
+	 * @param mixed $meta_key
+	 * @param mixed $meta_value
+	 * @return bool false if the update action to db fails
+	 */
+	public function update_tamara_meta( $meta_key, $meta_value ) {
+		update_post_meta( $this->wc_order_id, $meta_key, $meta_value );
+		if ( update_post_meta( $this->wc_order_id, '_' . $meta_key, $meta_value ) ) {
+			$this->tamara_meta_dto->$meta_key = $meta_value;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public function add_tamara_order_note( $order_note ) {
+		$order_note = 'Tamara - ' . $order_note;
+		$this->get_wc_order()->add_order_note( $order_note );
 	}
 
 	/**
@@ -168,16 +201,8 @@ class Tamara_WC_Order {
 		$get_order_by_reference_id_request = new GetOrderByReferenceIdRequest( (string) $wc_order_id );
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
 
-		if (
-		! is_object( $tamara_client_response )
-		) {
-			$error_message = $this->_t( 'Error when trying to get order from Tamara.' );
-			$error_message .= "<br />\n";
-			$error_message .= sprintf(
-				$this->_t( 'Error with Tamara API: %s' ),
-				$tamara_client_response
-			);
-			throw new Tamara_Exception( wp_kses_post( $error_message ) );
+		if ( ! is_object( $tamara_client_response ) ) {
+			throw new Tamara_Exception( wp_kses_post( $tamara_client_response ) );
 		}
 
 		return $tamara_client_response;
