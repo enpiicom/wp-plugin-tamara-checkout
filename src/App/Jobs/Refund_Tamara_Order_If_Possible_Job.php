@@ -16,6 +16,7 @@ use InvalidArgumentException;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order_Refund;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Payment\RefundResponse;
@@ -58,6 +59,25 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
 		$this->tamara_wc_order_refund = new Tamara_WC_Order_Refund( $this->wc_order_refund, $this->wc_order_id );
+
+		parent::__construct();
+	}
+
+	/**
+	 * We want to retry this job if it is not a succesful one
+	 *  after this amount of seconds
+	 * @return int
+	 */
+	public function backoff() {
+		return 700;
+	}
+
+	/**
+	 * Set tag for filtering
+	 * @return string[]
+	 */
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:refund' ];
 	}
 
 	/**
@@ -65,6 +85,8 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 * @throws \Exception
 	 */
 	public function handle() {
+		$this->before_handle();
+
 		if ( ! $this->check_prerequisites() ) {
 			return;
 		}
@@ -72,7 +94,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		$this->tamara_refund_request = $this->tamara_wc_order_refund->build_refund_request();
 		$tamara_client_response = $this->tamara_client()->refund( $this->tamara_refund_request );
 
-		if ( ! is_object( $tamara_client_response ) ) {
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
 		}
 
@@ -105,16 +127,16 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 
 	/**
 	 * We do needed thing on failed scenario
-	 * @param string $tamara_error_message Error message from Tamara API
+	 * @param Tamara_Api_Error_VO $tamara_api_error Error message from Tamara API
 	 * @return void
 	 * @throws Tamara_Exception
 	 */
-	protected function process_failed_action( string $tamara_error_message ): void {
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
 		$error_message = $this->_t( 'Error when trying to refund with Tamara.' );
-		$error_message .= "<br />\n";
+		$error_message .= "\n";
 		$error_message .= sprintf(
 			$this->_t( 'Error with Tamara API: %s' ),
-			$tamara_error_message
+			$tamara_api_error->error_message
 		);
 		$this->tamara_wc_order_refund->add_tamara_order_note( $error_message );
 

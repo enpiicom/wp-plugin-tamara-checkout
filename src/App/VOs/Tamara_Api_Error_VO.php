@@ -12,9 +12,9 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * Value Object for Tamara_WC_Payment_Gateway object setting
  *  to be able to use auto-complete faster
  * @package Tamara_Checkout\App\VOs
- * @property bool $is_success
- * @property string $original_error_message The message from Tamara API
  * @property string $error_message The message that being processed
+ * @property string $message The message from Tamara API
+ * @property string $status_code The status code returned from Tamara API
  * @property array $errors in details from Tamara Api
  */
 class Tamara_Api_Error_VO extends Base_VO {
@@ -31,12 +31,11 @@ class Tamara_Api_Error_VO extends Base_VO {
 	protected $status_code;
 	protected $errors;
 
-	public function __construct( array $config )
-	{
+	public function __construct( array $config ) {
 		$this->bind_config( $config );
 	}
 
 	public function get_errors() {
-		return empty($this->errors) ? [] : (array) $this->errors;
+		return empty( $this->errors ) ? [] : (array) $this->errors;
 	}
 }

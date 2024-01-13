@@ -16,6 +16,7 @@ use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
@@ -43,9 +44,30 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
+
+		parent::__construct();
+	}
+
+	/**
+	 * We want to retry this job if it is not a succesful one
+	 *  after this amount of seconds
+	 * @return int
+	 */
+	public function backoff() {
+		return 700;
+	}
+
+	/**
+	 * Set tag for filtering
+	 * @return string[]
+	 */
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:authorise' ];
 	}
 
 	public function handle() {
+		$this->before_handle();
+
 		if ( ! $this->check_prerequisites() ) {
 			return;
 		}
@@ -56,24 +78,17 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$tamara_client_response = $this->tamara_client()->authorise_order( new AuthoriseOrderRequest( $this->tamara_order_id ) );
 
-		if ( ! is_object( $tamara_client_response ) ) {
-			$this->process_authorise_failed();
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO && $tamara_client_response->status_code !== 409 ) {
+			$this->process_failed_action();
 		}
 
-		if (
-			! $tamara_client_response->isSuccess() &&
-			$tamara_client_response->getStatusCode() !== 409
-		) {
-			$this->process_authorise_failed();
-		}
-
-		$this->process_authorise_successfully();
+		$this->process_successful_action();
 	}
 
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	protected function process_authorise_failed(): void {
+	protected function process_failed_action(): void {
 		$wc_order = wc_get_order( $this->wc_order_id );
 		$settings = $this->tamara_settings();
 
@@ -88,22 +103,33 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	/**
 	 * @throws \WC_Data_Exception
 	 */
-	protected function process_authorise_successfully(): void {
+	protected function process_successful_action(): void {
 		// We want to re-build a new Tamara_WC_Order here
 		//  to have refreshed meta data
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
 
-		$new_order_status = $this->tamara_settings()->get_payment_authorised_done_status();
-		$update_order_status_note = 'Tamara - ';
-		$update_order_status_note .= $this->_t( 'Order authorised successfully.' );
-		$update_order_status_note .= "\n<br/>";
-		$update_order_status_note .= 'Tamara - ' . sprintf( $this->_t( 'Payment Type: %s, Instalments: %d, Payment Status: %s.' ), $this->tamara_wc_order->get_tamara_payment_type(), $this->tamara_wc_order->get_tamara_instalments(), $this->tamara_wc_order->get_tamara_payment_status() );
-		$update_order_status_note .= "\n<br/>";
-		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, true );
-
 		// Use the default Payment Gateway for the order after all
 		$this->tamara_wc_order->get_wc_order()->set_payment_method( $this->default_payment_gateway_id() );
 		$this->tamara_wc_order->get_wc_order()->save();
+
+		$new_order_status = $this->tamara_settings()->get_payment_authorised_done_status();
+		$this->tamara_wc_order->add_tamara_order_note( $this->_t( 'Order authorised successfully.' ) );
+
+		if ( $this->tamara_wc_order->get_tamara_instalments() ) {
+			$update_order_status_note = 'Tamara - ' . sprintf(
+				$this->_t( 'Payment Status: %s, Payment Type: %s.' ),
+				$this->tamara_wc_order->get_tamara_payment_status(),
+				$this->tamara_wc_order->get_tamara_payment_type()
+			);
+		} else {
+			$update_order_status_note = 'Tamara - ' . sprintf(
+				$this->_t( 'Payment Status: %s, Payment Type: %s, Payment Instalments: %s.' ),
+				$this->tamara_wc_order->get_tamara_payment_status(),
+				$this->tamara_wc_order->get_tamara_payment_type(),
+				$this->tamara_wc_order->get_tamara_instalments()
+			);
+		}
+		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, true );
 	}
 
 	/**
@@ -113,7 +139,8 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	 */
 	protected function check_prerequisites(): bool {
 		$wc_order_id = $this->wc_order_id;
-		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
+		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
+		$tamara_wc_order = $this->tamara_wc_order;
 
 		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
 			return false;

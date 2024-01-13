@@ -14,6 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Tamara\Response\Payment\CancelResponse;
 
@@ -43,12 +44,33 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
+
+		parent::__construct();
+	}
+
+	/**
+	 * We want to retry this job if it is not a succesful one
+	 *  after this amount of seconds
+	 * @return int
+	 */
+	public function backoff() {
+		return 7;
+	}
+
+	/**
+	 * Set tag for filtering
+	 * @return string[]
+	 */
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:cancel' ];
 	}
 
 	/**
 	 * @throws Tamara_Exception
 	 */
 	public function handle() {
+		$this->before_handle();
+
 		if ( ! $this->check_prerequisites() ) {
 			return;
 		}
@@ -56,7 +78,7 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		$cancel_request = $this->tamara_wc_order->build_cancel_request();
 		$tamara_client_response = $this->tamara_client()->cancel_order( $cancel_request );
 
-		if ( ! is_object( $tamara_client_response ) ) {
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
 		}
 
@@ -80,18 +102,18 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 
 	/**
 	 * We do needed thing on failed scenario
-	 * @param string $tamara_error_message Error message from Tamara API
+	 * @param Tamara_Api_Error_VO $tamara_error_message Error message from Tamara API
 	 * @return void
 	 * @throws Tamara_Exception
 	 */
-	protected function process_failed_action( string $tamara_error_message ): void {
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$error_message = $this->_t( 'Error when trying to cancel order with Tamara.' );
-		$error_message .= "<br />\n";
+		$error_message .= "\n";
 		$error_message .= sprintf(
 			$this->_t( 'Error with Tamara API: %s' ),
-			$tamara_error_message
+			$tamara_api_error->error_message
 		);
 		$tamara_wc_order->add_tamara_order_note( $error_message );
 
@@ -107,6 +129,10 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 			! $this->tamara_wc_order->is_paid_with_tamara() ||
 			empty( $this->tamara_wc_order->get_tamara_order_id() )
 		) {
+			return false;
+		}
+
+		if ( $this->tamara_wc_order->get_tamara_cancel_id() ) {
 			return false;
 		}
 

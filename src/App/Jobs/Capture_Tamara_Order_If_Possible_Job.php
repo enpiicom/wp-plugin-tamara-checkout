@@ -14,8 +14,8 @@ use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
-use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Payment\CaptureResponse;
 
@@ -50,12 +50,33 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
 		$this->tamara_wc_order = new Tamara_WC_Order( wc_get_order( $this->wc_order_id ) );
+
+		parent::__construct();
+	}
+
+	/**
+	 * We want to retry this job if it is not a succesful one
+	 *  after this amount of seconds
+	 * @return int
+	 */
+	public function backoff() {
+		return 700;
+	}
+
+	/**
+	 * Set tag for filtering
+	 * @return string[]
+	 */
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:capture' ];
 	}
 
 	/**
 	 * @throws Tamara_Exception
 	 */
 	public function handle() {
+		$this->before_handle();
+
 		if ( ! $this->check_prerequisites() ) {
 			return;
 		}
@@ -63,9 +84,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 		$this->tamara_capture_request = $this->tamara_wc_order->build_capture_request();
 		$tamara_client_response = $this->tamara_client()->capture( $this->tamara_capture_request );
 
-		if (
-			! is_object( $tamara_client_response )
-		) {
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
 		}
 
@@ -82,27 +101,33 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 		$capture_id = $tamara_client_response->getCaptureId();
 		$tamara_wc_order->update_tamara_meta( 'tamara_capture_id', $tamara_client_response->getCaptureId() );
 
-		$tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Order fully captured successfully. Capture Id: %s, Captured Amount %s.' ), $this->tamara_capture_request->getCapture()->getTotalAmount()->getAmount(), $capture_id ) );
+		$tamara_wc_order->add_tamara_order_note(
+			sprintf(
+				$this->_t( 'Order fully captured successfully. Capture Id: %s, Captured Amount %s.' ),
+				$capture_id,
+				$this->tamara_capture_request->getCapture()->getTotalAmount()->getAmount()
+			)
+		);
 	}
 
 	/**
 	 * We do needed thing on failed scenario
 	 *
-	 * @param  string  $tamara_error_message  Error message from Tamara API
-	 *
+	 * @param  Tamara_Api_Error_VO $tamara_api_error  Error message from Tamara API
 	 * @return void
 	 * @throws Tamara_Exception
 	 */
-	protected function process_failed_action( string $tamara_error_message ): void {
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$error_message = $this->_t( 'Error when trying to capture order with Tamara.' );
-		$error_message .= "<br />\n";
+		$error_message .= "\n";
 		$error_message .= sprintf(
 			$this->_t( 'Error with Tamara API: %s' ),
-			$tamara_error_message
+			$tamara_api_error->error_message
 		);
 		$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
+
 		throw new Tamara_Exception( wp_kses_post( $error_message ) );
 	}
 

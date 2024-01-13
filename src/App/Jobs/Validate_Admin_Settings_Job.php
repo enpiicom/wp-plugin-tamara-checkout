@@ -4,35 +4,45 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
+use Enpii_Base\App\Support\Traits\Admin_Flash_Message_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Validator;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
-use WC_Payment_Gateway;
 
-class Validate_Admin_Settings_Job extends Base_Job {
+class Validate_Admin_Settings_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable;
+	use InteractsWithQueue;
+	use Queueable;
+	use SerializesModels;
 	use Tamara_Trans_Trait;
 	use Tamara_Checkout_Trait;
+	use Admin_Flash_Message_Trait;
 
-	protected $plugin;
 	protected $processed_post_data;
 
-	public function __construct( WC_Payment_Gateway $plugin ) {
-		$this->plugin = $plugin;
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api' ];
 	}
 
 	public function handle() {
+		// We must call this for the queue to be able to see
+		//  which site (blog) the job belongs to
+		$this->before_handle();
+
 		/** @var \Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway $this_plugin */
-		$this_plugin = $this->plugin;
+		$this_plugin = $this->tamara_gateway();
 
 		$post_data = $this_plugin->get_post_data();
 		$field_prefix = $this_plugin->plugin_id . $this_plugin->id . '_';
-		$this->processed_post_data = $this->process_post_data( $post_data );
-		$processed_post_data = $this->processed_post_data;
+		$processed_post_data = $this->process_post_data( $post_data );
 
 		// We want to use Laravel validation here instead of using function mentioned in
 		//  parent::get_field_value() to validate
@@ -45,13 +55,11 @@ class Validate_Admin_Settings_Job extends Base_Job {
 			$processed_post_data,
 			[
 				'sandbox_api_token' => [
-					'required',
 					function ( $attribute, $value, $fail_callback ) use ( $processed_post_data ) {
 						$this->validate_api_token_attribute( $processed_post_data, $attribute, $value, $fail_callback );
 					},
 				],
 				'live_api_token' => [
-					'required',
 					function ( $attribute, $value, $fail_callback ) use ( $processed_post_data ) {
 						$this->validate_api_token_attribute( $processed_post_data, $attribute, $value, $fail_callback );
 					},
@@ -69,7 +77,7 @@ class Validate_Admin_Settings_Job extends Base_Job {
 		if ( ! empty( $validator->errors() ) ) {
 			$errors = $validator->errors()->toArray();
 			foreach ( $errors as $error_field => $error_message ) {
-				Session::flash( 'warning', $error_message );
+				$this->add_admin_warning_message( $error_message );
 				unset( $post_data[ $field_prefix . $error_field ] );
 			}
 		}
@@ -79,7 +87,7 @@ class Validate_Admin_Settings_Job extends Base_Job {
 
 	protected function process_post_data( $post_data ) {
 		/** @var \Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway $this_plugin */
-		$this_plugin = $this->plugin;
+		$this_plugin = $this->tamara_gateway();
 
 		$field_prefix = $this_plugin->plugin_id . $this_plugin->id . '_';
 		$processed_post_data = $post_data;
@@ -123,16 +131,17 @@ class Validate_Admin_Settings_Job extends Base_Job {
 			}
 		}
 
+		if ( empty( $value ) ) {
+			return $fail_callback( sprintf( $this->_t( '%s: required.' ), ':attribute' ) );
+		}
+
 		// We validate the attribute `sandbox_api_token` and `live_api_token`
 		$api_token = $value;
-
-		$this->tamara_client()->init_tamara_client( $api_token, $api_url, $this->processed_post_data );
+		$this->tamara_client()->init_tamara_client( $api_token, $api_url, $processed_post_data );
 
 		$tamara_client_response = $this->tamara_client()->get_merchant_public_configs( new GetPublicConfigsRequest() );
 
-		if (
-			! is_object( $tamara_client_response )
-		) {
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			return $fail_callback( sprintf( $this->_t( '%s is incorrect.' ), ':attribute' ) );
 		}
 

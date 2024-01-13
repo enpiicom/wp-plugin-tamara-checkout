@@ -129,6 +129,25 @@ class Tamara_WC_Order {
 		return (string) $this->get_tamara_meta( 'tamara_cancel_id' );
 	}
 
+	/**
+	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 */
+	public function get_tamara_capture_id(): string {
+		$tamara_capture_id = $this->get_tamara_meta( 'tamara_capture_id' );
+
+		if ( empty( $tamara_capture_id ) ) {
+			$tamara_client_response = $this->get_tamara_order_by_reference_id();
+			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
+			$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
+			if ( ! empty( $capture_item ) ) {
+				$tamara_capture_id = $capture_item->getCaptureId();
+				$this->update_tamara_meta( 'tamara_capture_id', $tamara_capture_id );
+			}
+		}
+
+		return (string) $tamara_capture_id;
+	}
+
 	public function get_tamara_meta( $meta_key ) {
 		if ( ! empty( $this->tamara_meta_dto->$meta_key ) ) {
 			return $this->tamara_meta_dto->$meta_key;
@@ -190,20 +209,6 @@ class Tamara_WC_Order {
 	public function get_tamara_order_id_by_wc_order_id(): ?string {
 		$tamara_client_response = $this->get_tamara_order_by_reference_id();
 		return ! empty( $tamara_client_response->getOrderId() ) ? $tamara_client_response->getOrderId() : null;
-	}
-
-	/**
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
-	 */
-	public function get_tamara_capture_id(): ?string {
-		$tamara_client_response = $this->get_tamara_order_by_reference_id();
-		/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
-		$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
-		if ( ! empty( $capture_item ) ) {
-			return $capture_item->getCaptureId();
-		}
-
-		return null;
 	}
 
 	/**

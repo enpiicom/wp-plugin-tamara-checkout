@@ -7,7 +7,6 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Build_Payment_Gateway_Admin_Form_Fields_Query;
-use Tamara_Checkout\App\Queries\Process_Payment_With_Tamara_Query;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
@@ -108,8 +107,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * @return void
 	 */
 	public function process_admin_options(): void {
-		Validate_Admin_Settings_Job::dispatchSync( $this );
-
+		Validate_Admin_Settings_Job::dispatchSync();
 		$saved = parent::process_admin_options();
 		if ( $saved ) {
 			if ( $this->get_option( 'custom_log_message_enabled' ) && empty( $this->update_option( 'custom_log_message' ) ) ) {
@@ -118,18 +116,6 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 				$this->update_option( 'custom_log_message', '' );
 			}
 		}
-	}
-
-	/**
-	 * @inheritDoc
-	 * @throws \Exception
-	 */
-	public function process_payment( $wc_order_id ) {
-		return Process_Payment_With_Tamara_Query::execute_now(
-			wc_get_order( $wc_order_id ),
-			$this->payment_type,
-			$this->instalment
-		);
 	}
 
 	/**

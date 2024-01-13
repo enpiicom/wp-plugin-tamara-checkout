@@ -7,7 +7,7 @@ namespace Tamara_Checkout\App\Services;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\VOs\Tamara_Api_Response_VO;
@@ -97,7 +97,7 @@ class Tamara_Client {
 	 * @throws Exception
 	 */
 	public function register_webhook( RegisterWebhookRequest $client_request ) {
-		return $this->perform_remote_request_tmp( 'registerWebhook', $client_request );
+		return $this->perform_remote_request( 'registerWebhook', $client_request );
 	}
 
 	/**
@@ -211,7 +211,7 @@ class Tamara_Client {
 	 * @return Tamara_Api_Response_VO|mixed
 	 * @throws Exception
 	 */
-	protected function perform_remote_request_tmp( $remote_action, $client_request ) {
+	protected function perform_remote_request( $remote_action, $client_request ) {
 		try {
 			$api_response = $this->api_client->$remote_action( $client_request );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
@@ -221,41 +221,25 @@ class Tamara_Client {
 		}
 
 		if ( empty( $api_response ) ) {
-			return new Tamara_Api_Error_VO( [
-				'error_message' => $error_message,
-			] );
+			return new Tamara_Api_Error_VO(
+				[
+					'error_message' => $error_message,
+				] 
+			);
 		}
 
 		if ( ! $api_response->isSuccess() ) {
-			return new Tamara_Api_Error_VO( [
-				'error_message' => $this->build_client_response_errors( $api_response ),
-				'message' => $api_response->getMessage(),
-				'errors' => $api_response->getErrors(),
-				'status_code' => $api_response->getStatusCode(),
-			] );
+			return new Tamara_Api_Error_VO(
+				[
+					'error_message' => $this->build_client_response_errors( $api_response ),
+					'message' => $api_response->getMessage(),
+					'errors' => $api_response->getErrors(),
+					'status_code' => $api_response->getStatusCode(),
+				] 
+			);
 		}
 
 		return $api_response;
-	}
-
-	protected function perform_remote_request( $remote_action, $client_request ) {
-		try {
-			$client_response = $this->api_client->$remote_action( $client_request );
-		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
-		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
-		}
-
-		if ( empty( $client_response ) ) {
-			return $error_message;
-		}
-
-		if ( ! $client_response->isSuccess() ) {
-			return $this->build_client_response_errors( $client_response );
-		}
-
-		return $client_response;
 	}
 
 	protected function build_client_response_errors( ClientResponse $tamara_client_response ): string {
@@ -265,14 +249,18 @@ class Tamara_Client {
 		array_walk(
 			$errors,
 			function ( &$tmp_item ) {
-				$tmp_item = General_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
+				$tmp_item = Tamara_Checkout_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
 			}
 		);
-		$error_message = General_Helper::convert_message( $error_message );
-		$error_message .= "<br />\n";
-		$error_message .= implode( "<br />\n", $errors );
+		$error_message = Tamara_Checkout_Helper::convert_message( $error_message );
+		$error_message .= $error_message ? "\n" : '';
+		$error_message .= implode( "\n", $errors );
 
-		return $error_message;
+		if ( empty( $error_message ) ) {
+			$error_message = $tamara_client_response->getStatusCode();
+		}
+
+		return (string) $error_message;
 	}
 
 	protected function build_logger() {

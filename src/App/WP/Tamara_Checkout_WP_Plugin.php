@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP;
 
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
@@ -33,6 +34,7 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
  * @method static Tamara_Checkout_WP_Plugin wp_app_instance()
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
+	use Queue_Trait;
 
 	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
@@ -213,9 +215,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function tamara_gateway_register_webhook(): void {
 		try {
 			Register_Tamara_Webhook_Job::dispatchSync();
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			// We want to re-perform this job 7 mins later
-			Register_Tamara_Webhook_Job::dispatch()->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW )->delay(now()->addMinutes(7));
+			$this->enqueue_job_later( Register_Tamara_Webhook_Job::dispatch() );
+
 		}
 	}
 
@@ -386,7 +389,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function register_tamara_custom_order_statuses() {
-		Register_Tamara_Custom_Order_Statuses_Job::dispatchSync();
+		Register_Tamara_Custom_Order_Statuses_Job::execute_now();
 	}
 
 	/**
@@ -488,14 +491,18 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			return;
 		}
 
-		Capture_Tamara_Order_If_Possible_Job::dispatch(
-			[
-				'wc_order_id' => $wc_order_id,
-				'status_from' => $status_from,
-				'status_to' => $status_to,
-				'to_capture_status' => $to_capture_status,
-			]
-		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+		$args = [
+			'wc_order_id' => $wc_order_id,
+			'status_from' => $status_from,
+			'status_to' => $status_to,
+			'to_capture_status' => $to_capture_status,
+		];
+
+		try {
+			Capture_Tamara_Order_If_Possible_Job::dispatchSync( $args );
+		} catch ( Exception $e ) {
+			$this->enqueue_job_later( Capture_Tamara_Order_If_Possible_Job::dispatch( $args ) );
+		}
 	}
 
 	/**
@@ -515,14 +522,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			return;
 		}
 
-		Cancel_Tamara_Order_If_Possible_Job::dispatch(
-			[
-				'wc_order_id'      => $wc_order_id,
-				'status_from'      => $status_from,
-				'status_to'        => $status_to,
-				'to_cancel_status' => $to_cancel_status,
-			]
-		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+		$args = [
+			'wc_order_id' => $wc_order_id,
+			'status_from' => $status_from,
+			'status_to' => $status_to,
+			'to_cancel_status' => $to_cancel_status,
+		];
+		try {
+			Cancel_Tamara_Order_If_Possible_Job::dispatchSync( $args );
+		} catch ( Exception $e ) {
+			$this->enqueue_job_later( Cancel_Tamara_Order_If_Possible_Job::dispatch( $args ) );
+		}
 	}
 
 	/**
@@ -533,13 +543,15 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws RuntimeException
 	 */
 	public function refund_tamara_order_if_possible( $wc_order_refund, $refund_args ): void {
-		dev_error_log( 'wc_order_refund', $wc_order_refund, 'refund_args', $refund_args );
-		Refund_Tamara_Order_If_Possible_Job::dispatch(
-			[
-				'wc_order_refund' => $wc_order_refund,
-				'wc_order_id' => $refund_args['order_id'],
-				'refund_args' => $refund_args,
-			]
-		)->onConnection( 'database' )->onQueue( App_Const::QUEUE_LOW );
+		$args = [
+			'wc_order_refund' => $wc_order_refund,
+			'wc_order_id' => $refund_args['order_id'],
+			'refund_args' => $refund_args,
+		];
+		try {
+			Refund_Tamara_Order_If_Possible_Job::dispatchSync( $args );
+		} catch ( Exception $e ) {
+			$this->enqueue_job_later( Refund_Tamara_Order_If_Possible_Job::dispatch( $args ) );
+		}
 	}
 }

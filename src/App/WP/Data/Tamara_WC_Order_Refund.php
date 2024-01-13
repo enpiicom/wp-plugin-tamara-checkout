@@ -49,15 +49,15 @@ class Tamara_WC_Order_Refund extends Tamara_WC_Order {
 	public function build_refund_request(): RefundRequest {
 		$wc_order_refund = $this->wc_order_refund;
 		$wc_refund_total_amount = Tamara_Checkout_Helper::build_money_object(
-			abs( (int) $wc_order_refund->get_total() ),
+			abs( (float) $wc_order_refund->get_total() ),
 			$wc_order_refund->get_currency()
 		);
 		$wc_refund_shipping_amount = Tamara_Checkout_Helper::build_money_object(
-			abs( (int) $wc_order_refund->get_shipping_total() ),
+			abs( (float) $wc_order_refund->get_shipping_total() ),
 			$wc_order_refund->get_currency()
 		);
 		$wc_refund_tax_amount = Tamara_Checkout_Helper::build_money_object(
-			abs( (int) $wc_order_refund->get_total_tax() ),
+			abs( (float) $wc_order_refund->get_total_tax() ),
 			$wc_order_refund->get_currency()
 		);
 		$wc_refund_discount_amount = Tamara_Checkout_Helper::build_money_object(
