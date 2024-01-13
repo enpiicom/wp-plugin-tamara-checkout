@@ -125,4 +125,38 @@ class Tamara_Checkout_Helper {
 			$currency
 		);
 	}
+
+	/**
+	 * Get messages translated
+	 *
+	 * @param $tamara_message
+	 *
+	 * @return string
+	 * @throws \Exception
+	 */
+	public static function convert_message( $tamara_message ): string {
+		return ! empty( static::get_error_map()[ $tamara_message ] ) ?
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( static::get_error_map()[ $tamara_message ] ) :
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
+	}
+
+	/**
+	 * Common error codes when calling create checkout session API
+	 *
+	 * @throws \Exception
+	 */
+	public static function get_error_map(): array {
+		return [
+			'total_amount_invalid_limit_24hrs_gmv' => 'We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method.',
+			'tamara_disabled' => 'Tamara is currently unavailable, please try again later.',
+			'consumer_invalid_phone_number' => 'Invalid Consumer Phone Number',
+			'invalid_phone_number' => 'Invalid Phone Number.',
+			'total_amount_invalid_currency' => 'We do not support cross currencies. Please select the correct currency for your country.',
+			'billing_address_invalid_phone_number' => 'Invalid Billing Address Phone Number.',
+			'shipping_address_invalid_phone_number' => 'Invalid Shipping Address Phone Number.',
+			'total_amount_invalid_limit' => 'The grand total of order is over/under limit of Tamara.',
+			'currency_unsupported' => 'We do not support cross currencies. Please select the correct currency for your country.',
+			'not_supported_delivery_country' => 'We do not support your delivery country.',
+		];
+	}
 }

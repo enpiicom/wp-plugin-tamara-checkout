@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
-use Enpii_Base\App\Exceptions\Simple_Exception;
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Exception;
@@ -13,10 +12,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use InvalidArgumentException;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
-use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
-use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order_Refund;
+use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Payment\RefundResponse;
 
 class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable;
@@ -25,19 +28,56 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	use SerializesModels;
 	use Config_Trait;
 	use Tamara_Trans_Trait;
-
-	protected $wc_refund;
-	protected $wc_order_id;
-	protected $tamara_wc_order;
+	use Tamara_Checkout_Trait;
 
 	/**
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
-	 * @throws \Exception
+	 * @var \WC_Order_Refund
+	 */
+	protected $wc_order_refund;
+	protected $wc_order_id;
+	protected $refund_args;
+
+	/**
+	 * @var Tamara_WC_Order_Refund
+	 */
+	protected $tamara_wc_order_refund;
+
+	/**
+	 *
+	 * @var RefundRequest
+	 */
+	protected $tamara_refund_request;
+
+	/**
+	 * Constructor
+	 * @param array $config
+	 * @return void
+	 * @throws InvalidArgumentException
+	 * @throws Exception
+	 * @throws Tamara_Exception
 	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
+		$this->tamara_wc_order_refund = new Tamara_WC_Order_Refund( $this->wc_order_refund, $this->wc_order_id );
 
-		$this->tamara_wc_order = new Tamara_WC_Order( wc_get_order( $this->wc_order_id ), $this->wc_refund );
+		parent::__construct();
+	}
+
+	/**
+	 * We want to retry this job if it is not a succesful one
+	 *  after this amount of seconds
+	 * @return int
+	 */
+	public function backoff() {
+		return 700;
+	}
+
+	/**
+	 * Set tag for filtering
+	 * @return string[]
+	 */
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:refund' ];
 	}
 
 	/**
@@ -45,77 +85,82 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 * @throws \Exception
 	 */
 	public function handle() {
-		if ( ! $this->check_refund_prerequisites() ) {
+		$this->before_handle();
+
+		if ( ! $this->check_prerequisites() ) {
 			return;
 		}
-		$refund_request = $this->tamara_wc_order->build_refund_request();
-		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->refund( $refund_request );
 
-		if (
-			! is_object( $tamara_client_response )
-		) {
-			$this->process_refunded_failed( $tamara_client_response );
+		$this->tamara_refund_request = $this->tamara_wc_order_refund->build_refund_request();
+		$tamara_client_response = $this->tamara_client()->refund( $this->tamara_refund_request );
+
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
+			$this->process_failed_action( $tamara_client_response );
 		}
 
-		if ( $tamara_client_response->isSuccess() ) {
-			$this->process_refunded_successfully();
-		}
+		$this->process_successful_action( $tamara_client_response );
 	}
 
 	/**
 	 * We do needed thing on successful scenario
 	 */
-	protected function process_refunded_successfully(): void {
-		$tamara_wc_refund = $this->wc_refund;
-		$tamara_wc_order = $this->tamara_wc_order;
+	protected function process_successful_action( RefundResponse $tamara_client_response ): void {
+		$response_tamara_refunds = $tamara_client_response->getRefunds();
+		$latest_response_tamara_refund = end( $response_tamara_refunds );
 
-		$order_note = 'Tamara - ';
-		$order_note .= sprintf(
-			$this->_t( 'Order has been refunded successfully - WC Refund ID: #%1$s' ),
-			$tamara_wc_refund->get_id()
+		$request_tamara_refunds = $this->tamara_refund_request->getRefunds();
+		$latest_request_tamara_refund = end( $request_tamara_refunds );
+
+		$this->tamara_wc_order_refund->add_tamara_refund_meta(
+			$latest_response_tamara_refund->getRefundId(),
+			$latest_response_tamara_refund->getCaptureId()
 		);
-		$tamara_wc_order->get_wc_order()->add_order_note( $order_note );
+
+		$order_note = sprintf(
+			$this->_t( 'Order has been refunded successfully. Capture Id: %1$s, Refund Id: %2$s, Refunded amount: %3$s.' ),
+			$latest_response_tamara_refund->getCaptureId(),
+			$latest_response_tamara_refund->getRefundId(),
+			$latest_request_tamara_refund->getTotalAmount()->getAmount()
+		);
+		$this->tamara_wc_order_refund->add_tamara_order_note( $order_note );
 	}
 
 	/**
 	 * We do needed thing on failed scenario
-	 * @param string $tamara_error_message Error message from Tamara API
+	 * @param Tamara_Api_Error_VO $tamara_api_error Error message from Tamara API
 	 * @return void
-	 * @throws Exception
+	 * @throws Tamara_Exception
 	 */
-	protected function process_refunded_failed( string $tamara_error_message ): void {
-		$tamara_wc_order = $this->tamara_wc_order;
-
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
 		$error_message = $this->_t( 'Error when trying to refund with Tamara.' );
-		$error_message .= "<br />\n";
+		$error_message .= "\n";
 		$error_message .= sprintf(
 			$this->_t( 'Error with Tamara API: %s' ),
-			$tamara_error_message
+			$tamara_api_error->error_message
 		);
-		$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
+		$this->tamara_wc_order_refund->add_tamara_order_note( $error_message );
+
 		throw new Tamara_Exception( wp_kses_post( $error_message ) );
 	}
 
 	/**
 	 * We want to check if we want to start the refund request or not
-	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
+	 * @throws Tamara_Exception
 	 */
-	protected function check_refund_prerequisites(): bool {
-		$wc_order_id = $this->wc_order_id;
-		$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
-		$tamara_capture_id = $tamara_wc_order->get_tamara_capture_id();
-
-		if ( ! $tamara_wc_order->is_paid_with_tamara() ) {
+	protected function check_prerequisites(): bool {
+		$tamara_wc_order_refund = $this->tamara_wc_order_refund;
+		if ( ! $tamara_wc_order_refund->is_paid_with_tamara() ) {
 			return false;
 		}
 
+		$tamara_capture_id = $tamara_wc_order_refund->get_tamara_capture_id();
 		if ( empty( $tamara_capture_id ) ) {
-			$error_message = $this->_t( 'Tamara - Unable to create a refund. Capture ID not found.' );
-			$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
+			$error_message = $this->_t( 'Unable to create a refund. Capture ID not found.' );
+			$tamara_wc_order_refund->add_tamara_order_note( $error_message );
+
 			throw new Tamara_Exception( wp_kses_post( $error_message ) );
 		}
 
-		$tamara_wc_order->reupdate_meta_for_tamara_order_id();
 		return true;
 	}
 }

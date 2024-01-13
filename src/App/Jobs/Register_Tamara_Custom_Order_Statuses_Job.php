@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Jobs;
 
 use Enpii_Base\Foundation\Shared\Base_Job;
-use Illuminate\Foundation\Bus\Dispatchable;
+use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 
 class Register_Tamara_Custom_Order_Statuses_Job extends Base_Job {
-	use Dispatchable;
+	use Executable_Trait;
 	use Tamara_Trans_Trait;
 
 	public function handle() {
