@@ -117,16 +117,16 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		if ( $this->tamara_wc_order->get_tamara_instalments() ) {
 			$update_order_status_note = 'Tamara - ' . sprintf(
-				$this->_t( 'Payment Status: %s, Payment Type: %s.' ),
-				$this->tamara_wc_order->get_tamara_payment_status(),
-				$this->tamara_wc_order->get_tamara_payment_type()
-			);
-		} else {
-			$update_order_status_note = 'Tamara - ' . sprintf(
 				$this->_t( 'Payment Status: %s, Payment Type: %s, Payment Instalments: %s.' ),
 				$this->tamara_wc_order->get_tamara_payment_status(),
 				$this->tamara_wc_order->get_tamara_payment_type(),
 				$this->tamara_wc_order->get_tamara_instalments()
+			);
+		} else {
+			$update_order_status_note = 'Tamara - ' . sprintf(
+				$this->_t( 'Payment Status: %s, Payment Type: %s.' ),
+				$this->tamara_wc_order->get_tamara_payment_status(),
+				$this->tamara_wc_order->get_tamara_payment_type()
 			);
 		}
 		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, true );
