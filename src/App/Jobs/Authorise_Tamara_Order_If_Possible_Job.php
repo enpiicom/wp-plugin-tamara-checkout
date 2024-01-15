@@ -92,7 +92,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$wc_order = wc_get_order( $this->wc_order_id );
 		$settings = $this->tamara_settings();
 
-		$new_order_status = $settings->get_payment_authorised_failed_status();
+		$new_order_status = $settings->tamara_authorise_failure;
 		$update_order_status_note = 'Tamara - ';
 		$update_order_status_note .= $this->_t( 'Order authorised failed.' );
 		$wc_order->update_status( $new_order_status, $update_order_status_note, true );
@@ -112,7 +112,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$this->tamara_wc_order->get_wc_order()->set_payment_method( $this->default_payment_gateway_id() );
 		$this->tamara_wc_order->get_wc_order()->save();
 
-		$new_order_status = $this->tamara_settings()->get_payment_authorised_done_status();
+		$new_order_status = $this->tamara_settings()->tamara_authorise_done;
 		$this->tamara_wc_order->add_tamara_order_note( $this->_t( 'Order authorised successfully.' ) );
 
 		if ( $this->tamara_wc_order->get_tamara_instalments() ) {
