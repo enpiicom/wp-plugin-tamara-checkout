@@ -12,6 +12,7 @@ use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment_Query;
 use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Address;
 use Tamara_Checkout\Deps\Tamara\Model\Order\Consumer;
@@ -232,7 +233,7 @@ class Tamara_WC_Order {
 		$get_order_by_reference_id_request = new GetOrderByReferenceIdRequest( (string) $wc_order_id );
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
 
-		if ( ! is_object( $tamara_client_response ) ) {
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			throw new Tamara_Exception( wp_kses_post( $tamara_client_response ) );
 		}
 
