@@ -225,7 +225,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'description' => __( 'Configure Tamara Advanced Settings <br> <p class="tamara-highlight">Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.</p>' )
 				. '<div class="tamara-advanced-settings-manage button-primary">' . $this->_t( 'Show Tamara Advanced Settings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
-			'crobjob_enabled' => [
+			'cronjob_enabled' => [
 				'title' => $this->_t( 'Enable Cron Job' ),
 				'type' => 'checkbox',
 				'description' => $this->_t( 'In you tick on this setting, Tamara will use a cron-job to find all completed orders that has not been verified but not authorised or not captured within 180 days and force them to be authorised or captured. It fires an asynchronous call on Admin request to perform this action.' ),

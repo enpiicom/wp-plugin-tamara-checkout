@@ -10,8 +10,10 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
 use RuntimeException;
+use Tamara_Checkout\App\Jobs\Authorise_Tamara_Stuck_Approved_Orders_Job;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Capture_Tamara_Stuck_Authorised_Orders_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
@@ -151,6 +153,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				10,
 				2
 			);
+
+			// For WP App
+			if ( $this->get_tamara_gateway_service()->get_settings()->cronjob_enabled ) {
+				add_action( App_Const::ACTION_WP_APP_WEB_WORKER, [ $this, 'process_tamara_stuck_orders' ] );
+			}
 		}
 	}
 
@@ -553,5 +560,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		} catch ( Exception $e ) {
 			$this->enqueue_job_later( Refund_Tamara_Order_If_Possible_Job::dispatch( $args ) );
 		}
+	}
+
+	public function process_tamara_stuck_orders(): void {
+		Authorise_Tamara_Stuck_Approved_Orders_Job::dispatchSync();
+		Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
 	}
 }
