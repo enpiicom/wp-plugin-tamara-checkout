@@ -61,22 +61,14 @@ class Update_Tamara_Webhook_Event_Job extends Base_Job implements ShouldQueue {
 		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:' . str_replace( '-', '_', sanitize_title( $this->event_type ) ) ];
 	}
 
+	/**
+	 * We want to add notes for the order whenever receiving a webhook event from Tamara
+	 */
 	public function handle() {
 		$this->before_handle();
 
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
-		$this->tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Tamara webhook event `%s` for this order has just happened' ), $this->event_type ) );
-
-		$new_order_status = '';
-		switch ( $this->event_type ) {
-			case 'order_canceled':
-			case 'order_expired':
-				$new_order_status = $this->tamara_settings()->tamara_payment_cancel;
-				break;
-			case 'order_declined':
-				$new_order_status = $this->tamara_settings()->tamara_payment_failure;
-				break;
-		}
+		$this->tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Tamara webhook event `%s` for this order has just happened. Tamara Order Id `%s`' ), $this->event_type, $this->tamara_order_id ) );
 
 		if ( ! empty( $new_order_status ) ) {
 			$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status );

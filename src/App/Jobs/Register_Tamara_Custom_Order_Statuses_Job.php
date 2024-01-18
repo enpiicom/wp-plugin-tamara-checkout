@@ -14,31 +14,31 @@ class Register_Tamara_Custom_Order_Statuses_Job extends Base_Job {
 
 	public function handle() {
 		register_post_status(
-			'wc-tamara-p-canceled',
+			'wc-tamara-canceled',
 			[
-				'label' => $this->_x( 'Tamara Payment Cancelled', 'Order status' ),
+				'label' => $this->_x( 'Tamara Cancelled', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
 				'label_count' => $this->_n_noop(
-					'Tamara Payment Cancelled <span class="count">(%s)</span>',
-					'Tamara Payment Cancelled <span class="count">(%s)</span>'
+					'Tamara Cancelled <span class="count">(%s)</span>',
+					'Tamara Cancelled <span class="count">(%s)</span>'
 				),
 			]
 		);
 
 		register_post_status(
-			'wc-tamara-p-failed',
+			'wc-tamara-failed',
 			[
-				'label' => $this->_x( 'Tamara Payment Failed', 'Order status' ),
+				'label' => $this->_x( 'Tamara Failed', 'Order status' ),
 				'public' => true,
 				'exclude_from_search' => false,
 				'show_in_admin_all_list' => true,
 				'show_in_admin_status_list' => true,
 				'label_count' => $this->_n_noop(
-					'Tamara Payment Failed <span class="count">(%s)</span>',
-					'Tamara Payment Failed <span class="count">(%s)</span>'
+					'Tamara Failed <span class="count">(%s)</span>',
+					'Tamara Failed <span class="count">(%s)</span>'
 				),
 			]
 		);

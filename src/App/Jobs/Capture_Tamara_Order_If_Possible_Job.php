@@ -143,7 +143,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 		);
 		$tamara_wc_order->get_wc_order()->add_order_note( $error_message );
 
-		$new_order_status = $this->tamara_settings()->tamara_capture_failure;
+		$new_order_status = $this->tamara_settings()->payment_captured_failed_status;
 		$tamara_wc_order->get_wc_order()->update_status( $new_order_status );
 
 		throw new Tamara_Exception( wp_kses_post( $error_message ) );

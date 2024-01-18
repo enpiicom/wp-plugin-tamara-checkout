@@ -523,7 +523,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
-		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->status_to_capture_tamara_payment;
+		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->order_status_to_capture_tamara_payment;
 
 		if ( $to_capture_status !== 'wc-' . $status_to ) {
 			return;
@@ -554,7 +554,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
-		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->status_to_cancel_tamara_payment;
+		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->order_status_to_cancel_tamara_payment;
 
 		if ( $to_cancel_status !== 'wc-' . $status_to ) {
 			return;

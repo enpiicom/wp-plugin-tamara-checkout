@@ -55,7 +55,7 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 
 		/** @var \Illuminate\Database\Eloquent\Builder $pending_orders_query */
 		$wc_status_pending = 'wc-pending';
-		$wc_status_tamara_authorise_failure = $this->tamara_gateway()->get_settings()->tamara_authorise_failure;
+		$wc_status_payment_authorised_failed = $this->tamara_gateway()->get_settings()->order_status_when_tamara_authorisation_fails;
 		$pending_orders_query = WC_Order_Model::site( $site_id )->where(
 			[
 				[ 'type', 'shop_order' ],
@@ -64,10 +64,10 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 			]
 		)
 		->where(
-			function ( $query ) use ( $wc_status_pending, $wc_status_tamara_authorise_failure ) {
+			function ( $query ) use ( $wc_status_pending, $wc_status_payment_authorised_failed ) {
 				/** @var \Illuminate\Database\Eloquent\Builder $query */
 				$query->where( 'status', $wc_status_pending )
-					->orWhere( 'status', $wc_status_tamara_authorise_failure );
+					->orWhere( 'status', $wc_status_payment_authorised_failed );
 			}
 		)
 		->orderBy( 'date_created_gmt', 'asc' )

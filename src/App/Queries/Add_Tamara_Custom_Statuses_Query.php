@@ -20,12 +20,12 @@ class Add_Tamara_Custom_Statuses_Query extends Base_Query {
 
 	public function handle() {
 		$order_statuses = $this->order_statuses;
-		$order_statuses['wc-tamara-p-canceled'] = $this->_x(
-			'Tamara Payment Cancelled',
+		$order_statuses['wc-tamara-canceled'] = $this->_x(
+			'Tamara Cancelled',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-p-failed'] = $this->_x(
-			'Tamara Payment Failed',
+		$order_statuses['wc-tamara-failed'] = $this->_x(
+			'Tamara Failed',
 			'Order status'
 		);
 		$order_statuses['wc-tamara-c-failed'] = $this->_x(
