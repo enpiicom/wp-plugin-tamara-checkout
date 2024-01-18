@@ -107,7 +107,7 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_cronjob_enabled(): bool {
-		return ! empty( $this->cronjob_enabled ) || $this->cronjob_enabled === 'no' ? false : true;
+		return empty( $this->cronjob_enabled ) || $this->cronjob_enabled === 'no' ? false : true;
 	}
 
 	public function get_force_checkout_phone(): bool {
