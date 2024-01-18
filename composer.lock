@@ -4,8 +4,70 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f3e2e48a5580ef9053b59f3ef6b5b597",
-    "packages": [],
+    "content-hash": "15b2434a6e09942c223118454b6b9e84",
+    "packages": [
+        {
+            "name": "enpii/enpii-base",
+            "version": "dev-wp-release",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
+                "reference": "89232ea017e5a84a9e43767543b8f9591a144d4c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/89232ea017e5a84a9e43767543b8f9591a144d4c",
+                "reference": "89232ea017e5a84a9e43767543b8f9591a144d4c",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0.0"
+            },
+            "type": "wordpress-muplugin",
+            "extra": {
+                "exclude-from-files": [
+                    "laravel/framework/src/Illuminate/Foundation/helpers.php"
+                ]
+            },
+            "autoload": {
+                "files": [
+                    "./src/Foundation/Support/helpers-utils.php",
+                    "./src/Foundation/helpers-wp-app.php",
+                    "./src/Foundation/helpers-overrides.php",
+                    "./enpii-base-bootstrap.php",
+                    "./enpii-base-init.php"
+                ],
+                "psr-4": {
+                    "Enpii_Base\\": "src",
+                    "Enpii_Base\\Deps\\": "src-deps"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trac Nguyen",
+                    "email": "npbtrac@yahoo.com",
+                    "homepage": "https://enpii.com/users/trac-nguyen",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Loi Le",
+                    "homepage": "https://enpii.com/users/loi-le",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The base plugin to have powerful Laravel development on WordPress",
+            "homepage": "https://enpii.com/wp-plugin-enpii-base",
+            "support": {
+                "issues": "https://github.com/enpiicom/wp-plugin-enpii-base/issues",
+                "source": "https://github.com/enpiicom/wp-plugin-enpii-base/tree/wp-release"
+            },
+            "time": "2024-01-09T09:25:04+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "10up/wp_mock",
@@ -2337,16 +2399,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.8.0",
+            "version": "3.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "5805f7a4e4958dbb5e944ef1e6edae0a303765e7"
+                "reference": "14f5fff1e64118595db5408e946f3a22c75807f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/5805f7a4e4958dbb5e944ef1e6edae0a303765e7",
-                "reference": "5805f7a4e4958dbb5e944ef1e6edae0a303765e7",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/14f5fff1e64118595db5408e946f3a22c75807f7",
+                "reference": "14f5fff1e64118595db5408e946f3a22c75807f7",
                 "shasum": ""
             },
             "require": {
@@ -2356,11 +2418,11 @@
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.3.4"
             },
             "bin": [
-                "bin/phpcs",
-                "bin/phpcbf"
+                "bin/phpcbf",
+                "bin/phpcs"
             ],
             "type": "library",
             "extra": {
@@ -2413,7 +2475,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2023-12-08T12:32:31+00:00"
+            "time": "2024-01-11T20:47:48+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -2534,15 +2596,14 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "enpii/enpii-base": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.3|^8.0"
     },
     "platform-dev": [],
-    "platform-overrides": {
-        "php": "7.3.0"
-    },
     "plugin-api-version": "2.3.0"
 }

@@ -27,6 +27,7 @@
       }
     ],
     "require": {
+      "enpii/enpii-base": "dev-wp-release",
       "php": "^7.3|^8.0"
     },
     "replace": {
@@ -55,9 +56,6 @@
       }
     },
     "config": {
-      "platform": {
-        "php": "7.3.0"
-      },
       "platform-check": false,
       "allow-plugins": {
         "dealerdirect/phpcodesniffer-composer-installer": true
