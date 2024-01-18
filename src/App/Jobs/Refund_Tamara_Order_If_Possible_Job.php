@@ -96,6 +96,8 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
+
+			return;
 		}
 
 		$this->process_successful_action( $tamara_client_response );

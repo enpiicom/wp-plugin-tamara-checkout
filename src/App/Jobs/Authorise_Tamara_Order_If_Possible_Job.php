@@ -95,6 +95,8 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO && $tamara_client_response->status_code !== 409 ) {
 			$this->process_failed_action();
+
+			return;
 		}
 
 		$this->process_successful_action();
@@ -110,7 +112,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$new_order_status = $settings->tamara_authorise_failure;
 		$update_order_status_note = 'Tamara - ';
 		$update_order_status_note .= $this->_t( 'Order authorised failed.' );
-		$wc_order->update_status( $new_order_status, $update_order_status_note, true );
+		$wc_order->update_status( $new_order_status, $update_order_status_note, false );
 
 		throw new Tamara_Exception( wp_kses_post( $this->_t( 'Order authorised failed.' ) ) );
 	}
@@ -144,7 +146,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 				$this->tamara_wc_order->get_tamara_payment_type()
 			);
 		}
-		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, true );
+		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, false );
 	}
 
 	/**

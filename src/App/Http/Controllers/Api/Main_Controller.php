@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Update_Tamara_Webhook_Event_Job;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\Deps\Http\Client\Exception;
 
@@ -116,7 +117,29 @@ class Main_Controller extends Base_Controller {
 		$webhook_message = $this->tamara_notification()->process_webhook_message();
 
 		switch ( $webhook_message->getEventType() ) {
-			case 'order_approved':
+			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CANCELED:
+			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_EXPIRED:
+				$this->process_order_canceled_event(
+					$webhook_message->getOrderReferenceId(),
+					$webhook_message->getOrderId(),
+					$webhook_message->getEventType()
+				);
+				break;
+			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_DECLINED:
+				$this->process_order_declined_event(
+					$webhook_message->getOrderReferenceId(),
+					$webhook_message->getOrderId(),
+					$webhook_message->getEventType()
+				);
+				break;
+			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CAPTURED:
+				$this->process_order_captured_event(
+					$webhook_message->getOrderReferenceId(),
+					$webhook_message->getOrderId(),
+					$webhook_message->getEventType()
+				);
+				break;
+			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED:
 				$this->process_authorise_tamara_order( $webhook_message->getOrderReferenceId(), $webhook_message->getOrderId() );
 				break;
 			default:
@@ -153,6 +176,32 @@ class Main_Controller extends Base_Controller {
 			Authorise_Tamara_Order_If_Possible_Job::dispatchSync( $args );
 		} catch ( Exception $e ) {
 			$this->enqueue_job_later( Authorise_Tamara_Order_If_Possible_Job::dispatch( $args ) );
+		}
+	}
+
+	protected function process_order_canceled_event( $wc_order_id, $tamara_order_id, $event_type ) {
+		$$tamara_wc_order = $this->build_tamara_wc_order( $wc_order_id );
+		$tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Process Tamara webhook event `%s` for Tamara Order Id: %s' ), $event_type, $tamara_order_id ) );
+
+		$new_order_status = $this->tamara_gateway()->get_settings()->tamara_payment_cancel;
+		$tamara_wc_order->get_wc_order()->update_status( $new_order_status );
+	}
+
+	protected function process_order_declined_event( $wc_order_id, $tamara_order_id, $event_type ) {
+		$$tamara_wc_order = $this->build_tamara_wc_order( $wc_order_id );
+		$tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Process Tamara webhook event `%s` for Tamara Order Id: %s' ), $event_type, $tamara_order_id ) );
+
+		$new_order_status = $this->tamara_gateway()->get_settings()->tamara_payment_failure;
+		$tamara_wc_order->get_wc_order()->update_status( $new_order_status );
+	}
+
+	protected function process_order_captured_event( $wc_order_id, $tamara_order_id, $event_type ) {
+		$new_order_status = $this->tamara_gateway()->get_settings()->status_to_capture_tamara_payment;
+
+		$tamara_wc_order = $this->build_tamara_wc_order( $wc_order_id );
+		if ( 'wc-' . $tamara_wc_order->get_wc_order()->get_status() !== $new_order_status ) {
+			$tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Process Tamara webhook event `%s` for Tamara Order Id: %s' ), $event_type, $tamara_order_id ) );
+			$tamara_wc_order->get_wc_order()->update_status( $new_order_status );
 		}
 	}
 

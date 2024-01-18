@@ -15,10 +15,12 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 
 /**
- * We want to search for processing orders that are paid and captured by Tamara
- *  then we try to update the order to the correct status
+ * We want to search for orders that have status `to capture` or `capture failed`
+ *  that haven't been captured successfully
+ *  then we try to re-capture them
  * @package Tamara_Checkout\App\Jobs
  */
 class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements ShouldQueue {
@@ -55,24 +57,37 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 
 		/** @var \Illuminate\Database\Eloquent\Builder $pending_orders_query */
 		$wc_status_to_capture = $this->tamara_gateway()->get_settings()->status_to_capture_tamara_payment;
-		$to_capture_orders_query = WC_Order_Model::site( $site_id )->where(
+		$wc_status_tamara_capture_failure = $this->tamara_gateway()->get_settings()->tamara_capture_failure;
+		$to_capture_orders_query = WC_Order_Model::site( $site_id )
+		->where(
 			[
 				[ 'type', 'shop_order' ],
-				[ 'status', $wc_status_to_capture ],
 				[ 'date_created_gmt', '>=', now()->subDays( 30 )->startOfDay() ],
 				[ 'payment_method', 'LIKE', $this->default_payment_gateway_id() . '%' ],
 			]
-		)->limit( 7 );
+		)
+		->where(
+			function ( $query ) use ( $wc_status_to_capture, $wc_status_tamara_capture_failure ) {
+				/** @var \Illuminate\Database\Eloquent\Builder $query */
+				$query->where( 'status', $wc_status_to_capture )
+					->orWhere( 'status', $wc_status_tamara_capture_failure );
+			}
+		)
+		->orderBy( 'date_created_gmt', 'asc' )
+		->limit( 7 );
 
 		foreach ( $to_capture_orders_query->get() as $wc_order_model ) {
-			try {
-				Capture_Tamara_Order_If_Possible_Job::dispatchSync(
-					[
-						'wc_order_id' => $wc_order_model->id,
-					]
-				);
-			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			} catch ( Exception $e ) {
+			$tamara_wc_order = $this->build_tamara_wc_order( $wc_order_model->id );
+			if ( ! $tamara_wc_order->get_tamara_capture_id() ) {
+				try {
+					Capture_Tamara_Order_If_Possible_Job::dispatchSync(
+						[
+							'wc_order_id' => $wc_order_model->id,
+						]
+					);
+				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( Exception $e ) {
+				}
 			}
 		}
 	}

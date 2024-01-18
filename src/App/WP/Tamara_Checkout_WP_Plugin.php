@@ -9,6 +9,7 @@ use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use RuntimeException;
 use Tamara_Checkout\App\Jobs\Authorise_Tamara_Stuck_Approved_Orders_Job;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
@@ -153,6 +154,36 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				10,
 				2
 			);
+
+			if ( $this->get_tamara_gateway_service()->get_settings()->force_checkout_phone ) {
+				add_filter(
+					'woocommerce_billing_fields',
+					[ $this, 'force_billing_address_phone_field' ],
+					1001,
+					2
+				);
+				add_filter(
+					'woocommerce_shipping_fields',
+					[ $this, 'force_shipping_address_phone_field' ],
+					1001,
+					2
+				);
+			}
+
+			if ( $this->get_tamara_gateway_service()->get_settings()->force_checkout_email ) {
+				add_filter(
+					'woocommerce_billing_fields',
+					[ $this, 'force_billing_address_email_field' ],
+					1001,
+					2
+				);
+				add_filter(
+					'woocommerce_shipping_fields',
+					[ $this, 'force_shipping_address_email_field' ],
+					1001,
+					2
+				);
+			}
 
 			// For WP App
 			if ( $this->get_tamara_gateway_service()->get_settings()->cronjob_enabled ) {
@@ -562,8 +593,102 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		}
 	}
 
+	/**
+	 * We want to process Tamara orders that being updated to specific statuses
+	 *  but haven't had corresponding statuses on Tamara side
+	 * @return void
+	 * @throws BindingResolutionException
+	 */
 	public function process_tamara_stuck_orders(): void {
 		Authorise_Tamara_Stuck_Approved_Orders_Job::dispatchSync();
 		Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
+	}
+
+	/**
+	 * As Phone field is mandatory for Tamara checking out
+	 *  therefore, we need to put back the default Phone field
+	 * @param mixed $fields
+	 * @param mixed $country
+	 * @return array
+	 */
+	public function force_billing_address_phone_field( $fields, $country ): array {
+		if ( is_wc_endpoint_url( 'edit-address' ) || ! empty( $fields['billing_phone'] ) ) {
+			return $fields;
+		} elseif ( empty( $fields['billing_phone'] ) ) {
+			$fields['billing_phone'] = [
+				'label' => __( 'Phone', 'woocommerce' ),
+				'required' => true,
+			];
+
+			return $fields;
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * As Phone field is mandatory for Tamara checking out
+	 *  therefore, we need to put back the default Phone field
+	 * @param mixed $fields
+	 * @param mixed $country
+	 * @return array
+	 */
+	public function force_shipping_address_phone_field( $fields, $country ): array {
+		if ( is_wc_endpoint_url( 'edit-address' ) || ! empty( $fields['shipping_phone'] ) ) {
+			return $fields;
+		} elseif ( empty( $fields['shipping_phone'] ) ) {
+			$fields['shipping_phone'] = [
+				'label' => __( 'Phone', 'woocommerce' ),
+				'required' => true,
+			];
+
+			return $fields;
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * As Email field is mandatory for Tamara checking out
+	 *  therefore, we need to put back the default Email field
+	 * @param mixed $fields
+	 * @param mixed $country
+	 * @return array
+	 */
+	public function force_billing_address_email_field( $fields, $country ): array {
+		if ( is_wc_endpoint_url( 'edit-address' ) || ! empty( $fields['billing_email'] ) ) {
+			return $fields;
+		} elseif ( empty( $fields['billing_email'] ) ) {
+			$fields['billing_email'] = [
+				'label' => __( 'Email', 'woocommerce' ),
+				'required' => true,
+			];
+
+			return $fields;
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * As Email field is mandatory for Tamara checking out
+	 *  therefore, we need to put back the default Email field
+	 * @param mixed $fields
+	 * @param mixed $country
+	 * @return array
+	 */
+	public function force_shipping_address_email_field( $fields, $country ): array {
+		if ( is_wc_endpoint_url( 'edit-address' ) || ! empty( $fields['shipping_email'] ) ) {
+			return $fields;
+		} elseif ( empty( $fields['shipping_email'] ) ) {
+			$fields['shipping_email'] = [
+				'label' => __( 'Email', 'woocommerce' ),
+				'required' => true,
+			];
+
+			return $fields;
+		}
+
+		return $fields;
 	}
 }

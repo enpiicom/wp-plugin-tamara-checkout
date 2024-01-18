@@ -80,6 +80,8 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
+
+			return;
 		}
 
 		// If Tamara Client returns an object, that would be a successful object

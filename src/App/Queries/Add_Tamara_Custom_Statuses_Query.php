@@ -32,20 +32,8 @@ class Add_Tamara_Custom_Statuses_Query extends Base_Query {
 			'Tamara Capture Failed',
 			'Order status'
 		);
-		$order_statuses['wc-tamara-a-done'] = $this->_x(
-			'Tamara Authorise Done',
-			'Order status'
-		);
 		$order_statuses['wc-tamara-a-failed'] = $this->_x(
 			'Tamara Authorise Failed',
-			'Order status'
-		);
-		$order_statuses['wc-tamara-o-canceled'] = $this->_x(
-			'Tamara Order Cancelled',
-			'Order status'
-		);
-		$order_statuses['wc-tamara-p-capture'] = $this->_x(
-			'Tamara Payment Capture',
 			'Order status'
 		);
 

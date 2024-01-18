@@ -17,7 +17,7 @@ use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 
 /**
- * We want to search for pending payment order that are paid by Tamara
+ * We want to search for pending payment or authorised failed orders that are paid by Tamara
  *  then we try to authorise them if possible
  * @package Tamara_Checkout\App\Jobs
  */
@@ -55,14 +55,23 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 
 		/** @var \Illuminate\Database\Eloquent\Builder $pending_orders_query */
 		$wc_status_pending = 'wc-pending';
+		$wc_status_tamara_authorise_failure = $this->tamara_gateway()->get_settings()->tamara_authorise_failure;
 		$pending_orders_query = WC_Order_Model::site( $site_id )->where(
 			[
 				[ 'type', 'shop_order' ],
-				[ 'status', $wc_status_pending ],
 				[ 'date_created_gmt', '>=', now()->subDays( 30 )->startOfDay() ],
 				[ 'payment_method', 'LIKE', $this->default_payment_gateway_id() . '%' ],
 			]
-		)->limit( 7 );
+		)
+		->where(
+			function ( $query ) use ( $wc_status_pending, $wc_status_tamara_authorise_failure ) {
+				/** @var \Illuminate\Database\Eloquent\Builder $query */
+				$query->where( 'status', $wc_status_pending )
+					->orWhere( 'status', $wc_status_tamara_authorise_failure );
+			}
+		)
+		->orderBy( 'date_created_gmt', 'asc' )
+		->limit( 7 );
 
 		foreach ( $pending_orders_query->get() as $wc_order_model ) {
 			try {

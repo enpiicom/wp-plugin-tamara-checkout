@@ -86,6 +86,8 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
+
+			return;
 		}
 
 		// If Tamara Client returns an object, that would be a successful object
@@ -118,6 +120,19 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 	 * @throws Tamara_Exception
 	 */
 	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
+		if ( (int) $tamara_api_error->status_code === 409 ) {
+			return;
+		}
+
+		if ( ! empty( $tamara_api_error->errors[0] ) && ! empty( $tamara_api_error->errors[0]['data'] ) ) {
+			$error_data = $tamara_api_error->errors[0]['data'];
+			$old_state = ! empty( $error_data['old_state'] ) ? (string) $error_data['old_state'] : '';
+			$new_state = ! empty( $error_data['new_state'] ) ? (string) $error_data['new_state'] : '';
+			if ( $old_state === $new_state ) {
+				return;
+			}
+		}
+
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$error_message = $this->_t( 'Error when trying to capture order with Tamara.' );

@@ -111,11 +111,11 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_force_checkout_phone(): bool {
-		return empty( $this->force_checkout_phone ) || $this->force_checkout_phone === 'no' ? false : true;
+		return ! empty( $this->force_checkout_phone ) && $this->force_checkout_phone === 'no' ? false : true;
 	}
 
 	public function get_force_checkout_email(): bool {
-		return empty( $this->force_checkout_email ) || $this->force_checkout_email === 'no' ? false : true;
+		return ! empty( $this->force_checkout_email ) && $this->force_checkout_email === 'no' ? false : true;
 	}
 
 	public function get_popup_widget_disabled(): bool {
@@ -127,7 +127,8 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_webhook_enabled(): bool {
-		return empty( $this->webhook_enabled ) || $this->webhook_enabled === 'no' ? false : true;
+		// We always want webhook to be enabled
+		return true;
 	}
 
 	public function get_custom_log_message_enabled(): bool {

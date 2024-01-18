@@ -229,7 +229,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'title' => $this->_t( 'Enable Cron Job' ),
 				'type' => 'checkbox',
 				'description' => $this->_t( 'In you tick on this setting, Tamara will use a cron-job to find all completed orders that has not been verified but not authorised or not captured within 30 days and force them to be authorised or captured. It fires an asynchronous call on Admin request to perform this action.' ),
-				'default' => 'yes',
+				'default' => 'no',
 			],
 			'force_checkout_phone' => [
 				'title' => $this->_t( 'Force Enable Phone' ),
@@ -275,6 +275,10 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			],
 			'webhook_enabled' => [
 				'type' => 'checkbox',
+				'default' => 'yes',
+				'custom_attributes' => [
+					'readonly' => 'readonly',
+				],
 			],
 			'success_url' => [
 				'title' => $this->_t( 'Tamara Payment Success Url' ),
