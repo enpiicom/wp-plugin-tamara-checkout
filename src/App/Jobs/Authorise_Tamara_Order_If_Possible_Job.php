@@ -6,11 +6,13 @@ namespace Tamara_Checkout\App\Jobs;
 
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use InvalidArgumentException;
 use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
@@ -19,6 +21,7 @@ use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 
 class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
@@ -42,8 +45,20 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	 * @throws Tamara_Exception
 	 * @throws \Exception
 	 */
+
+	/**
+	 *
+	 * @param array $config shoud be ['wc_order_id' => $value]
+	 * @return void
+	 * @throws InvalidArgumentException
+	 * @throws Exception
+	 * @throws Tamara_Exception
+	 */
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
+		if ( empty( $this->wc_order_id ) ) {
+			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Error! Incorrect Order.' ) ) );
+		}
 
 		parent::__construct();
 	}
@@ -80,6 +95,8 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO && $tamara_client_response->status_code !== 409 ) {
 			$this->process_failed_action();
+
+			return;
 		}
 
 		$this->process_successful_action();
@@ -92,10 +109,10 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$wc_order = wc_get_order( $this->wc_order_id );
 		$settings = $this->tamara_settings();
 
-		$new_order_status = $settings->get_payment_authorised_failed_status();
+		$new_order_status = $settings->order_status_when_tamara_authorisation_fails;
 		$update_order_status_note = 'Tamara - ';
-		$update_order_status_note .= $this->_t( 'Order authorised failed.' );
-		$wc_order->update_status( $new_order_status, $update_order_status_note, true );
+		$update_order_status_note .= $this->_t( 'Order authorisation process failed.' );
+		$wc_order->update_status( $new_order_status, $update_order_status_note );
 
 		throw new Tamara_Exception( wp_kses_post( $this->_t( 'Order authorised failed.' ) ) );
 	}
@@ -112,7 +129,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$this->tamara_wc_order->get_wc_order()->set_payment_method( $this->default_payment_gateway_id() );
 		$this->tamara_wc_order->get_wc_order()->save();
 
-		$new_order_status = $this->tamara_settings()->get_payment_authorised_done_status();
+		$new_order_status = $this->tamara_settings()->order_status_on_tamara_authorised;
 		$this->tamara_wc_order->add_tamara_order_note( $this->_t( 'Order authorised successfully.' ) );
 
 		if ( $this->tamara_wc_order->get_tamara_instalments() ) {
@@ -129,7 +146,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 				$this->tamara_wc_order->get_tamara_payment_type()
 			);
 		}
-		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, true );
+		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, false );
 	}
 
 	/**
@@ -146,10 +163,10 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			return false;
 		}
 
-		$tamara_client_response = $this->tamara_client()->get_order( new GetOrderRequest( $this->tamara_order_id ) );
+		$tamara_client_response = $this->tamara_client()->get_order_by_reference_id( new GetOrderByReferenceIdRequest( (string) $this->wc_order_id ) );
 
 		if (
-			! is_object( $tamara_client_response ) ||
+			$tamara_client_response instanceof Tamara_Api_Error_VO ||
 			( $tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
 			$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED )
 		) {

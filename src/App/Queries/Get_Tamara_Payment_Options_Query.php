@@ -8,6 +8,7 @@ use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_10_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_11_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_12_WC_Payment_Gateway;
@@ -64,10 +65,10 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 			$this->is_vip
 		);
 
-		$response = $this->tamara_client()->check_payment_options_availability( new CheckPaymentOptionsAvailabilityRequest( $payment_options_availability ) );
+		$tamara_client_response = $this->tamara_client()->check_payment_options_availability( new CheckPaymentOptionsAvailabilityRequest( $payment_options_availability ) );
 
-		if ( is_object( $response ) ) {
-			return $response->getAvailablePaymentLabels();
+		if ( ! $tamara_client_response instanceof Tamara_Api_Error_VO ) {
+			return $tamara_client_response->getAvailablePaymentLabels();
 		}
 
 		return [];

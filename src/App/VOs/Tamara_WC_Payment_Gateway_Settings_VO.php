@@ -22,20 +22,17 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property string $sandbox_api_token
  * @property string $sandbox_public_key
  * @property string $sandbox_notification_key
- * @property string $tamara_payment_cancel
- * @property string $tamara_payment_failure
- * @property string $tamara_authorise_done
- * @property string $tamara_authorise_failure
- * @property string $tamara_capture_failure
- * @property string $tamara_order_cancel
- * @property string $tamara_cancel_order
- * @property string $tamara_payment_capture
- * @property string $status_to_capture_tamara_payment
- * @property string $status_to_cancel_tamara_payment
+ * @property string $order_status_on_tamara_authorised
+ * @property string $order_status_on_tamara_canceled
+ * @property string $order_status_on_tamara_failed
+ * @property string $order_status_when_tamara_authorisation_fails
+ * @property string $order_status_when_tamara_capture_fails
+ * @property string $order_status_to_capture_tamara_payment
+ * @property string $order_status_to_cancel_tamara_payment
  * @property array $excluded_products array or products' Ids that should be excluded
  * @property array $excluded_product_categories array or terms' Ids
  *                  (from 'product_category' taxonomy) that should be excluded
- * @property bool $crobjob_enabled
+ * @property bool $cronjob_enabled
  * @property bool $force_checkout_phone
  * @property bool $force_checkout_email
  * @property bool $popup_widget_disabled
@@ -81,7 +78,7 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	protected $tamara_payment_capture;
 	protected $excluded_products;
 	protected $excluded_product_categories;
-	protected $crobjob_enabled;
+	protected $cronjob_enabled;
 	protected $force_checkout_phone;
 	protected $force_checkout_email;
 	protected $popup_widget_disabled;
@@ -106,16 +103,16 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		return empty( $this->enabled ) || $this->enabled === 'no' ? false : true;
 	}
 
-	public function get_crobjob_enabled(): bool {
-		return empty( $this->crobjob_enabled ) || $this->crobjob_enabled === 'no' ? false : true;
+	public function get_cronjob_enabled(): bool {
+		return empty( $this->cronjob_enabled ) || $this->cronjob_enabled === 'no' ? false : true;
 	}
 
 	public function get_force_checkout_phone(): bool {
-		return empty( $this->force_checkout_phone ) || $this->force_checkout_phone === 'no' ? false : true;
+		return ! empty( $this->force_checkout_phone ) && $this->force_checkout_phone === 'no' ? false : true;
 	}
 
 	public function get_force_checkout_email(): bool {
-		return empty( $this->force_checkout_email ) || $this->force_checkout_email === 'no' ? false : true;
+		return ! empty( $this->force_checkout_email ) && $this->force_checkout_email === 'no' ? false : true;
 	}
 
 	public function get_popup_widget_disabled(): bool {
@@ -127,7 +124,8 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	}
 
 	public function get_webhook_enabled(): bool {
-		return empty( $this->webhook_enabled ) || $this->webhook_enabled === 'no' ? false : true;
+		// We always want webhook to be enabled
+		return true;
 	}
 
 	public function get_custom_log_message_enabled(): bool {
@@ -183,10 +181,6 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		return ( $this->environment === 'live_mode' );
 	}
 
-	public function get_webhook_id(): string {
-		return $this->tamara_webhook_id ?? '';
-	}
-
 	public function get_excluded_product_categories(): array {
 		/** @var string $excluded_product_categories */
 		$excluded_product_categories = $this->excluded_product_categories;
@@ -204,27 +198,31 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		return $excluded_product_categories_data;
 	}
 
-	public function get_payment_cancel_status(): string {
-		return ! empty( $this->tamara_payment_cancel ) ? $this->tamara_payment_cancel : 'wc-tamara-p-canceled';
-	}
-
-	public function get_payment_failure_status(): string {
-		return ! empty( $this->tamara_payment_failure ) ? $this->tamara_payment_failure : 'wc-tamara-p-failed';
-	}
-
-	public function get_payment_authorised_done_status(): string {
-		return ! empty( $this->tamara_authorise_done ) ? $this->tamara_authorise_done : 'wc-tamara-a-done';
-	}
-
-	public function get_payment_authorised_failed_status(): string {
+	public function get_order_status_when_tamara_authorisation_fails(): string {
 		return ! empty( $this->tamara_authorise_failure ) ? $this->tamara_authorise_failure : 'wc-tamara-a-failed';
 	}
 
-	public function get_status_to_capture_tamara_payment(): string {
+	public function get_order_status_when_tamara_capture_fails(): string {
+		return ! empty( $this->tamara_capture_failure ) ? $this->tamara_capture_failure : 'wc-tamara-c-failed';
+	}
+
+	public function get_order_status_to_capture_tamara_payment(): string {
 		return ! empty( $this->tamara_payment_capture ) ? $this->tamara_payment_capture : 'wc-completed';
 	}
 
-	public function get_status_to_cancel_tamara_payment(): string {
+	public function get_order_status_to_cancel_tamara_payment(): string {
 		return ! empty( $this->tamara_cancel_order ) ? $this->tamara_cancel_order : 'wc-cancelled';
+	}
+
+	public function get_order_status_on_tamara_authorised(): string {
+		return ! empty( $this->tamara_authorise_done ) ? $this->tamara_authorise_done : 'wc-processing';
+	}
+
+	public function get_order_status_on_tamara_canceled(): string {
+		return ! empty( $this->tamara_order_cancel ) ? $this->tamara_order_cancel : 'wc-tamara-canceled';
+	}
+
+	public function get_order_status_on_tamara_failed(): string {
+		return ! empty( $this->tamara_payment_failure ) ? $this->tamara_payment_failure : 'wc-tamara-failed';
 	}
 }

@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Services\Tamara_Client;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
@@ -69,6 +70,8 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
+
+			return;
 		} else {
 			$this->process_successful_action( $tamara_client_response );
 		}
@@ -101,13 +104,13 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	 */
 	protected function get_tamara_webhook_events(): array {
 		return [
-			'order_approved',
-			'order_declined',
-			'order_authorised',
-			'order_canceled',
-			'order_captured',
-			'order_refunded',
-			'order_expired',
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_DECLINED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CANCELED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_AUTHORISED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CAPTURED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_REFUNDED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_EXPIRED,
 		];
 	}
 }

@@ -8,8 +8,11 @@ use Enpii_Base\App\Models\User;
 use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\Foundation\Http\Base_Controller;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Update_Tamara_Webhook_Event_Job;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\Deps\Http\Client\Exception;
 
@@ -99,28 +102,34 @@ class Main_Controller extends Base_Controller {
 	/**
 	 * @throws \Exception
 	 */
-	public function handle_tamara_ipn() {
+	public function handle_tamara_ipn(): JsonResponse {
 		$authorise_message = $this->tamara_notification()->process_authorise_message();
 		$this->process_authorise_tamara_order( $authorise_message->getOrderReferenceId(), $authorise_message->getOrderId() );
 
-		wp_app_response()->json(
+		return wp_app_response()->json(
 			[
 				'message' => 'success',
 			]
 		);
 	}
 
-	public function handle_tamara_webhook( Request $request ): void {
+	public function handle_tamara_webhook(): JsonResponse {
 		$webhook_message = $this->tamara_notification()->process_webhook_message();
 
 		switch ( $webhook_message->getEventType() ) {
-			case 'order_approved':
+			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED:
 				$this->process_authorise_tamara_order( $webhook_message->getOrderReferenceId(), $webhook_message->getOrderId() );
 				break;
 			default:
+				$this->process_other_tamara_webhook_events(
+					$webhook_message->getOrderReferenceId(),
+					$webhook_message->getOrderId(),
+					$webhook_message->getEventType()
+				);
+				break;
 		}
 
-		wp_app_response()->json(
+		return wp_app_response()->json(
 			[
 				'message' => 'success',
 			]
@@ -145,6 +154,19 @@ class Main_Controller extends Base_Controller {
 			Authorise_Tamara_Order_If_Possible_Job::dispatchSync( $args );
 		} catch ( Exception $e ) {
 			$this->enqueue_job_later( Authorise_Tamara_Order_If_Possible_Job::dispatch( $args ) );
+		}
+	}
+
+	protected function process_other_tamara_webhook_events( $wc_order_id, $tamara_order_id, $event_type ) {
+		$args = [
+			'wc_order_id' => $wc_order_id,
+			'tamara_order_id' => $tamara_order_id,
+			'event_type' => $event_type,
+		];
+		try {
+			Update_Tamara_Webhook_Event_Job::dispatchSync( $args );
+		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( Exception $e ) {
 		}
 	}
 }

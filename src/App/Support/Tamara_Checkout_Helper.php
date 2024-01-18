@@ -14,8 +14,17 @@ class Tamara_Checkout_Helper {
 	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
 	const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';
 	const TAMARA_ORDER_STATUS_CANCELED = 'canceled';
+	const TAMARA_ORDER_STATUS_DECLINED = 'declined';
 	const TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
 	const TAMARA_ORDER_STATUS_REFUNDED = 'fully_refunded';
+
+	const TAMARA_EVENT_TYPE_ORDER_APPROVED = 'order_approved';
+	const TAMARA_EVENT_TYPE_ORDER_AUTHORISED = 'order_authorised';
+	const TAMARA_EVENT_TYPE_ORDER_CANCELED = 'order_canceled';
+	const TAMARA_EVENT_TYPE_ORDER_DECLINED = 'order_declined';
+	const TAMARA_EVENT_TYPE_ORDER_EXPIRED = 'order_expired';
+	const TAMARA_EVENT_TYPE_ORDER_CAPTURED = 'order_captured';
+	const TAMARA_EVENT_TYPE_ORDER_REFUNDED = 'order_refunded';
 
 	public static function check_mandatory_prerequisites(): bool {
 		return static::check_enpii_base_plugin() && static::check_woocommerce_plugin();
