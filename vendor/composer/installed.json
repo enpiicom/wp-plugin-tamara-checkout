@@ -1,0 +1,70 @@
+{
+    "packages": [
+        {
+            "name": "enpii/enpii-base",
+            "version": "dev-wp-release",
+            "version_normalized": "dev-wp-release",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
+                "reference": "89232ea017e5a84a9e43767543b8f9591a144d4c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/89232ea017e5a84a9e43767543b8f9591a144d4c",
+                "reference": "89232ea017e5a84a9e43767543b8f9591a144d4c",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0.0"
+            },
+            "time": "2024-01-09T09:25:04+00:00",
+            "type": "wordpress-muplugin",
+            "extra": {
+                "exclude-from-files": [
+                    "laravel/framework/src/Illuminate/Foundation/helpers.php"
+                ]
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "./src/Foundation/Support/helpers-utils.php",
+                    "./src/Foundation/helpers-wp-app.php",
+                    "./src/Foundation/helpers-overrides.php",
+                    "./enpii-base-bootstrap.php",
+                    "./enpii-base-init.php"
+                ],
+                "psr-4": {
+                    "Enpii_Base\\": "src",
+                    "Enpii_Base\\Deps\\": "src-deps"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trac Nguyen",
+                    "email": "npbtrac@yahoo.com",
+                    "homepage": "https://enpii.com/users/trac-nguyen",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Loi Le",
+                    "homepage": "https://enpii.com/users/loi-le",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The base plugin to have powerful Laravel development on WordPress",
+            "homepage": "https://enpii.com/wp-plugin-enpii-base",
+            "support": {
+                "issues": "https://github.com/enpiicom/wp-plugin-enpii-base/issues",
+                "source": "https://github.com/enpiicom/wp-plugin-enpii-base/tree/wp-release"
+            },
+            "install-path": "../enpii/enpii-base"
+        }
+    ],
+    "dev": false,
+    "dev-package-names": []
+}

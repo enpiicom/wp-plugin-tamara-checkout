@@ -1,0 +1,91 @@
+{
+  "name": "enpii/enpii-base",
+  "type": "wordpress-muplugin",
+  "description": "The base plugin to have powerful Laravel development on WordPress",
+  "version": "v0.3.2",
+  "time": "2024-01-09 09:25:04",
+  "homepage": "https://enpii.com/wp-plugin-enpii-base",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Trac Nguyen",
+      "email": "npbtrac@yahoo.com",
+      "homepage": "https://enpii.com/users/trac-nguyen",
+      "role": "Developer"
+    },
+    {
+      "name": "Loi Le",
+      "homepage": "https://enpii.com/users/loi-le",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.3|^8.0.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
+    }
+  ],
+  "autoload": {
+    "files": [
+      "./src/Foundation/Support/helpers-utils.php",
+      "./src/Foundation/helpers-wp-app.php",
+      "./src/Foundation/helpers-overrides.php",
+      "./enpii-base-bootstrap.php",
+      "./enpii-base-init.php"
+    ],
+    "psr-4": {
+      "Enpii_Base\\Deps\\": "src-deps",
+      "Enpii_Base\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "files": [
+    ],
+    "psr-4": {
+      "Enpii_Base\\Tests\\": "tests",
+      "Enpii_Base\\Tests\\Unit\\": "tests/unit"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "8.1.0"
+    },
+    "platform-check": false,
+    "allow-plugins": {
+      "composer/installers": true,
+      "mcaskill/composer-exclude-files": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "vendor-dir": "./vendor",
+    "sort-packages": true
+  },
+  "extra": {
+    "exclude-from-files": [
+      "laravel/framework/src/Illuminate/Foundation/helpers.php"
+    ]
+  },
+  "scripts": {
+    "phpcs": [
+      "./vendor/bin/phpcs"
+    ],
+    "phpunit": [
+      "./vendor/bin/phpunit"
+    ],
+    "codecept-run": [
+      "./vendor/bin/codecept run"
+    ],
+    "test": [
+      "@phpcs",
+      "@codecept-run unit"
+    ]
+  }
+}
