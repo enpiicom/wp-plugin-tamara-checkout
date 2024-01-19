@@ -5,14 +5,13 @@ namespace Tamara_Checkout\Tests\Support\Helpers;
 use ReflectionClass;
 
 trait Test_Utils_Trait {
-
 	/**
 	 * @description: For testing protected, private method in class
 	 * @throws \ReflectionException
 	 */
 	protected function invoke_protected_method( &$class_object, $method_name, array $method_parameters = [] ) {
 		$reflection = new ReflectionClass( get_class( $class_object ) );
-		$method     = $reflection->getMethod( $method_name );
+		$method = $reflection->getMethod( $method_name );
 		$method->setAccessible( true );
 
 		return $method->invokeArgs( $class_object, $method_parameters );
@@ -28,7 +27,7 @@ trait Test_Utils_Trait {
 	 */
 	protected function get_protected_property_value( object $class_object, string $property_name ) {
 		$reflection = new \ReflectionClass( get_class( $class_object ) );
-		$property   = $reflection->getProperty( $property_name );
+		$property = $reflection->getProperty( $property_name );
 		$property->setAccessible( true );
 
 		return $property->getValue( $class_object );
@@ -45,7 +44,7 @@ trait Test_Utils_Trait {
 	 */
 	protected function set_property_value( object $class_object, string $property, mixed $value ): void {
 		$reflection = new \ReflectionClass( get_class( $class_object ) );
-		$property   = $reflection->getProperty( $property );
+		$property = $reflection->getProperty( $property );
 		$property->setAccessible( true );
 		$property->setValue( $class_object, $value );
 	}

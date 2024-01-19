@@ -9,6 +9,8 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class Tamara_Checkout_Helper {
+	const TEXT_DOMAIN = 'tamara';
+
 	const TAMARA_ORDER_STATUS_APPROVED = 'approved';
 	const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
 	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
@@ -166,6 +168,112 @@ class Tamara_Checkout_Helper {
 			'total_amount_invalid_limit' => 'The grand total of order is over/under limit of Tamara.',
 			'currency_unsupported' => 'We do not support cross currencies. Please select the correct currency for your country.',
 			'not_supported_delivery_country' => 'We do not support your delivery country.',
+		];
+	}
+
+	/**
+	 * Check if current screen is Tamara Admin Settings page
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_admin_settings_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& ( $_GET['page'] === 'wc-settings' )
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& ( $_GET['tab'] === 'checkout' )
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& ( $_GET['section'] === Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID ) );
+	}
+
+	/**
+	 * Check if current screen is WC shop order page
+	 *
+	 * @return bool
+	 */
+	public static function is_shop_order_screen(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return ! ! ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
+	}
+
+	/**
+	 *  Get displayed price of a WC product
+	 *
+	 * @return float | false
+	 */
+	public static function get_displayed_product_price() {
+		global $product;
+
+		if ( $product instanceof \WC_Product_Variable ) {
+			return $product->get_variation_prices( true )['price'];
+		}
+
+		if ( $product instanceof \WC_Product ) {
+			return wc_get_price_to_display( $product );
+		}
+
+		return false;
+	}
+
+	public static function is_tamara_gateway( $payment_method ): bool {
+		return strpos(
+			$payment_method,
+			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
+		) === 0;
+	}
+
+	/**
+	 * Get store's base country code
+	 *
+	 * @return string
+	 */
+	public static function get_store_base_country_code(): string {
+		return ! empty( WC()->countries->get_base_country() )
+			? WC()->countries->get_base_country()
+			: Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+	}
+
+	/**
+	 * Define which total amount should be used for Tamara order on checkout page
+	 *
+	 * @param $amount
+	 *
+	 * @return mixed
+	 */
+	public static function define_total_amount_to_calculate( $amount ) {
+		global $wp;
+
+		if ( is_checkout_pay_page() ) {
+			if ( isset( $wp->query_vars['order-pay'] ) && absint( $wp->query_vars['order-pay'] ) > 0 ) {
+				$wc_order_id = absint( $wp->query_vars['order-pay'] );
+				$wc_order = wc_get_order( $wc_order_id );
+				if ( $wc_order ) {
+					return $wc_order->get_total();
+				}
+			}
+		}
+
+		return $amount;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function get_current_cart_info(): array {
+		$current_cart_total = ! empty( WC()->cart->total ) ? WC()->cart->total : 0;
+		$billing_customer_phone = ! empty( WC()->customer->get_billing_phone() ) ? WC()->customer->get_billing_phone() : '';
+		$cart_total = static::define_total_amount_to_calculate( $current_cart_total );
+		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ];
+		$country_code = WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : $country_mapping;
+		$customer_phone = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_customer_phone_number() ?
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->get_customer_phone_number() :
+			$billing_customer_phone;
+
+		return [
+			'cart_total' => $cart_total,
+			'customer_phone' => $customer_phone,
+			'country_code' => $country_code,
 		];
 	}
 }

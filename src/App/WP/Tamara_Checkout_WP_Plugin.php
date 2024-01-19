@@ -25,8 +25,6 @@ use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
@@ -39,7 +37,6 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Queue_Trait;
 
-	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
 	public const DEFAULT_COUNTRY_CODE = 'SA';
 	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
@@ -212,7 +209,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_text_domain(): string {
-		return static::TEXT_DOMAIN;
+		return \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN;
 	}
 
 	public function provides() {
@@ -330,16 +327,19 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 */
 	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
 		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings()->get_enabled() ) {
-			$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
+			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
 			$country_code = ! empty( $current_cart_info['country_code'] )
 				? $current_cart_info['country_code']
 				: self::DEFAULT_COUNTRY_CODE;
-			$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
+			$currency_by_country_code = array_flip( Tamara_Checkout_Helper::get_currency_country_mappings() );
 			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
 				$currency_code = $currency_by_country_code[ $country_code ];
-				$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
+				$order_total = new Money(
+					Tamara_Checkout_Helper::format_price_number( $cart_total, $currency_code ),
+					$currency_code
+				);
 				return Get_Tamara_Payment_Options_Query::execute_now(
 					[
 						'available_gateways' => $available_gateways,

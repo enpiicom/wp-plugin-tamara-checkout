@@ -82,6 +82,14 @@ class Validate_Admin_Settings_Job extends Base_Job implements ShouldQueue {
 			}
 		}
 
+		// We want to disable the Payment Gateway if API token is incorrect
+		if (
+			( $post_data[ $field_prefix . 'environment' ] === 'live_mode' && empty( $post_data[ $field_prefix . 'live_api_token' ] ) ) ||
+			( $post_data[ $field_prefix . 'environment' ] === 'sandbox_mode' && empty( $post_data[ $field_prefix . 'sandbox_api_token' ] ) )
+		) {
+			unset( $post_data[ $field_prefix . 'enabled' ] );
+		}
+
 		$this_plugin->set_post_data( $post_data );
 	}
 

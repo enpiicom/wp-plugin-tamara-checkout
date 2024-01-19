@@ -7,7 +7,7 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
 use Tamara_Checkout\App\Queries\Build_Payment_Gateway_Admin_Form_Fields_Query;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
@@ -146,7 +146,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		$js_url_handle_id = 'tamara-checkout-admin';
 
 		// Only enqueue the setting scripts on the Tamara Checkout settings screen and shop order screen.
-		if ( General_Helper::is_tamara_admin_settings_screen() ) {
+		if ( Tamara_Checkout_Helper::is_tamara_admin_settings_screen() ) {
 			wp_enqueue_script(
 				$js_url_handle_id,
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/dist/js/admin.js',
@@ -162,7 +162,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()
 			);
 
-		} elseif ( General_Helper::is_shop_order_screen() ) {
+		} elseif ( Tamara_Checkout_Helper::is_shop_order_screen() ) {
 			wp_enqueue_style(
 				$js_url_handle_id,
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/dist/css/admin.css',

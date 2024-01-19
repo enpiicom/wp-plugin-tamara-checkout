@@ -12,3 +12,7 @@ function output_debug( $debug_string ) {
 // Bootstrap WP_Mock to initialize built-in features
 WP_Mock::setUsePatchwork( true );
 WP_Mock::bootstrap();
+
+if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+	Mockery::mock( 'WC_Payment_Gateway' );
+}

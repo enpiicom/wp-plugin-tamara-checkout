@@ -1,13 +1,16 @@
-actor: Unit_Tester
+namespace: Tamara_Checkout\Tests\Support
+actor: UnitTester
 modules:
   enabled:
     - Asserts
     - Tamara_Checkout\Tests\Support\Helpers\Unit
 coverage:
+  remote: false
   enabled: true
   include:
     - src/*
-  format: html
-  lower_limit: 50
-  upper_limit: 90
+  lower_limit: 30
+  upper_limit: 80
   processUncoveredFiles: false
+  show_only_summary: false
+  show_uncovered: false
