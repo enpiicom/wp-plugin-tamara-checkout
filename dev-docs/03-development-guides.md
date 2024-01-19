@@ -49,7 +49,7 @@ php74 ./vendor/bin/codecept run unit
 #### Using Coverage report
 - Run Unit Test with Codeception (with coverage report)
 ```
-XDEBUG_MODE=coverage php74 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html --coverage-text unit
+XDEBUG_MODE=coverage php74 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html unit
 ```
 - Run Unit Test with PhpUnit (with coverage report)
 ```

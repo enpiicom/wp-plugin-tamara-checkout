@@ -37,20 +37,7 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Queue_Trait;
 
-	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
-	public const DEFAULT_COUNTRY_CODE = 'SA';
-	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
-
-	public const TAMARA_AUTHORISED_STATUS = 'authorised',
-				TAMARA_CANCELED_STATUS = 'canceled',
-				TAMARA_PARTIALLY_CAPTURED_STATUS = 'partially_captured',
-				TAMARA_FULLY_CAPTURED_STATUS = 'fully_captured',
-				TAMARA_PARTIALLY_REFUNDED_STATUS = 'partially_refunded',
-				TAMARA_FULLY_REFUNDED_STATUS = 'fully_refunded';
-
-	const TAMARA_CHECKOUT = 'tamara-checkout';
-
-	protected $customer_phone_number;
+	protected $checkout_data_on_runtime = [];
 
 	public function manipulate_hooks(): void {
 		add_action( 'init', [ $this, 'register_tamara_custom_order_statuses' ] );
@@ -62,12 +49,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		add_action( 'woocommerce_init', [ $this, 'init_woocommerce' ] );
 
 		add_action(
-			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
+			'woocommerce_update_options_payment_gateways_' . Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID,
 			[ $this, 'tamara_gateway_process_admin_options' ],
 			10
 		);
 		add_action(
-			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
+			'woocommerce_update_options_payment_gateways_' . Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID,
 			[ $this, 'tamara_gateway_register_webhook' ],
 			11
 		);
@@ -107,7 +94,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			);
 			add_action(
 				'woocommerce_checkout_update_order_review',
-				[ $this, 'get_updated_phone_number_on_checkout' ]
+				[ $this, 'build_checkout_data_on_runtime' ]
 			);
 			add_filter(
 				'woocommerce_available_payment_gateways',
@@ -126,10 +113,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				[ $this, 'fetch_tamara_order_received_note' ],
 				10,
 				2
-			);
-			add_action(
-				'woocommerce_checkout_update_order_review',
-				[ $this, 'get_updated_phone_number_on_checkout' ]
 			);
 			add_action(
 				'woocommerce_order_status_changed',
@@ -237,8 +220,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		return wp_app( Tamara_WC_Payment_Gateway::class );
 	}
 
-	public function get_customer_phone_number() {
-		return $this->customer_phone_number;
+	public function get_checkout_data_on_runtime() {
+		return $this->checkout_data_on_runtime;
 	}
 
 	public function tamara_gateway_process_admin_options() {
@@ -332,7 +315,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
 			$country_code = ! empty( $current_cart_info['country_code'] )
 				? $current_cart_info['country_code']
-				: self::DEFAULT_COUNTRY_CODE;
+				: Tamara_Checkout_Helper::DEFAULT_COUNTRY_CODE;
 			$currency_by_country_code = array_flip( Tamara_Checkout_Helper::get_currency_country_mappings() );
 			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
 				$currency_code = $currency_by_country_code[ $country_code ];
@@ -349,7 +332,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					]
 				);
 			} else {
-				unset( $available_gateways[ static::DEFAULT_TAMARA_GATEWAY_ID ] );
+				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
 			}
 		}
 
@@ -488,15 +471,13 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * Update phone number on every ajax calls on checkout
+	 * We need to fetch checkout data (from post submit everytime the data is changed)
 	 *
 	 * @param $posted_data
 	 *
 	 * @return void
 	 */
-	public function get_updated_phone_number_on_checkout( $posted_data ): void {
-		global $woocommerce;
-
+	public function build_checkout_data_on_runtime( $posted_data ): void {
 		// Parsing posted data on checkout
 		$post = [];
 		$vars = explode( '&', $posted_data );
@@ -505,8 +486,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			$post[ $v[0] ] = $v[1];
 		}
 
-		// Update phone number get from posted data
-		$this->customer_phone_number = $post['billing_phone'];
+		$this->checkout_data_on_runtime = $post;
 	}
 
 	/**

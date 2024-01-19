@@ -8,6 +8,7 @@ use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
@@ -40,7 +41,7 @@ trait Tamara_Checkout_Trait {
 	}
 
 	protected function default_payment_gateway_id(): string {
-		return Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
+		return Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID;
 	}
 
 	/**

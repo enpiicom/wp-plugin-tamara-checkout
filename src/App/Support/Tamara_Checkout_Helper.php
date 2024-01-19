@@ -9,24 +9,26 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class Tamara_Checkout_Helper {
-	const TEXT_DOMAIN = 'tamara';
+	public const TEXT_DOMAIN = 'tamara';
+	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
+	public const DEFAULT_COUNTRY_CODE = 'SA';
 
-	const TAMARA_ORDER_STATUS_APPROVED = 'approved';
-	const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
-	const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
-	const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';
-	const TAMARA_ORDER_STATUS_CANCELED = 'canceled';
-	const TAMARA_ORDER_STATUS_DECLINED = 'declined';
-	const TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
-	const TAMARA_ORDER_STATUS_REFUNDED = 'fully_refunded';
+	public const TAMARA_ORDER_STATUS_APPROVED = 'approved';
+	public const TAMARA_ORDER_STATUS_AUTHORISED = 'authorised';
+	public const TAMARA_ORDER_STATUS_PARTIALLY_CAPTURED = 'partially_captured';
+	public const TAMARA_ORDER_STATUS_FULLY_CAPTURED = 'fully_captured';
+	public const TAMARA_ORDER_STATUS_CANCELED = 'canceled';
+	public const TAMARA_ORDER_STATUS_DECLINED = 'declined';
+	public const TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+	public const TAMARA_ORDER_STATUS_REFUNDED = 'fully_refunded';
 
-	const TAMARA_EVENT_TYPE_ORDER_APPROVED = 'order_approved';
-	const TAMARA_EVENT_TYPE_ORDER_AUTHORISED = 'order_authorised';
-	const TAMARA_EVENT_TYPE_ORDER_CANCELED = 'order_canceled';
-	const TAMARA_EVENT_TYPE_ORDER_DECLINED = 'order_declined';
-	const TAMARA_EVENT_TYPE_ORDER_EXPIRED = 'order_expired';
-	const TAMARA_EVENT_TYPE_ORDER_CAPTURED = 'order_captured';
-	const TAMARA_EVENT_TYPE_ORDER_REFUNDED = 'order_refunded';
+	public const TAMARA_EVENT_TYPE_ORDER_APPROVED = 'order_approved';
+	public const TAMARA_EVENT_TYPE_ORDER_AUTHORISED = 'order_authorised';
+	public const TAMARA_EVENT_TYPE_ORDER_CANCELED = 'order_canceled';
+	public const TAMARA_EVENT_TYPE_ORDER_DECLINED = 'order_declined';
+	public const TAMARA_EVENT_TYPE_ORDER_EXPIRED = 'order_expired';
+	public const TAMARA_EVENT_TYPE_ORDER_CAPTURED = 'order_captured';
+	public const TAMARA_EVENT_TYPE_ORDER_REFUNDED = 'order_refunded';
 
 	public static function check_mandatory_prerequisites(): bool {
 		return static::check_enpii_base_plugin() && static::check_woocommerce_plugin();
@@ -60,7 +62,7 @@ class Tamara_Checkout_Helper {
 	 * @return string
 	 */
 	public static function get_current_country_code(): string {
-		$store_base_country = ! empty( WC()->countries->get_base_country() ) ? WC()->countries->get_base_country() : Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+		$store_base_country = ! empty( WC()->countries->get_base_country() ) ? WC()->countries->get_base_country() : static::DEFAULT_COUNTRY_CODE;
 		$currency_country_mapping = static::get_currency_country_mappings();
 
 		return $currency_country_mapping[ strtoupper( get_woocommerce_currency() ) ] ?? $store_base_country;
@@ -81,7 +83,7 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function get_admin_settings_section_url() {
 		if ( version_compare( WC()->version, '2.6', '>=' ) ) {
-			$section_slug = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
+			$section_slug = static::DEFAULT_TAMARA_GATEWAY_ID;
 		} else {
 			$section_slug = strtolower( Tamara_WC_Payment_Gateway::class );
 		}
@@ -184,7 +186,7 @@ class Tamara_Checkout_Helper {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&& ( $_GET['tab'] === 'checkout' )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& ( $_GET['section'] === Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID ) );
+			&& ( $_GET['section'] === static::DEFAULT_TAMARA_GATEWAY_ID ) );
 	}
 
 	/**
@@ -219,7 +221,7 @@ class Tamara_Checkout_Helper {
 	public static function is_tamara_gateway( $payment_method ): bool {
 		return strpos(
 			$payment_method,
-			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
+			static::DEFAULT_TAMARA_GATEWAY_ID
 		) === 0;
 	}
 
@@ -231,7 +233,7 @@ class Tamara_Checkout_Helper {
 	public static function get_store_base_country_code(): string {
 		return ! empty( WC()->countries->get_base_country() )
 			? WC()->countries->get_base_country()
-			: Tamara_Checkout_WP_Plugin::DEFAULT_COUNTRY_CODE;
+			: static::DEFAULT_COUNTRY_CODE;
 	}
 
 	/**
@@ -262,12 +264,14 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function get_current_cart_info(): array {
 		$current_cart_total = ! empty( WC()->cart->total ) ? WC()->cart->total : 0;
+		$runtime_checkout_data = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_checkout_data_on_runtime();
+
 		$billing_customer_phone = ! empty( WC()->customer->get_billing_phone() ) ? WC()->customer->get_billing_phone() : '';
 		$cart_total = static::define_total_amount_to_calculate( $current_cart_total );
 		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ];
 		$country_code = WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : $country_mapping;
-		$customer_phone = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_customer_phone_number() ?
-			Tamara_Checkout_WP_Plugin::wp_app_instance()->get_customer_phone_number() :
+		$customer_phone = ! empty( $runtime_checkout_data['billing_phone'] ) ?
+			$runtime_checkout_data['billing_phone'] :
 			$billing_customer_phone;
 
 		return [
