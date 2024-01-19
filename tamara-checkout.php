@@ -11,6 +11,10 @@
 
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 
+// Update these constants whenever you bump the version
+//	We put this constant here for the convenience when bump the version
+defined( 'TAMARA_CHECKOUT_VERSION' ) || define( 'TAMARA_CHECKOUT_VERSION', '2.0.0' );
+
 // We want to split all the bootstrapping code to a separate file
 // 	for putting into composer autoload and
 // 	for easier including on other section e.g. unit test

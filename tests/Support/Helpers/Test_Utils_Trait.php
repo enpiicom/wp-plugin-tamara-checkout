@@ -25,7 +25,7 @@ trait Test_Utils_Trait {
 	 *
 	 * @throws \ReflectionException
 	 */
-	protected function get_protected_property_value( object $class_object, string $property_name ) {
+	protected function get_protected_property_value( $class_object, $property_name ) {
 		$reflection = new \ReflectionClass( get_class( $class_object ) );
 		$property = $reflection->getProperty( $property_name );
 		$property->setAccessible( true );
@@ -42,7 +42,7 @@ trait Test_Utils_Trait {
 	 *
 	 * @throws \ReflectionException
 	 */
-	protected function set_property_value( object $class_object, string $property, mixed $value ): void {
+	protected function set_property_value( $class_object, $property, $value ): void {
 		$reflection = new \ReflectionClass( get_class( $class_object ) );
 		$property = $reflection->getProperty( $property );
 		$property->setAccessible( true );

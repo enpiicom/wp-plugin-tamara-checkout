@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\WP;
 
+use Closure;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
@@ -61,7 +62,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 		// Add Tamara custom statuses to wc order status list
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
-		add_action( 'wp_loaded', [ $this, 'cancel_order_uncomplete_payment' ], 21 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tamara_admin_scripts' ] );
 
@@ -175,9 +175,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		wp_app()->singleton(
 			Tamara_WC_Payment_Gateway::class,
 			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) {
-				return Tamara_WC_Payment_Gateway::instance();
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
 		);
 
 		$this->register_services();
@@ -369,40 +367,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * Cancel a pending order and add Tamara payment cancelled/failed notice.
-	 *
-	 * @throws \Exception
-	 */
-	public function cancel_order_uncomplete_payment() {
-		if (
-			isset( $_GET['cancel_order'] ) &&
-			isset( $_GET['order'] ) &&
-			isset( $_GET['order_id'] ) &&
-			( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-cancel_order' ) ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		) {
-			wc_nocache_headers();
-			$order_key = wp_unslash( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$order_id = absint( $_GET['order_id'] );
-			$order = wc_get_order( $order_id );
-			$payment_method = $order->get_payment_method();
-			$user_can_cancel = current_user_can( 'cancel_order', $order_id ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
-			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', [ 'pending', 'failed' ], $order ) );
-			$redirect = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			// Todo: Add verify if the payment method is Tamara
-			if ( $user_can_cancel && ! $order_can_cancel ) {
-				wc_clear_notices();
-				wc_add_notice( $this->_t( 'Your payment via Tamara has failed, please try again with a different payment method.' ), 'error' );
-			}
-
-			if ( $redirect ) {
-				wp_safe_redirect( $redirect );
-				exit;
-			}
-		}
-	}
-
-	/**
 	 * Register Tamara new statuses
 	 *
 	 * @throws \Exception
@@ -421,40 +385,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 */
 	public function add_tamara_custom_order_statuses( array $order_statuses ): array {
 		return Add_Tamara_Custom_Statuses_Query::execute_now( $order_statuses );
-	}
-
-	/**
-	 * We want to register all services with this plugin here
-	 *
-	 * @return void
-	 *
-	 */
-	protected function register_services(): void {
-		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
-
-		wp_app()->singleton(
-			Tamara_Client::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
-			}
-		);
-		wp_app()->singleton(
-			Tamara_Notification::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Notification::instance( $gateway_settings->notification_key );
-			}
-		);
-		wp_app()->singleton(
-			Tamara_Widget::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
-			}
-		);
-
-		$this->manipulate_hooks_after_settings();
 	}
 
 	/**
@@ -668,5 +598,43 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * We want to register all services with this plugin here
+	 *
+	 * @return void
+	 *
+	 */
+	protected function register_services(): void {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
+
+		wp_app()->singleton(
+			Tamara_Client::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
+			}
+		);
+		wp_app()->singleton(
+			Tamara_Notification::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Notification::instance( $gateway_settings->notification_key );
+			}
+		);
+		wp_app()->singleton(
+			Tamara_Widget::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
+			}
+		);
+
+		$this->manipulate_hooks_after_settings();
+	}
+
+	protected function build_tamara_gateway_instance() {
+		return Tamara_WC_Payment_Gateway::instance();
 	}
 }

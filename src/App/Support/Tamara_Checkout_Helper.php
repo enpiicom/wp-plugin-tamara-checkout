@@ -9,6 +9,7 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 
 class Tamara_Checkout_Helper {
+	public const PLUGIN_NAME = 'Tamara Checkout';
 	public const TEXT_DOMAIN = 'tamara';
 	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
 	public const DEFAULT_COUNTRY_CODE = 'SA';
