@@ -56,6 +56,7 @@ $foo = "bar"; // phpcs:ignore
 $foo = 'bar';
 */
 // phpcs:enable
+```
 
 ### Running Unit Test
 We must run the composer and codecept run test using PHP 7.4
@@ -75,6 +76,7 @@ php74 ./vendor/bin/phpunit --verbose tests/unit/App/Support/Tamara_Checkout_Help
 ```
 php74 ./vendor/bin/codecept run unit
 ```
+
 #### Using Coverage report
 - Run Unit Test with Codeception (with coverage report)
 ```
