@@ -4,7 +4,7 @@
   ```
   rm -rf vendor
   ```
-  - Update needed files from the main branchs
+  - Update needed files from the main branches
   ```
   gco develop -- public-assets resources src src-deps composer.* package* tamara* webpack* yarn* phpcs*
   ```
@@ -27,6 +27,35 @@
   ```
   - Remove require stuff in composer.json
   - The add and commit everything
+
+### Codestyling (PHPCS)
+- Fix all possible phpcs issues
+```
+php74 ./vendor/bin/phpcbf
+```
+- Fix possible phpcs issues on a specified folder
+```
+php74 ./vendor/bin/phpcbf <path/to/the/folder>
+```
+- Find all the phpcs issues
+```
+php74 ./vendor/bin/phpcs
+```
+- Suppress one or multible phpcs rules for the next below line
+```
+// phpcs:ignore <rule1>(, <rule2>...)
+```
+or at same line
+```
+$foo = "bar"; // phpcs:ignore
+```
+- Disable phpcs for a block of code
+```
+// phpcs:disable
+/*
+$foo = 'bar';
+*/
+// phpcs:enable
 
 ### Running Unit Test
 We must run the composer and codecept run test using PHP 7.4
