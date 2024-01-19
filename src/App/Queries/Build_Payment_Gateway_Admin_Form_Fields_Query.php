@@ -6,7 +6,7 @@ namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -511,7 +511,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
             }
         }
 JS_SCRIPT;
-		if ( General_Helper::is_tamara_admin_settings_screen() ) {
+		if ( Tamara_Checkout_Helper::is_tamara_admin_settings_screen() ) {
 			wp_add_inline_script( 'tamara-custom-admin', $js_script, 'before' );
 		}
 	}

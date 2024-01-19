@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\WP;
 
+use Closure;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
@@ -25,8 +26,6 @@ use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
@@ -39,21 +38,7 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Queue_Trait;
 
-	public const TEXT_DOMAIN = 'tamara';
-	public const DEFAULT_TAMARA_GATEWAY_ID = 'tamara-gateway';
-	public const DEFAULT_COUNTRY_CODE = 'SA';
-	public const MESSAGE_LOG_FILE_NAME = 'tamara-custom.log';
-
-	public const TAMARA_AUTHORISED_STATUS = 'authorised',
-				TAMARA_CANCELED_STATUS = 'canceled',
-				TAMARA_PARTIALLY_CAPTURED_STATUS = 'partially_captured',
-				TAMARA_FULLY_CAPTURED_STATUS = 'fully_captured',
-				TAMARA_PARTIALLY_REFUNDED_STATUS = 'partially_refunded',
-				TAMARA_FULLY_REFUNDED_STATUS = 'fully_refunded';
-
-	const TAMARA_CHECKOUT = 'tamara-checkout';
-
-	protected $customer_phone_number;
+	protected $checkout_data_on_runtime = [];
 
 	public function manipulate_hooks(): void {
 		add_action( 'init', [ $this, 'register_tamara_custom_order_statuses' ] );
@@ -65,19 +50,18 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		add_action( 'woocommerce_init', [ $this, 'init_woocommerce' ] );
 
 		add_action(
-			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
+			'woocommerce_update_options_payment_gateways_' . Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID,
 			[ $this, 'tamara_gateway_process_admin_options' ],
 			10
 		);
 		add_action(
-			'woocommerce_update_options_payment_gateways_' . static::DEFAULT_TAMARA_GATEWAY_ID,
+			'woocommerce_update_options_payment_gateways_' . Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID,
 			[ $this, 'tamara_gateway_register_webhook' ],
 			11
 		);
 
 		// Add Tamara custom statuses to wc order status list
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
-		add_action( 'wp_loaded', [ $this, 'cancel_order_uncomplete_payment' ], 21 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tamara_admin_scripts' ] );
 
@@ -110,7 +94,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			);
 			add_action(
 				'woocommerce_checkout_update_order_review',
-				[ $this, 'get_updated_phone_number_on_checkout' ]
+				[ $this, 'build_checkout_data_on_runtime' ]
 			);
 			add_filter(
 				'woocommerce_available_payment_gateways',
@@ -129,10 +113,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				[ $this, 'fetch_tamara_order_received_note' ],
 				10,
 				2
-			);
-			add_action(
-				'woocommerce_checkout_update_order_review',
-				[ $this, 'get_updated_phone_number_on_checkout' ]
 			);
 			add_action(
 				'woocommerce_order_status_changed',
@@ -195,9 +175,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		wp_app()->singleton(
 			Tamara_WC_Payment_Gateway::class,
 			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) {
-				return Tamara_WC_Payment_Gateway::instance();
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
 		);
 
 		$this->register_services();
@@ -212,7 +190,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_text_domain(): string {
-		return static::TEXT_DOMAIN;
+		return \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN;
 	}
 
 	public function provides() {
@@ -240,8 +218,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		return wp_app( Tamara_WC_Payment_Gateway::class );
 	}
 
-	public function get_customer_phone_number() {
-		return $this->customer_phone_number;
+	public function get_checkout_data_on_runtime() {
+		return $this->checkout_data_on_runtime;
 	}
 
 	public function tamara_gateway_process_admin_options() {
@@ -330,16 +308,19 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 */
 	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
 		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings()->get_enabled() ) {
-			$current_cart_info = WC_Order_Helper::get_current_cart_info() ?? [];
+			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
 			$country_code = ! empty( $current_cart_info['country_code'] )
 				? $current_cart_info['country_code']
-				: self::DEFAULT_COUNTRY_CODE;
-			$currency_by_country_code = array_flip( General_Helper::get_currency_country_mappings() );
+				: Tamara_Checkout_Helper::DEFAULT_COUNTRY_CODE;
+			$currency_by_country_code = array_flip( Tamara_Checkout_Helper::get_currency_country_mappings() );
 			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
 				$currency_code = $currency_by_country_code[ $country_code ];
-				$order_total = new Money( General_Helper::format_tamara_number( $cart_total ), $currency_code );
+				$order_total = new Money(
+					Tamara_Checkout_Helper::format_price_number( $cart_total, $currency_code ),
+					$currency_code
+				);
 				return Get_Tamara_Payment_Options_Query::execute_now(
 					[
 						'available_gateways' => $available_gateways,
@@ -349,7 +330,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					]
 				);
 			} else {
-				unset( $available_gateways[ static::DEFAULT_TAMARA_GATEWAY_ID ] );
+				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
 			}
 		}
 
@@ -386,40 +367,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * Cancel a pending order and add Tamara payment cancelled/failed notice.
-	 *
-	 * @throws \Exception
-	 */
-	public function cancel_order_uncomplete_payment() {
-		if (
-			isset( $_GET['cancel_order'] ) &&
-			isset( $_GET['order'] ) &&
-			isset( $_GET['order_id'] ) &&
-			( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-cancel_order' ) ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		) {
-			wc_nocache_headers();
-			$order_key = wp_unslash( $_GET['order'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$order_id = absint( $_GET['order_id'] );
-			$order = wc_get_order( $order_id );
-			$payment_method = $order->get_payment_method();
-			$user_can_cancel = current_user_can( 'cancel_order', $order_id ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
-			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', [ 'pending', 'failed' ], $order ) );
-			$redirect = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			// Todo: Add verify if the payment method is Tamara
-			if ( $user_can_cancel && ! $order_can_cancel ) {
-				wc_clear_notices();
-				wc_add_notice( $this->_t( 'Your payment via Tamara has failed, please try again with a different payment method.' ), 'error' );
-			}
-
-			if ( $redirect ) {
-				wp_safe_redirect( $redirect );
-				exit;
-			}
-		}
-	}
-
-	/**
 	 * Register Tamara new statuses
 	 *
 	 * @throws \Exception
@@ -441,40 +388,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * We want to register all services with this plugin here
-	 *
-	 * @return void
-	 *
-	 */
-	protected function register_services(): void {
-		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
-
-		wp_app()->singleton(
-			Tamara_Client::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
-			}
-		);
-		wp_app()->singleton(
-			Tamara_Notification::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Notification::instance( $gateway_settings->notification_key );
-			}
-		);
-		wp_app()->singleton(
-			Tamara_Widget::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
-			}
-		);
-
-		$this->manipulate_hooks_after_settings();
-	}
-
-	/**
 	 * Add the Tamara Settings links to plugin links
 	 * @param mixed $plugin_links
 	 * @return array
@@ -488,15 +401,13 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * Update phone number on every ajax calls on checkout
+	 * We need to fetch checkout data (from post submit everytime the data is changed)
 	 *
 	 * @param $posted_data
 	 *
 	 * @return void
 	 */
-	public function get_updated_phone_number_on_checkout( $posted_data ): void {
-		global $woocommerce;
-
+	public function build_checkout_data_on_runtime( $posted_data ): void {
 		// Parsing posted data on checkout
 		$post = [];
 		$vars = explode( '&', $posted_data );
@@ -505,8 +416,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			$post[ $v[0] ] = $v[1];
 		}
 
-		// Update phone number get from posted data
-		$this->customer_phone_number = $post['billing_phone'];
+		$this->checkout_data_on_runtime = $post;
 	}
 
 	/**
@@ -688,5 +598,43 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * We want to register all services with this plugin here
+	 *
+	 * @return void
+	 *
+	 */
+	protected function register_services(): void {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
+
+		wp_app()->singleton(
+			Tamara_Client::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
+			}
+		);
+		wp_app()->singleton(
+			Tamara_Notification::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Notification::instance( $gateway_settings->notification_key );
+			}
+		);
+		wp_app()->singleton(
+			Tamara_Widget::class,
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( WP_Application $app ) use ( $gateway_settings ) {
+				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
+			}
+		);
+
+		$this->manipulate_hooks_after_settings();
+	}
+
+	protected function build_tamara_gateway_instance() {
+		return Tamara_WC_Payment_Gateway::instance();
 	}
 }

@@ -4,7 +4,6 @@
 
 	<file>src/</file>
 	<file>resources/views/</file>
-	<file>tests/</file>
 
 	<!-- Exclude Composer vendor directory. -->
 	<exclude-pattern>*/.git/*</exclude-pattern>
