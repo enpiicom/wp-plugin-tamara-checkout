@@ -9,7 +9,6 @@ use Exception;
 use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
 use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment_Query;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
@@ -84,7 +83,7 @@ class Tamara_WC_Order {
 
 		return strpos(
 			$payment_method,
-			Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID
+			Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID
 		) === 0;
 	}
 
@@ -529,7 +528,7 @@ class Tamara_WC_Order {
 		$city = ! empty( $wc_address['city'] ) ? $wc_address['first_name'] : 'N/A';
 		$state = ! empty( $wc_address['state'] ) ? $wc_address['first_name'] : 'N/A';
 		$phone = ! empty( $wc_address['phone'] ) ? $wc_address['phone'] : null;
-		$country = ! empty( $wc_address['country'] ) ? $wc_address['country'] : General_Helper::get_store_base_country_code();
+		$country = ! empty( $wc_address['country'] ) ? $wc_address['country'] : Tamara_Checkout_Helper::get_store_base_country_code();
 
 		$tamara_address = new Address();
 		$tamara_address->setFirstName( (string) $first_name );

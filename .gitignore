@@ -11,6 +11,8 @@ phpcs.cache
 # Docker compose
 docker-compose.override.yml
 docker-compose.local.yml
+tests
+/dev-*
 
 # package management
 /vendor

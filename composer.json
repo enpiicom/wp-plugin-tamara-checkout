@@ -27,7 +27,28 @@
       }
     ],
     "require": {
+      "enpii/enpii-base": "dev-wp-release",
       "php": "^7.3|^8.0"
+    },
+    "replace": {
+      "symfony/http-foundation": "^5.0.0",
+      "symfony/deprecation-contracts": "^2.5.0",
+      "symfony/contracts": "^2.5.0",
+      "symfony/options-resolver": "^5.4.0",
+      "symfony/error-handler": "^4.4.0",
+      "psr/log": "^1.1.4",
+      "psr/cache": "^1.0.1",
+      "psr/container": "1.1.0",
+      "symfony/string": "^5.4"
+    },
+    "require-dev": {
+      "10up/wp_mock": "~0.5.0|^1.0.0",
+      "automattic/vipwpcs": "^3.0.0",
+      "symfony/console": "^5.4.0",
+      "codeception/codeception": "^5.0.0",
+      "codeception/module-asserts": "^3.0",
+      "phpcompatibility/php-compatibility": "^9.3.5",
+        "codeception/module-phpbrowser": "^3.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -35,7 +56,8 @@
       "psr-4": {
         "Tamara_Checkout\\": "src",
         "Tamara_Checkout\\Deps\\": "src-deps",
-        "Tamara_Checkout\\Tests\\": "tests"
+        "Tamara_Checkout\\Tests\\": "tests",
+        "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
       }
     },
     "config": {
@@ -64,9 +86,6 @@
     ],
     "phpunit": [
       "./vendor/bin/phpunit"
-    ],
-    "codecept-run": [
-      "./vendor/bin/codecept run"
     ],
     "test": [
       "@phpcs",

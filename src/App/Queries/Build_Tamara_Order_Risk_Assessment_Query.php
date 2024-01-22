@@ -6,7 +6,7 @@ namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\Deps\Tamara\Model\Order\RiskAssessment;
 use WC_Order;
 
@@ -125,7 +125,7 @@ class Build_Tamara_Order_Risk_Assessment_Query extends Base_Query {
 			}
 		}
 
-		return General_Helper::format_tamara_number( $total_amount, $currency );
+		return Tamara_Checkout_Helper::format_price_number( $total_amount, $currency );
 	}
 
 	protected function get_current_user_order_count_last_3_months() {

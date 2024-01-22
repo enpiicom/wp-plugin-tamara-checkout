@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'tamara/tamara-checkout',
-        'pretty_version' => 'dev-develop',
-        'version' => 'dev-develop',
-        'reference' => '9990b3774cafed6de74fa8edd22cb2e36813471a',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '8c32e9b261a2bf7ba1ff22ef61b15b52f9cb61a8',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -74,9 +74,9 @@
             ),
         ),
         'tamara/tamara-checkout' => array(
-            'pretty_version' => 'dev-develop',
-            'version' => 'dev-develop',
-            'reference' => '9990b3774cafed6de74fa8edd22cb2e36813471a',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '8c32e9b261a2bf7ba1ff22ef61b15b52f9cb61a8',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
