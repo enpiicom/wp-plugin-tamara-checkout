@@ -16,14 +16,24 @@ class Auth_Service_Provider extends AuthServiceProvider {
 	}
 
 	/**
-	 * Register the authenticator services.
+	 * @inheritDoc
 	 *
 	 * @return void
 	 */
 	protected function registerAuthenticator() {
-		$this->app->singleton( 'auth', fn ( $app ) => new Auth_Manager( $app ) );
+		$this->app->singleton(
+			'auth',
+			function ( $app ) {
+				return new Auth_Manager( $app );
+			}
+		);
 
-		$this->app->singleton( 'auth.driver', fn ( $app ) => $app['auth']->guard() );
+		$this->app->singleton(
+			'auth.driver',
+			function ( $app ) {
+				return $app['auth']->guard();
+			}
+		);
 	}
 
 	protected function fetch_config(): void {

@@ -85,14 +85,14 @@ class Log_Service_Provider extends LogServiceProvider {
 
 				'single' => [
 					'driver' => 'single',
-					'path' => storage_path( 'logs/laravel.log' ),
+					'path' => ini_get( 'error_log' ) ? ini_get( 'error_log' ) : storage_path( 'logs/laravel.log' ),
 					'level' => env( 'LOG_LEVEL', 'debug' ),
 					'replace_placeholders' => true,
 				],
 
 				'daily' => [
 					'driver' => 'daily',
-					'path' => storage_path( 'logs/laravel.log' ),
+					'path' => ini_get( 'error_log' ) ? ini_get( 'error_log' ) : storage_path( 'logs/laravel.log' ),
 					'level' => env( 'LOG_LEVEL', 'debug' ),
 					'days' => 14,
 					'replace_placeholders' => true,
