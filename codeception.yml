@@ -1,5 +1,5 @@
 namespace: Tamara_Checkout\Tests
-support_namespace: Tamara_Checkout\Tests\Support
+support_namespace: Support
 paths:
   tests  : tests          # where the tests stored
   data   : tests/_data    # directory for fixture data

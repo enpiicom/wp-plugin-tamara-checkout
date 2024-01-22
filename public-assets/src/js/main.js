@@ -5,7 +5,6 @@
 	$(document).ready(function () {
 		// Set new price value to PDP Widget
 		function set_new_PDP_widget_value(new_value) {
-			console.log(new_value)
 			setTimeout(() => {
 				let tamara_widget = $('tamara-widget');
 				// Assigning new data

@@ -59,30 +59,39 @@ $foo = 'bar';
 ```
 
 ### Running Unit Test
-We must run the composer and codecept run test using PHP 7.4
+We must run the composer and codecept run test using PHP 8.0 (considering `php80` is the alias to your PHP 8.0 executable file)
+
+If you don't have PHP 8.0 locally, you can use the docker:
+```
+docker pull serversideup/php:8.0-cli
+```
+and whenever you want to rin something, you can do something like this:
+```
+docker run --rm --interactive --tty -v $PWD:/var/www/html serversideup/php:8.0-cli ./vendor/bin/codecept build
+```
 - Set up
 ```
-php74 ./vendor/bin/codecept build
+php80 ./vendor/bin/codecept build
 ```
 - Run Unit Test with Codeception on a specific file (for development purposes)
 ```
-php74 ./vendor/bin/codecept run -vvv unit tests/unit/App/Support/Tamara_Checkout_Helper_Test.php
+php80 ./vendor/bin/codecept run -vvv unit tests/unit/App/Support/Tamara_Checkout_Helper_Test.php
 ```
 - Run Unit Test with PhpUnit on a specific file (for development purposes)
 ```
-php74 ./vendor/bin/phpunit --verbose tests/unit/App/Support/Tamara_Checkout_Helper_Test.php
+php80 ./vendor/bin/phpunit --verbose tests/unit/App/Support/Tamara_Checkout_Helper_Test.php
 ```
 - Run Unit Test with Codeception (for the whole unit suite)
 ```
-php74 ./vendor/bin/codecept run unit
+php80 ./vendor/bin/codecept run unit
 ```
 
 #### Using Coverage report
 - Run Unit Test with Codeception (with coverage report)
 ```
-XDEBUG_MODE=coverage php74 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html unit
+XDEBUG_MODE=coverage php80 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html unit
 ```
 - Run Unit Test with PhpUnit (with coverage report)
 ```
-XDEBUG_MODE=coverage php74 ./vendor/bin/phpunit --coverage-text -vvv tests/unit
+XDEBUG_MODE=coverage php80 ./vendor/bin/phpunit --coverage-text -vvv tests/unit
 ```
