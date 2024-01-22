@@ -7,14 +7,17 @@ namespace Tamara_Checkout\App\Services;
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
+use Tamara_Checkout\App\VOs\Tamara_Api_Response_VO;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Client;
 use Tamara_Checkout\Deps\Tamara\Configuration;
 use Tamara_Checkout\Deps\Tamara\Exception\RequestDispatcherException;
 use Tamara_Checkout\Deps\Tamara\HttpClient\GuzzleHttpAdapter;
+use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Merchant\GetPublicConfigsRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
@@ -23,8 +26,11 @@ use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\CaptureRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Payment\RefundRequest;
+use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Checkout\CheckPaymentOptionsAvailabilityResponse;
 use Tamara_Checkout\Deps\Tamara\Response\Checkout\CreateCheckoutResponse;
 use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
+use Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse;
 
 /**
  * A wrapper of Tamara Client
@@ -45,6 +51,10 @@ class Tamara_Client {
 	 */
 	protected $settings;
 
+	/**
+	 *
+	 * @var Client
+	 */
 	protected $api_client;
 
 	protected function __construct(
@@ -82,28 +92,32 @@ class Tamara_Client {
 
 	/**
 	 *
-	 * @param CreateCheckoutRequest $create_checkout_request
-	 * @return string|CreateCheckoutResponse return a string if error faced
+	 * @param RegisterWebhookRequest $client_request
+	 * @return string|RegisterWebhookResponse
 	 * @throws Exception
 	 */
-	public function create_checkout_request( CreateCheckoutRequest $create_checkout_request ) {
-		try {
-			$create_checkout_response = $this->api_client->createCheckout( $create_checkout_request );
-		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
-		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
-		}
+	public function register_webhook( RegisterWebhookRequest $client_request ) {
+		return $this->perform_remote_request( 'registerWebhook', $client_request );
+	}
 
-		if ( empty( $create_checkout_response ) ) {
-			return $error_message;
-		}
+	/**
+	 *
+	 * @param CheckPaymentOptionsAvailabilityRequest $client_request
+	 * @return string|CheckPaymentOptionsAvailabilityResponse
+	 * @throws Exception
+	 */
+	public function check_payment_options_availability( CheckPaymentOptionsAvailabilityRequest $client_request ) {
+		return $this->perform_remote_request( 'checkPaymentOptionsAvailability', $client_request );
+	}
 
-		if ( ! $create_checkout_response->isSuccess() ) {
-			return $this->build_client_response_errors( $create_checkout_response );
-		}
-
-		return $create_checkout_response;
+	/**
+	 *
+	 * @param CreateCheckoutRequest $client_request
+	 * @return string|CreateCheckoutResponse
+	 * @throws Exception
+	 */
+	public function create_checkout( CreateCheckoutRequest $client_request ) {
+		return $this->perform_remote_request( 'createCheckout', $client_request );
 	}
 
 	/**
@@ -127,15 +141,6 @@ class Tamara_Client {
 	}
 
 	/**
-	 * @param $client_request
-	 *
-	 * @return string | \Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
-	 */
-	public function get_order_by_wc_order_id( $client_request ) {
-		return $this->perform_remote_request( 'GetOrderByReferenceIdRequest', $client_request );
-	}
-
-	/**
 	 *
 	 * @param GetOrderByReferenceIdRequest $client_request
 	 * @return string|\Tamara_Checkout\Deps\Tamara\Response\Order\GetOrderByReferenceIdResponse
@@ -153,10 +158,6 @@ class Tamara_Client {
 	 */
 	public function authorise_order( AuthoriseOrderRequest $client_request ) {
 		return $this->perform_remote_request( 'authoriseOrder', $client_request );
-	}
-
-	public function capture_order( CaptureRequest $client_request ) {
-		return $this->perform_remote_request( 'capture', $client_request );
 	}
 
 	/**
@@ -203,24 +204,42 @@ class Tamara_Client {
 		return Client::create( $configuration );
 	}
 
+	/**
+	 *
+	 * @param mixed $remote_action
+	 * @param mixed $client_request
+	 * @return Tamara_Api_Response_VO|mixed
+	 * @throws Exception
+	 */
 	protected function perform_remote_request( $remote_action, $client_request ) {
 		try {
-			$client_response = $this->api_client->$remote_action( $client_request );
+			$api_response = $this->api_client->$remote_action( $client_request );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
 		} catch ( Exception $tamara_checkout_exception ) {
 			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
 		}
 
-		if ( empty( $client_response ) ) {
-			return $error_message;
+		if ( empty( $api_response ) ) {
+			return new Tamara_Api_Error_VO(
+				[
+					'error_message' => $error_message,
+				] 
+			);
 		}
 
-		if ( ! $client_response->isSuccess() ) {
-			return $this->build_client_response_errors( $client_response );
+		if ( ! $api_response->isSuccess() ) {
+			return new Tamara_Api_Error_VO(
+				[
+					'error_message' => $this->build_client_response_errors( $api_response ),
+					'message' => $api_response->getMessage(),
+					'errors' => $api_response->getErrors(),
+					'status_code' => $api_response->getStatusCode(),
+				] 
+			);
 		}
 
-		return $client_response;
+		return $api_response;
 	}
 
 	protected function build_client_response_errors( ClientResponse $tamara_client_response ): string {
@@ -230,14 +249,18 @@ class Tamara_Client {
 		array_walk(
 			$errors,
 			function ( &$tmp_item ) {
-				$tmp_item = General_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
+				$tmp_item = Tamara_Checkout_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
 			}
 		);
-		$error_message = General_Helper::convert_message( $error_message );
-		$error_message .= "<br />\n";
-		$error_message .= implode( "<br />\n", $errors );
+		$error_message = Tamara_Checkout_Helper::convert_message( $error_message );
+		$error_message .= $error_message ? "\n" : '';
+		$error_message .= implode( "\n", $errors );
 
-		return $error_message;
+		if ( empty( $error_message ) ) {
+			$error_message = $tamara_client_response->getStatusCode();
+		}
+
+		return (string) $error_message;
 	}
 
 	protected function build_logger() {

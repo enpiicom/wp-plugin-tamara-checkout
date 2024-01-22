@@ -11,6 +11,10 @@
 
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 
+// Update these constants whenever you bump the version
+//	We put this constant here for the convenience when bump the version
+defined( 'TAMARA_CHECKOUT_VERSION' ) || define( 'TAMARA_CHECKOUT_VERSION', '2.0.0' );
+
 // We want to split all the bootstrapping code to a separate file
 // 	for putting into composer autoload and
 // 	for easier including on other section e.g. unit test
@@ -40,18 +44,18 @@ add_action( 'plugins_loaded', function() {
 	$error_message = '';
 	if (! Tamara_Checkout_Helper::check_enpii_base_plugin()) {
 		$error_message .= $error_message ? '<br />' : '';
-		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', TAMARA_TEXT_DOMAIN ), 'Enpii Base');
+		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN ), 'Enpii Base');
 	}
 
 	if (! Tamara_Checkout_Helper::check_woocommerce_plugin()) {
 		$error_message .= $error_message ? '<br />' : '';
-		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', TAMARA_TEXT_DOMAIN ), 'WooCommerce');
+		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN ), 'WooCommerce');
 	}
 
 	if ($error_message) {
 		wp_admin_notice(
 			sprintf(
-				__( 'Plugin <strong>%s</strong> is disabled.', TAMARA_TEXT_DOMAIN ),
+				__( 'Plugin <strong>%s</strong> is disabled.', \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN ),
 				'Tamara Checkout'
 			) . '<br />' . $error_message,
 			[

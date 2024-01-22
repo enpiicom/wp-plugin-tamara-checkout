@@ -5,3 +5,4 @@
   - Tamara Notification service for decode messages sent from Tamara
   - Tamara Widget service for embedding Tamara promotion widgets
   - Tamara WC Payment Gateway service (inherited from WC_Payment_Gateway) to handle the payment
+- We use the Laravel db queue to execute (via the `web-worker`) several API actions asynchronously for not blocking any actions.

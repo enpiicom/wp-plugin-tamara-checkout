@@ -12,6 +12,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Services\Tamara_Client;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Request\Webhook\RegisterWebhookRequest;
 use Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse;
@@ -22,6 +26,26 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	use Queueable;
 	use SerializesModels;
 
+	use Tamara_Trans_Trait;
+	use Tamara_Checkout_Trait;
+
+	/**
+	 * We want to retry this job if it is not a succesful one
+	 *  after this amount of seconds
+	 * @return int
+	 */
+	public function backoff() {
+		return 700;
+	}
+
+	/**
+	 * Set tag for filtering
+	 * @return string[]
+	 */
+	public function tags() {
+		return [ 'site_id_' . $this->site_id, 'tamara:api', 'webhook:register' ];
+	}
+
 	/**
 	 * @param  \Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway  $tamara_gateway_service
 	 * @param  \Tamara_Checkout\App\Services\Tamara_Client  $tamara_client_service
@@ -29,31 +53,50 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	 * @throws \Exception
 	 */
 	public function handle( Tamara_WC_Payment_Gateway $tamara_gateway_service, Tamara_Client $tamara_client_service ) {
+		// We must call this for the queue to be able to see
+		//  which site (blog) the job belongs to
+		$this->before_handle();
+
 		// We need to get a refreshed settings from the Payment Gateway
 		$gateway_settings = $tamara_gateway_service->get_settings( true );
 		$tamara_client_service->init_tamara_client( $gateway_settings->api_token, $gateway_settings->api_url, $gateway_settings );
 
-		$tamara_register_webhook_api_request = new RegisterWebhookRequest(
-			wp_app_route_wp_url( 'wp-api::tamara-webhook' ),
-			$this->get_tamara_webhook_events()
+		$tamara_client_response = $tamara_client_service->register_webhook(
+			new RegisterWebhookRequest(
+				wp_app_route_wp_url( 'wp-api::tamara-webhook' ),
+				$this->get_tamara_webhook_events()
+			)
 		);
 
-		try {
-			$tamara_register_webhook_api_response = $tamara_client_service->get_api_client()->registerWebhook( $tamara_register_webhook_api_request );
-			if ( $tamara_register_webhook_api_response ) {
-				$this->handle_tamara_register_webhook_response( $tamara_register_webhook_api_response, $tamara_gateway_service );
-			}
-		} catch ( Exception $tamara_register_webhook_exception ) {
-			$this->throw_tamara_register_webhook_exception( $tamara_gateway_service, $tamara_register_webhook_exception );
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
+			$this->process_failed_action( $tamara_client_response );
+
+			return;
+		} else {
+			$this->process_successful_action( $tamara_client_response );
 		}
 	}
 
-	/**
-	 * @param  \Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway  $tamara_gateway_service
-	 * @param  null  $webhook_id
-	 */
-	protected function update_webhook_id_to_options( Tamara_WC_Payment_Gateway $tamara_gateway_service, $webhook_id = null ): void {
-		$tamara_gateway_service->update_option( 'tamara_webhook_id', $webhook_id );
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_client_response ) {
+		$error_code = $tamara_client_response->errors[0]['error_code'] ?? null;
+		if ( $error_code === 'webhook_already_registered' ) {
+			$this->tamara_gateway()->update_option( 'tamara_webhook_id', $tamara_client_response->errors[0]['data']['webhook_id'] ?? '' );
+		} else {
+			throw new Exception(
+				wp_kses_post(
+					sprintf(
+						$this->_t( 'Tamara Service timeout or disconnected. Error message: "%s".' ),
+						esc_attr( $tamara_client_response->error_message )
+					)
+				)
+			);
+		}
+	}
+
+	protected function process_successful_action( RegisterWebhookResponse $tamara_client_response ) {
+		$this->tamara_gateway()->update_option( 'tamara_webhook_id', $tamara_client_response->getWebhookId() );
+
+		$this->tamara_gateway()->get_settings( true );
 	}
 
 	/**
@@ -61,64 +104,13 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	 */
 	protected function get_tamara_webhook_events(): array {
 		return [
-			'order_approved',
-			'order_declined',
-			'order_authorised',
-			'order_canceled',
-			'order_captured',
-			'order_refunded',
-			'order_expired',
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_DECLINED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CANCELED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_AUTHORISED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CAPTURED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_REFUNDED,
+			Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_EXPIRED,
 		];
-	}
-
-	/**
-	 * @param  \Tamara_Checkout\Deps\Tamara\Response\Webhook\RegisterWebhookResponse  $tamara_register_webhook_api_response
-	 * @param  \Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway  $tamara_gateway_service
-	 *
-	 * @return void
-	 *
-	 * @throws \Illuminate\Contracts\Container\BindingResolutionException
-	 * @throws \Exception
-	 */
-	protected function handle_tamara_register_webhook_response(
-		RegisterWebhookResponse $tamara_register_webhook_api_response,
-		Tamara_WC_Payment_Gateway $tamara_gateway_service
-	): void {
-		$tamara_register_webhook_api_response_error_code =
-			$tamara_register_webhook_api_response->getErrors()[0]['error_code'] ?? null;
-		if ( $tamara_register_webhook_api_response->isSuccess() ) {
-			$this->update_webhook_id_to_options(
-				$tamara_gateway_service,
-				$tamara_register_webhook_api_response->getWebhookId()
-			);
-		} elseif ( $tamara_register_webhook_api_response_error_code === 'webhook_already_registered' ) {
-			$this->update_webhook_id_to_options(
-				$tamara_gateway_service,
-				$tamara_register_webhook_api_response->getErrors()[0]['data']['webhook_id']
-			);
-		} else {
-			throw new Exception(
-				esc_textarea( $tamara_gateway_service->_t( $tamara_register_webhook_api_response->getMessage() ) ),
-				(int) $tamara_register_webhook_api_response->getStatusCode()
-			);
-		}
-	}
-
-	/**
-	 * webhook_already_registered
-	 * @throws \Exception
-	 */
-	protected function throw_tamara_register_webhook_exception(
-		Tamara_WC_Payment_Gateway $tamara_gateway_service,
-		Exception $tamara_register_webhook_exception
-	) {
-		throw new Exception(
-			sprintf(
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				$tamara_gateway_service->_t( 'Tamara Service timeout or disconnected.\nError message: " %s".\nTrace: %s' ),
-				esc_textarea( $tamara_register_webhook_exception->getMessage() ),
-				esc_textarea( $tamara_register_webhook_exception->getTraceAsString() )
-			)
-		);
 	}
 }

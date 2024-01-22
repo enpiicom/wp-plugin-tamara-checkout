@@ -7,6 +7,8 @@ namespace Tamara_Checkout\App\Queries;
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
+use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_10_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_11_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_12_WC_Payment_Gateway;
@@ -21,14 +23,13 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Pay_In_9_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Next_Month_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
-use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Model\Checkout\PaymentOptionsAvailability;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
 
 class Get_Tamara_Payment_Options_Query extends Base_Query {
-
 	use Executable_Trait;
 	use Config_Trait;
+	use Tamara_Checkout_Trait;
 
 	protected $available_gateways;
 	protected $order_total;
@@ -63,11 +64,14 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 			$this->customer_phone,
 			$this->is_vip
 		);
-		$request = new CheckPaymentOptionsAvailabilityRequest( $payment_options_availability );
-		$tamara_client = $this->get_plugin_instance()->get_tamara_client_service()->get_api_client();
-		$response = $tamara_client->checkPaymentOptionsAvailability( $request );
 
-		return $response->getAvailablePaymentLabels();
+		$tamara_client_response = $this->tamara_client()->check_payment_options_availability( new CheckPaymentOptionsAvailabilityRequest( $payment_options_availability ) );
+
+		if ( ! $tamara_client_response instanceof Tamara_Api_Error_VO ) {
+			return $tamara_client_response->getAvailablePaymentLabels();
+		}
+
+		return [];
 	}
 
 	/**
@@ -104,7 +108,7 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 	 */
 	protected function process_available_gateways( array $remote_payment_methods ): array {
 		$available_gateways = $this->available_gateways;
-		$tamara_default_gateway_key = Tamara_Checkout_WP_Plugin::DEFAULT_TAMARA_GATEWAY_ID;
+		$tamara_default_gateway_key = $this->default_payment_gateway_id();
 		$tamara_default_gateway_offset = array_search(
 			$tamara_default_gateway_key,
 			array_keys( $available_gateways )
@@ -117,13 +121,6 @@ class Get_Tamara_Payment_Options_Query extends Base_Query {
 		unset( $available_gateways[ $tamara_default_gateway_key ] );
 
 		return $available_gateways;
-	}
-
-	/**
-	 * @return \Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin
-	 */
-	protected function get_plugin_instance(): Tamara_Checkout_WP_Plugin {
-		return Tamara_Checkout_WP_Plugin::wp_app_instance();
 	}
 
 	/**

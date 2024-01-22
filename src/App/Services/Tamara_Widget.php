@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
-use Tamara_Checkout\App\Support\Helpers\WC_Order_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Tamara_Widget {
 	use Static_Instance_Trait;
 	use Tamara_Trans_Trait;
+	use Tamara_Checkout_Trait;
 
 	public const DEFAULT_COUNTRY_CODE = 'sa';
 
@@ -35,8 +36,8 @@ class Tamara_Widget {
 		wp_enqueue_script( $js_url_handle_id, $this->get_widget_js_url(), [], Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(), $enqueue_script_args );
 
 		$public_key = esc_attr( esc_js( $this->get_public_key() ) );
-		$country_code = esc_attr( esc_js( General_Helper::get_current_country_code() ) );
-		$language_code = esc_attr( esc_js( General_Helper::get_current_language_code() ) );
+		$country_code = esc_attr( esc_js( Tamara_Checkout_Helper::get_current_country_code() ) );
+		$language_code = esc_attr( esc_js( Tamara_Checkout_Helper::get_current_language_code() ) );
 
 		$js_script = <<<JS_SCRIPT
 		window.tamaraWidgetConfig = {
@@ -61,7 +62,7 @@ JS_SCRIPT;
 
 	public function fetch_tamara_pdp_widget( $data = [] ) {
 		extract( (array) $data );
-		$widget_amount = ! empty( $price ) ? $price : General_Helper::get_displayed_product_price();
+		$widget_amount = ! empty( $price ) ? $price : Tamara_Checkout_Helper::get_displayed_product_price();
 
 		if ( is_array( $widget_amount ) ) {
 			foreach ( $widget_amount as $amount ) {
@@ -104,18 +105,21 @@ JS_SCRIPT;
 	/**
 	 * @throws \Exception
 	 */
-	public function fetch_tamara_checkout_widget(): string {
-		$widget_inline_type = 3;
-		$cart_amount = WC_Order_Helper::define_total_amount_to_calculate( WC()->cart->total );
-		$description = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
-			'blocks/tamara-widget',
-			[
-				'widget_inline_type' => $widget_inline_type,
-				'widget_amount' => $cart_amount,
-			]
-		);
+	public function fetch_tamara_checkout_widget( $description, $id ): string {
+		if ( Tamara_Checkout_Helper::is_tamara_payment_option( $id ) ) {
+			$widget_inline_type = 3;
+			$cart_amount = Tamara_Checkout_Helper::define_total_amount_to_calculate( WC()->cart->total );
+			$description = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
+				'blocks/tamara-widget',
+				[
+					'widget_inline_type' => $widget_inline_type,
+					'widget_amount' => $cart_amount,
+				]
+			);
 
-		$description .= $this->populate_default_description_text_on_checkout();
+			$description .= $this->populate_default_description_text_on_checkout();
+		}
+
 		return $description;
 	}
 
@@ -133,7 +137,7 @@ JS_SCRIPT;
 		$payment_method = $wc_order->get_payment_method();
 		$view_and_pay_url = $this->get_view_and_pay_url();
 
-		if ( ! empty( $payment_method ) && General_Helper::is_tamara_gateway( $payment_method ) ) {
+		if ( ! empty( $payment_method ) && Tamara_Checkout_Helper::is_tamara_gateway( $payment_method ) ) {
 			$order_note = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 				'blocks/tamara-order-received',
 				[
@@ -149,8 +153,8 @@ JS_SCRIPT;
 	 * @return string
 	 */
 	protected function get_view_and_pay_url(): string {
-		$base_url = General_Helper::is_live_mode() ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
-		$locale_suffix = General_Helper::get_current_language_code() === 'ar' ? '?locale=ar_SA' : '?locale=en_US';
+		$base_url = $this->tamara_gateway()->get_settings()->is_live_mode ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
+		$locale_suffix = Tamara_Checkout_Helper::get_current_language_code() === 'ar' ? '?locale=ar_SA' : '?locale=en_US';
 
 		return $base_url . $locale_suffix;
 	}
@@ -163,7 +167,7 @@ JS_SCRIPT;
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
 		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
-		if ( ! General_Helper::is_live_mode() ) {
+		if ( ! $this->tamara_gateway()->get_settings()->is_live_mode ) {
 			$description .= '<br/>' . $this->_t(
 				'SANDBOX ENABLED.
 							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide

@@ -1,9 +1,5 @@
 <?php
-$plugin_existed = defined( 'TAMARA_CHECKOUT_VERSION' );
-
-// Update these constants whenever you bump the version
-defined( 'TAMARA_CHECKOUT_VERSION' ) || define( 'TAMARA_CHECKOUT_VERSION', '2.0.0' );
-defined( 'TAMARA_TEXT_DOMAIN' ) || define( 'TAMARA_TEXT_DOMAIN', 'tamara' );
+$plugin_existed = defined( 'TAMARA_CHECKOUT_PLUGIN_SLUG' );
 
 // We set the slug for the plugin here.
 // This slug will be used to identify the plugin instance from the WP_Application container

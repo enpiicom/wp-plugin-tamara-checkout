@@ -16,7 +16,7 @@ namespace Tamara_Checkout\Tests\Support;
  *
  * @SuppressWarnings(PHPMD)
 */
-class Unit_Tester extends \Codeception\Actor {
+class UnitTester extends \Codeception\Actor {
 
 	use _generated\UnitTesterActions;
 

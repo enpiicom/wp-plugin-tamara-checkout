@@ -6,7 +6,7 @@ namespace Tamara_Checkout\App\Queries;
 
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
-use Tamara_Checkout\App\Support\Helpers\General_Helper;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -139,47 +139,40 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'description' => '<p>Mapping status for order according to Tamara action result.</p>
                 <div class="tamara-order-statuses-mappings-manage button-primary">' . $this->_t( 'Manage Order Statuses Mappings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
-			'tamara_payment_cancel' => [
-				'title' => $this->_t( 'Order status for payment cancelled from Tamara' ),
-				'type' => 'select',
-				'default' => 'wc-tamara-p-canceled',
-				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'Map status for order when the payment is cancelled from Tamara during checkout.' ),
-			],
-			'tamara_payment_failure' => [
-				'title' => $this->_t( 'Order status for payment failed from Tamara' ),
-				'type' => 'select',
-				'default' => 'wc-tamara-p-failed',
-				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'Map status for order when the payment is failed from Tamara during checkout.' ),
-			],
 			'tamara_authorise_done' => [
-				'title' => $this->_t( 'Order status for Authorise success from Tamara' ),
+				'title' => $this->_t( 'Order Status when Tamara Order is Authorised' ),
 				'type' => 'select',
 				'default' => 'wc-processing',
 				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'Map status for order when the payment is authorised successfully from Tamara.' ),
+				'description' => $this->_t( 'Mapping status for orders that have Tamara Payment authorised successfully on Tamara side. This process happens after the Customers complete the checkout on Tamara side successfully.' ),
+			],
+			'tamara_order_cancel' => [
+				'title' => $this->_t( 'Order Status when Tamara Order is Canceled' ),
+				'type' => 'select',
+				'default' => 'wc-cancelled',
+				'options' => wc_get_order_statuses(),
+				'description' => $this->_t( 'Mapping status for orders that are cancelled (Tamara calls `canceled`). The cancellation may happen because the customer actively cancel the order or the cancellation happens on the Partners portal or from Tamara side. Tamara triggers the Cancellation process and send to the website (via the webhook).' ),
+			],
+			'tamara_payment_failure' => [
+				'title' => $this->_t( 'Order Status when Tamara Order Fails' ),
+				'type' => 'select',
+				'default' => 'wc-tamara-failed',
+				'options' => wc_get_order_statuses(),
+				'description' => $this->_t( 'Mapping status for orders that are declined by Tamara. The Order failure may happen because the customer does not have a good credit history or having on-going orders with Tamara. Tamara triggers the Decline process and send to the website (via the webhook).' ),
 			],
 			'tamara_authorise_failure' => [
-				'title' => $this->_t( 'Order status for Authorise failed from Tamara' ),
+				'title' => $this->_t( 'Order Status when Tamara Authorisation fails' ),
 				'type' => 'select',
 				'default' => 'wc-tamara-a-failed',
 				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'Map status for order when the payment is failed in authorising from Tamara.' ),
+				'description' => $this->_t( 'Mapping status for orders when the payment failed at the Authorisation process on Tamara.' ),
 			],
 			'tamara_capture_failure' => [
-				'title' => $this->_t( 'Order status for Capture failed from Tamara' ),
+				'title' => $this->_t( 'Order Status when Capture fails on Tamara' ),
 				'type' => 'select',
 				'default' => 'wc-tamara-c-failed',
 				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'Map status for order when the Capture process is failed.' ),
-			],
-			'tamara_order_cancel' => [
-				'title' => $this->_t( 'Order status for cancelling the order from Tamara through Webhook' ),
-				'type' => 'select',
-				'default' => 'wc-tamara-o-canceled',
-				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'Map status for order when it is cancelled from Tamara (Order Expired, Order Declined...) through Webhook.' ),
+				'description' => $this->_t( 'Mapping status for orders when the payment failed at the Capture process on Tamara.' ),
 			],
 			'tamara_order_statuses_trigger' => [
 				'title' => $this->_t( 'Order Statuses to Trigger Tamara Events' ),
@@ -188,18 +181,18 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                 <div class="tamara-order-statuses-trigger-manage button-primary">' . $this->_t( 'Manage Order Statuses Trigger' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'tamara_cancel_order' => [
-				'title' => $this->_t( 'Order status that trigger Tamara cancel process for an order' ),
+				'title' => $this->_t( 'Order Status that triggers the Tamara Cancel process for an order' ),
 				'type' => 'select',
 				'default' => 'wc-cancelled',
 				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'When you update an order to this status it would connect to Tamara API to trigger the Cancel payment process on Tamara.' ),
+				'description' => $this->_t( 'When you update an order to this status, Tamara Checkout plugin would connect to Tamara API to trigger the Cancel process for the correspoding order on Tamara side.' ),
 			],
 			'tamara_payment_capture' => [
-				'title' => $this->_t( 'Order status that trigger Tamara capture process for an order' ),
+				'title' => $this->_t( 'Order Status that triggers Tamara Capture process for an order' ),
 				'type' => 'select',
 				'default' => 'wc-completed',
 				'options' => wc_get_order_statuses(),
-				'description' => $this->_t( 'When you update an order to this status it would connect to Tamara API to trigger the Capture payment process on Tamara.' ),
+				'description' => $this->_t( 'When you update an order to this status it would connect to Tamara API to trigger the Capture payment process on Tamara. Only when the Capture process done, the payment is available for the settlement.' ),
 			],
 			'tamara_custom_settings' => [
 				'title' => $this->_t( 'Tamara Custom Settings' ),
@@ -210,14 +203,14 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			'excluded_products' => [
 				'title' => $this->_t( 'Excluded Product Ids' ),
 				'type' => 'text',
-				'description' => $this->_t( 'Enter the product ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. 101, 205).' ),
-				'default' => null,
+				'description' => $this->_t( 'Enter the product ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. `101, 205`).' ),
+				'default' => '',
 			],
 			'excluded_product_categories' => [
 				'title' => $this->_t( 'Excluded Product Category Ids' ),
 				'type' => 'text',
-				'description' => __( 'Enter the product category ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. 26, 104).' ),
-				'default' => null,
+				'description' => __( 'Enter the product category ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. `26, 104`).' ),
+				'default' => '',
 			],
 			'tamara_general_settings' => [
 				'title' => $this->_t( 'Tamara Advanced Settings' ),
@@ -225,11 +218,11 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'description' => __( 'Configure Tamara Advanced Settings <br> <p class="tamara-highlight">Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.</p>' )
 				. '<div class="tamara-advanced-settings-manage button-primary">' . $this->_t( 'Show Tamara Advanced Settings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
-			'crobjob_enabled' => [
+			'cronjob_enabled' => [
 				'title' => $this->_t( 'Enable Cron Job' ),
 				'type' => 'checkbox',
-				'description' => $this->_t( 'In you tick on this setting, Tamara will use a cron-job to find all completed orders that has not been verified but not authorised or not captured within 180 days and force them to be authorised or captured. It fires an asynchronous call on Admin request to perform this action.' ),
-				'default' => 'yes',
+				'description' => $this->_t( 'In you tick on this setting, Tamara will use a cron-job to find all completed orders that has not been verified but not authorised or not captured within 30 days and force them to be authorised or captured. It fires an asynchronous call on Admin request to perform this action.' ),
+				'default' => 'no',
 			],
 			'force_checkout_phone' => [
 				'title' => $this->_t( 'Force Enable Phone' ),
@@ -275,6 +268,10 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			],
 			'webhook_enabled' => [
 				'type' => 'checkbox',
+				'default' => 'yes',
+				'custom_attributes' => [
+					'readonly' => 'readonly',
+				],
 			],
 			'success_url' => [
 				'title' => $this->_t( 'Tamara Payment Success Url' ),
@@ -353,10 +350,6 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                         </ul>
                     </div>
                 </div>';
-	}
-
-	protected function get_webhook_id(): string {
-		return 'webhook_id';
 	}
 
 	protected function get_debug_log_download_link(): string {
@@ -518,7 +511,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
             }
         }
 JS_SCRIPT;
-		if ( General_Helper::is_tamara_admin_settings_screen() ) {
+		if ( Tamara_Checkout_Helper::is_tamara_admin_settings_screen() ) {
 			wp_add_inline_script( 'tamara-custom-admin', $js_script, 'before' );
 		}
 	}
