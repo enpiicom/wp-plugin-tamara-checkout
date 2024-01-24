@@ -1,8 +1,27 @@
+### Use the docker to deploy the project locally
+- Copy the environments and adjust the values to match your local
+```
+cp .env.example .env
+```
+- Install need dev stuff
+```
+XDEBUG_MODE=off COMPOSER=composer-dev.json composer73 install
+```
+or if you don't have PHP 7.3 locally
+```
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev.json -v $PWD:/app npbtrac/php73_cli composer install
+```
+- Start the docker
+```
+docker-compose up -d
+```
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT}
+
 ### Update `wp-release` branch
 - Use the following commands
   - Remove vendors
   ```
-  rm -rf vendor
+  rm -rf vendor public-assets resources src src-deps
   ```
   - Update needed files from the main branches
   ```
