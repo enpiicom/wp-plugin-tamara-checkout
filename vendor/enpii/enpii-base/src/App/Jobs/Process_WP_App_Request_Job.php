@@ -23,5 +23,8 @@ class Process_WP_App_Request_Job extends Base_Job {
 		$response->send();
 
 		$kernel->terminate( $request, $response );
+
+		// We want to end up the execution here to conclude the request
+		exit( 0 );
 	}
 }

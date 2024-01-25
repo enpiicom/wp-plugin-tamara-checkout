@@ -74,10 +74,6 @@ class WP_Application extends Application {
 					$config
 				);
 
-				if ( ! file_exists( dirname( wp_app()->getCachedConfigPath() ) ) ) {
-					enpii_base_wp_app_prepare_folders();
-				}
-
 				do_action( App_Const::ACTION_WP_APP_LOADED );
 			},
 			-100

@@ -2,11 +2,12 @@
 /**
  * Plugin Name: Tamara Checkout
  * Plugin URI:  https://tamara.co/
- * Description: Allow to Buy Now Pay Later with Tamara payment gateway, based on Enpii Base
+ * Description: Allow to Buy Now Pay Later with Tamara payment gateway.
  * Author:      dev@tamara.co
  * Author URI:  https://tamara.co/
  * Version:     2.0.0
  * Text Domain: tamara
+ * Tags: BNPL, Enpii Base, Laravel
  */
 
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
@@ -42,6 +43,7 @@ add_action( 'plugins_loaded', function() {
 //	and the WP Plugin use the resources from these 2 therefore it may produce errrors
 add_action( 'plugins_loaded', function() {
 	$error_message = '';
+
 	if (! Tamara_Checkout_Helper::check_enpii_base_plugin()) {
 		$error_message .= $error_message ? '<br />' : '';
 		$error_message .= sprintf( __( 'Plugin <strong>%s</strong> is required.', \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN ), 'Enpii Base');
@@ -53,16 +55,18 @@ add_action( 'plugins_loaded', function() {
 	}
 
 	if ($error_message) {
-		wp_admin_notice(
-			sprintf(
+		add_action( 'admin_notices', function() use ($error_message) {
+			$error_message = sprintf(
 				__( 'Plugin <strong>%s</strong> is disabled.', \Tamara_Checkout\App\Support\Tamara_Checkout_Helper::TEXT_DOMAIN ),
 				'Tamara Checkout'
-			) . '<br />' . $error_message,
-			[
-				'dismissible' => true,
-				'type' => 'error',
-			]
-		);
+			) . '<br />' . $error_message;
+
+			?>
+			<div class="notice notice-warning is-dismissible">
+				<p><?php echo $error_message; ?></p>
+			</div>
+			<?php
+		} );
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 	}

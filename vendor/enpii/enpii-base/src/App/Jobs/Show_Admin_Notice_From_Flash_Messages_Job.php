@@ -21,12 +21,14 @@ class Show_Admin_Notice_From_Flash_Messages_Job extends Base_Job {
 		foreach ( $flash_keys as $type ) {
 			if ( Session::has( $type ) && ! empty( Session::get( $type ) ) ) {
 				$display_type = str_replace( 'admin-', '', $type );
-				wp_admin_notice(
-					$this->build_html_messages( (array) Session::get( $type ) ),
-					[
-						'dismissible' => true,
-						'type' => ( $display_type === 'caution' ? 'warning' : $display_type ),
-					]
+				$admin_message = $this->build_html_messages( (array) Session::get( $type ) );
+				add_action(
+					'admin_notices',
+					function () use ( $admin_message, $display_type ) {
+						echo '<div class="notice notice-' . ( $display_type === 'caution' ? 'warning' : esc_attr( $display_type ) ) . ' is-dismissible">
+						<p>' . wp_kses_post( $admin_message ) . '</p>
+					</div>';
+					}
 				);
 				Session::forget( $type );
 			}

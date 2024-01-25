@@ -5,6 +5,11 @@
 if (defined( 'WP_CONTENT_DIR' )) {
 	add_action( 'cli_init', 'enpii_base_prepare' );
 
+	if (! enpii_base_wp_app_check() ) {
+		// We do nothing but still keep the plugin enabled
+		return;
+	}
+
 	add_action( \Enpii_Base\App\Support\App_Const::ACTION_WP_APP_LOADED, function() {
 		\Enpii_Base\App\WP\Enpii_Base_WP_Plugin::init_with_wp_app(
 			ENPII_BASE_PLUGIN_SLUG,

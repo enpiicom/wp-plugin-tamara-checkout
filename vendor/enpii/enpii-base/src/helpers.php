@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 
 if ( ! function_exists( 'enpii_base_is_console_mode' ) ) {
 	function enpii_base_is_console_mode(): bool {
@@ -28,33 +29,33 @@ if ( ! function_exists( 'enpii_base_wp_app_prepare_folders' ) ) {
 		if ( empty( $wp_app_base_path ) ) {
 			$wp_app_base_path = enpii_base_wp_app_get_base_path();
 		}
+		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod
+		chmod( dirname( $wp_app_base_path ), $chmod );
 
 		$file_system = new \Illuminate\Filesystem\Filesystem();
-		$file_system->ensureDirectoryExists( $wp_app_base_path, $chmod );
 
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'config', $chmod );
-
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'database', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'database' . DIR_SEP . 'migrations', $chmod );
-
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'bootstrap', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'bootstrap' . DIR_SEP . 'cache', $chmod );
-
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'lang', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'resources', $chmod );
-
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'logs', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'views', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache' . DIR_SEP . 'data', $chmod );
-		$file_system->ensureDirectoryExists( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'sessions', $chmod );
-
-		$file_system->chmod( $wp_app_base_path . DIR_SEP . 'bootstrap' . DIR_SEP . 'cache', $chmod );
-		$file_system->chmod( $wp_app_base_path . DIR_SEP . 'storage', $chmod );
-		$file_system->chmod( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework', $chmod );
-		$file_system->chmod( $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'logs', $chmod );
+		$filepaths = [
+			$wp_app_base_path,
+			$wp_app_base_path . DIR_SEP . 'config',
+			$wp_app_base_path . DIR_SEP . 'database',
+			$wp_app_base_path . DIR_SEP . 'database' . DIR_SEP . 'migrations',
+			$wp_app_base_path . DIR_SEP . 'bootstrap',
+			$wp_app_base_path . DIR_SEP . 'bootstrap' . DIR_SEP . 'cache',
+			$wp_app_base_path . DIR_SEP . 'lang',
+			$wp_app_base_path . DIR_SEP . 'resources',
+			$wp_app_base_path . DIR_SEP . 'storage',
+			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'logs',
+			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework',
+			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'views',
+			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache',
+			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache' . DIR_SEP . 'data',
+			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'sessions',
+		];
+		foreach ( $filepaths as $filepath ) {
+			$file_system->ensureDirectoryExists( $filepath, $chmod );
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
+			chmod( $filepath, $chmod );
+		}
 	}
 }
 
@@ -84,5 +85,45 @@ if ( ! function_exists( 'enpii_base_prepare' ) ) {
 				enpii_base_wp_app_prepare_folders();
 			}
 		);
+	}
+}
+
+if ( ! function_exists( 'enpii_base_wp_app_check' ) ) {
+	/**
+	 * Check the mandatory prerequisites for the WP App
+	 * @return bool
+	 */
+	function enpii_base_wp_app_check(): bool {
+		$error_message = '';
+		$wp_app_base_path = enpii_base_wp_app_get_base_path();
+		if ( ! file_exists( $wp_app_base_path ) ) {
+			enpii_base_wp_app_prepare_folders();
+
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_is_writable
+			if ( ! is_writable( dirname( $wp_app_base_path ) ) ) {
+				$error_message .= sprintf(
+					// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain, WordPress.WP.I18n.MissingTranslatorsComment
+					__( 'Folder <strong>%s</strong> must be writable, please make it 0777.', Enpii_Base_Helper::TEXT_DOMAIN ),
+					dirname( $wp_app_base_path )
+				);
+			}
+		}
+
+		if ( $error_message ) {
+			add_action(
+				'admin_notices',
+				function () use ( $error_message ) {
+					?>
+					<div class="notice notice-error">
+						<p><?php echo wp_kses_post( $error_message ); ?></p>
+					</div>
+					<?php
+				}
+			);
+
+			return false;
+		}
+
+		return true;
 	}
 }

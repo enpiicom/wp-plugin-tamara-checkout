@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\Http\Middleware;
 
-use Enpii_Base\App\Support\General_Helper;
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 
 class Authenticate extends Middleware {
@@ -16,7 +16,7 @@ class Authenticate extends Middleware {
 	 * @return string|null
 	 */
 	protected function redirectTo( $request ) {
-		return $request->expectsJson() ? null : wp_login_url( General_Helper::get_current_url() );
+		return $request->expectsJson() ? null : wp_login_url( Enpii_Base_Helper::get_current_url() );
 	}
 
 	/**

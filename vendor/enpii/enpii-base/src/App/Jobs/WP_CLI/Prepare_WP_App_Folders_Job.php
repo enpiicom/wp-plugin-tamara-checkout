@@ -16,7 +16,7 @@ class Prepare_WP_App_Folders_Job extends Base_Job {
 	 * @return void
 	 */
 	public function handle(): void {
-		enpii_base_wp_app_prepare_folders( 0755 );
+		enpii_base_wp_app_prepare_folders();
 
 		WP_CLI::success( 'Preparing needed folders for WP App done!' );
 	}
