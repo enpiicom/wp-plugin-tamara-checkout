@@ -1,0 +1,52 @@
+{
+  "extend": "composer-dev.json",
+  "require-dev": {
+    "johnpbloch/wordpress-core": "~6.2.0",
+    "wpackagist-plugin/query-monitor": "^2.15",
+    "wpackagist-theme/storefront": "^4.0",
+    "wp-plugins/woocommerce": "*",
+    "automattic/vipwpcs": "^3.0.0",
+    "phpcompatibility/php-compatibility": "^9.3.5"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "wp-plugins/woocommerce",
+        "version": "7.1.0",
+        "type": "wordpress-plugin",
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/woocommerce.7.1.0.zip"
+        }
+      }
+    }
+  ],
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "extra": {
+    "installer-paths": {
+      "dev-docker/wordpress/wp-content/mu-plugins/{$name}/": [
+
+      ],
+      "dev-docker/wordpress/wp-content/themes/{$name}/": [
+        "type:wordpress-theme"
+      ],
+      "dev-docker/wordpress/wp-content/plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ]
+    }
+  }
+}
