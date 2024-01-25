@@ -108,8 +108,7 @@
         "type:wordpress-theme"
       ],
       "dev-docker/wordpress/wp-content/plugins/{$name}/": [
-        "type:wordpress-plugin",
-        "type:wordpress-muplugin"
+        "type:wordpress-plugin"
       ]
     }
   },

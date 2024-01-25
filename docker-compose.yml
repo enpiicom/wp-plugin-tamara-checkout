@@ -4,7 +4,7 @@ services:
   wordpress:
     build:
       context: .
-      dockerfile: ./dev-docker/Dockerfile
+      dockerfile: ./dev-docker/Dockerfile73
     ports:
       - $HTTP_EXPOSING_PORT:80
     extra_hosts:
@@ -14,7 +14,7 @@ services:
       - ./dev-docker/config/nginx/default.conf:/etc/nginx/sites-available/default
       - ./dev-docker/log/:/var/log/
       - ./dev-docker/wordpress/:/var/www/html/public
-      - ./dev-docker/config/wordpress/wp-config.php:/var/www/html/wp-config.php
+      - ./dev-docker/config/wordpress/wp-config.php:/var/www/html/public/wp-config.php
       - /var/www/html/public/wp-content/uploads
       - /var/www/html/public/wp-content/cache
       - /var/www/html/public/wp-content/upgrade

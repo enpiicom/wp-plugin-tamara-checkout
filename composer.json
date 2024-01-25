@@ -44,11 +44,11 @@
     "require-dev": {
       "10up/wp_mock": "~0.5.0|^1.0.0",
       "automattic/vipwpcs": "^3.0.0",
+      "phpcompatibility/php-compatibility": "^9.3.5",
       "symfony/console": "^5.4.0",
       "codeception/codeception": "^5.0.0",
       "codeception/module-asserts": "^3.0",
-      "phpcompatibility/php-compatibility": "^9.3.5",
-        "codeception/module-phpbrowser": "^3.0"
+      "codeception/module-phpbrowser": "^3.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -63,8 +63,9 @@
     "config": {
       "platform-check": false,
       "allow-plugins": {
-        "dealerdirect/phpcodesniffer-composer-installer": true
-      }
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "composer/installers": true
+        }
     },
   "extra": {
     "mozart": {

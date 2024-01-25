@@ -17,6 +17,13 @@ docker-compose up -d
 ```
 - Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT}
 
+#### Troubleshooting
+- If you see the errors, try to do:
+```
+docker compose exec wordpress wp --allow-root enpii-base prepare
+docker compose exec wordpress wp --allow-root enpii-base artisan wp-app:setup
+```
+
 ### Update `wp-release` branch
 - Use the following commands
   - Remove vendors
@@ -48,17 +55,22 @@ docker-compose up -d
   - The add and commit everything
 
 ### Codestyling (PHPCS)
+Install/update dependencies (you should use PHP 8.0+)
+```
+composer install
+```
+
 - Fix all possible phpcs issues
 ```
-php74 ./vendor/bin/phpcbf
+php ./vendor/bin/phpcbf
 ```
 - Fix possible phpcs issues on a specified folder
 ```
-php74 ./vendor/bin/phpcbf <path/to/the/folder>
+php ./vendor/bin/phpcbf <path/to/the/folder>
 ```
 - Find all the phpcs issues
 ```
-php74 ./vendor/bin/phpcs
+php ./vendor/bin/phpcs
 ```
 - Suppress one or multible phpcs rules for the next below line
 ```
@@ -78,7 +90,12 @@ $foo = 'bar';
 ```
 
 ### Running Unit Test
-We must run the composer and codecept run test using PHP 8.0 (considering `php80` is the alias to your PHP 8.0 executable file)
+Install/update dependencies (you should use PHP 8.0+)
+```
+composer install
+```
+
+We must run the composer and codecept run test using PHP 8.0+ (considering `php80` is the alias to your PHP 8.0 executable file)
 
 If you don't have PHP 8.0 locally, you can use the docker:
 ```
