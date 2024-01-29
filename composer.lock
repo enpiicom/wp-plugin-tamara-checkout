@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "552d157b5652414714b0c1e26215503e",
+    "content-hash": "f3b650f80aed051551e7b50ce1d4ce45",
     "packages": [
         {
             "name": "enpii/enpii-base",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "89232ea017e5a84a9e43767543b8f9591a144d4c"
+                "reference": "2917543cd446fc878fb528f39b1c27a8b49e6b1c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/89232ea017e5a84a9e43767543b8f9591a144d4c",
-                "reference": "89232ea017e5a84a9e43767543b8f9591a144d4c",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/2917543cd446fc878fb528f39b1c27a8b49e6b1c",
+                "reference": "2917543cd446fc878fb528f39b1c27a8b49e6b1c",
                 "shasum": ""
             },
             "require": {
@@ -4884,5 +4884,5 @@
         "php": "^7.3|^8.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

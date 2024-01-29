@@ -1,8 +1,34 @@
+### Use the docker to deploy the project locally
+- Copy the environments and adjust the values to match your local
+```
+cp .env.example .env
+```
+- Install need dev stuff
+```
+XDEBUG_MODE=off COMPOSER=composer-dev.json composer73 install
+```
+or if you don't have PHP 7.3 locally
+```
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev.json -v $PWD:/app npbtrac/php73_cli composer install
+```
+- Start the docker
+```
+docker-compose up -d
+```
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT}
+
+#### Troubleshooting
+- If you see the errors, try to do:
+```
+docker compose exec wordpress wp --allow-root enpii-base prepare
+docker compose exec wordpress wp --allow-root enpii-base artisan wp-app:setup
+```
+
 ### Update `wp-release` branch
 - Use the following commands
   - Remove vendors
   ```
-  rm -rf vendor
+  rm -rf vendor public-assets resources src src-deps
   ```
   - Update needed files from the main branches
   ```
@@ -29,17 +55,22 @@
   - The add and commit everything
 
 ### Codestyling (PHPCS)
+Install/update dependencies (you should use PHP 8.0+)
+```
+composer install
+```
+
 - Fix all possible phpcs issues
 ```
-php74 ./vendor/bin/phpcbf
+php ./vendor/bin/phpcbf
 ```
 - Fix possible phpcs issues on a specified folder
 ```
-php74 ./vendor/bin/phpcbf <path/to/the/folder>
+php ./vendor/bin/phpcbf <path/to/the/folder>
 ```
 - Find all the phpcs issues
 ```
-php74 ./vendor/bin/phpcs
+php ./vendor/bin/phpcs
 ```
 - Suppress one or multible phpcs rules for the next below line
 ```
@@ -59,7 +90,12 @@ $foo = 'bar';
 ```
 
 ### Running Unit Test
-We must run the composer and codecept run test using PHP 8.0 (considering `php80` is the alias to your PHP 8.0 executable file)
+Install/update dependencies (you should use PHP 8.0+)
+```
+composer install
+```
+
+We must run the composer and codecept run test using PHP 8.0+ (considering `php80` is the alias to your PHP 8.0 executable file)
 
 If you don't have PHP 8.0 locally, you can use the docker:
 ```

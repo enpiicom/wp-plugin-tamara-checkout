@@ -1,0 +1,13 @@
+FROM npbtrac/php73_web
+
+RUN mkdir -p /etc/nginx/site-opts.d/
+
+# Putting config files to their locations
+COPY ./dev-docker/config/nginx/http.conf /etc/nginx/site-opts.d/http.conf
+COPY ./dev-docker/config/nginx/https.conf /etc/nginx/site-opts.d/https.conf
+
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
+
+WORKDIR /var/www/html/public
