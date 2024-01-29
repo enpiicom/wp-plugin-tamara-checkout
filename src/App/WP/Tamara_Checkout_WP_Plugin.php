@@ -509,7 +509,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 */
 	public function process_tamara_stuck_orders(): void {
 		Authorise_Tamara_Stuck_Approved_Orders_Job::dispatchSync();
-		Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
+		// Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
 	}
 
 	/**

@@ -1,9 +1,23 @@
 FROM npbtrac/php80_web
 
-COPY ./dev-docker/config/nginx/default.conf /etc/nginx/sites-available/default
+# Putting config files to their locations
+COPY ./dev-docker/config/nginx/http.conf /etc/nginx/site-opts.d/http.conf
+COPY ./dev-docker/config/nginx/https.conf /etc/nginx/site-opts.d/https.conf
+
 COPY ./dev-docker/wordpress/ /var/www/html/public
 COPY ./dev-docker/config/wordpress/wp-config.php /var/www/html/public/wp-config.php
 COPY ./dev-miscs/wp-cli.yml /var/www/html/public/wp-cli.yml
 COPY ./ /var/www/html/public/wp-content/plugins/tamara-checkout/
+
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
+
+# Prepare folders
+RUN mkdir -p /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
+RUN chmod -R 777 /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
+
+RUN mkdir -p /var/www/html/public/wp-content/plugins var/www/html/public/wp-content/themes
+RUN chmod 777 /var/www/html/public/wp-content/plugins var/www/html/public/wp-content/themes
 
 WORKDIR /var/www/html/public
