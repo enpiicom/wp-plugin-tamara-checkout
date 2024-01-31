@@ -30,23 +30,17 @@
     "enpii/enpii-base": "dev-wp-release",
     "php": "^7.3|^8.0"
   },
-  "replace": {
-    "symfony/http-foundation": "^5.0.0",
-    "symfony/deprecation-contracts": "^2.5.0",
-    "symfony/contracts": "^2.5.0",
-    "symfony/options-resolver": "^5.4.0",
-    "symfony/error-handler": "^4.4.0",
-    "psr/log": "^1.1.4",
-    "psr/cache": "^1.0.1",
-    "psr/container": "1.1.0",
-    "symfony/string": "^5.4"
-  },
   "require-dev": {
     "10up/wp_mock": "~0.5.0|^1.0.0",
     "automattic/vipwpcs": "^3.0.0",
     "phpcompatibility/php-compatibility": "^9.3.5",
-    "symfony/console": "^5.4.0",
     "codeception/codeception": "^5.0.0",
+    "symfony/var-dumper": "^5.4.0",
+    "symfony/finder": "^5.4.0",
+    "symfony/console": "^5.4.0",
+    "symfony/yaml": "^5.4.0",
+    "symfony/dom-crawler": "^5.4.0",
+    "symfony/browser-kit": "^5.4.0",
     "codeception/module-asserts": "^3.0",
     "codeception/module-phpbrowser": "^3.0"
   },
@@ -63,9 +57,10 @@
   "config": {
     "platform-check": false,
     "allow-plugins": {
-          "dealerdirect/phpcodesniffer-composer-installer": true,
-          "composer/installers": true
-      }
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true,
+      "mcaskill/composer-exclude-files": true
+    }
   },
   "extra": {
     "mozart": {
