@@ -56,8 +56,8 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 		$site_id = (int) get_current_blog_id();
 
 		/** @var \Illuminate\Database\Eloquent\Builder $pending_orders_query */
-		$wc_status_to_capture = $this->tamara_gateway()->get_settings()->order_status_to_capture_tamara_payment;
-		$wc_status_payment_captured_failed = $this->tamara_gateway()->get_settings()->order_status_when_tamara_capture_fails;
+		$wc_status_to_capture = $this->tamara_gateway()->get_settings_vo()->order_status_to_capture_tamara_payment;
+		$wc_status_payment_captured_failed = $this->tamara_gateway()->get_settings_vo()->order_status_when_tamara_capture_fails;
 		$to_capture_orders_query = WC_Order_Model::site( $site_id )
 		->where(
 			[

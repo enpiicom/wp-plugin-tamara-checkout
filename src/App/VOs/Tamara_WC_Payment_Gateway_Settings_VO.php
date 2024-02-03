@@ -97,6 +97,9 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		$this->bind_config( $config );
 		$this->live_notification_key = $this->live_notification_token;
 		$this->sandbox_notification_key = $this->sandbox_notification_token;
+		if (empty($this->environment)) {
+			$this->environment = 'live_mode';
+		}
 	}
 
 	public function get_enabled(): bool {

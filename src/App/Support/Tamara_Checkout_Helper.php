@@ -281,4 +281,13 @@ class Tamara_Checkout_Helper {
 			'country_code' => $country_code,
 		];
 	}
+
+	/**
+	 * Check if is Tamara Checkout settings page.
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_checkout_settings_page() {
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'checkout' === $_GET['tab'] && static::DEFAULT_TAMARA_GATEWAY_ID === $_GET['section'];
+	}
 }

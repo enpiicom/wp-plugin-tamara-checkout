@@ -58,7 +58,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 		$this->before_handle();
 
 		// We need to get a refreshed settings from the Payment Gateway
-		$gateway_settings = $tamara_gateway_service->get_settings( true );
+		$gateway_settings = $tamara_gateway_service->get_settings_vo( true );
 		$tamara_client_service->init_tamara_client( $gateway_settings->api_token, $gateway_settings->api_url, $gateway_settings );
 
 		$tamara_client_response = $tamara_client_service->register_webhook(
@@ -96,7 +96,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 	protected function process_successful_action( RegisterWebhookResponse $tamara_client_response ) {
 		$this->tamara_gateway()->update_option( 'tamara_webhook_id', $tamara_client_response->getWebhookId() );
 
-		$this->tamara_gateway()->get_settings( true );
+		$this->tamara_gateway()->get_settings_vo( true );
 	}
 
 	/**

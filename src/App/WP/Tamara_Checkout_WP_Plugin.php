@@ -75,17 +75,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return void
 	 */
 	public function manipulate_hooks_after_settings(): void {
-		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
+		if ( $this->get_tamara_gateway_service()->get_settings_vo()->enabled ) {
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
 			add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
-				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
+			if ( ! $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_disabled ) {
+				add_action( $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
 			}
 
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
 			add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
-				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
+			if ( ! $this->get_tamara_gateway_service()->get_settings_vo()->cart_popup_widget_disabled ) {
+				add_action( $this->get_tamara_gateway_service()->get_settings_vo()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
 			}
 
 			add_action(
@@ -133,7 +133,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				2
 			);
 
-			if ( $this->get_tamara_gateway_service()->get_settings()->force_checkout_phone ) {
+			if ( $this->get_tamara_gateway_service()->get_settings_vo()->force_checkout_phone ) {
 				add_filter(
 					'woocommerce_billing_fields',
 					[ $this, 'force_billing_address_phone_field' ],
@@ -148,7 +148,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				);
 			}
 
-			if ( $this->get_tamara_gateway_service()->get_settings()->force_checkout_email ) {
+			if ( $this->get_tamara_gateway_service()->get_settings_vo()->force_checkout_email ) {
 				add_filter(
 					'woocommerce_billing_fields',
 					[ $this, 'force_billing_address_email_field' ],
@@ -164,7 +164,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			}
 
 			// For WP App
-			if ( $this->get_tamara_gateway_service()->get_settings()->cronjob_enabled ) {
+			if ( $this->get_tamara_gateway_service()->get_settings_vo()->cronjob_enabled ) {
 				add_action( App_Const::ACTION_WP_APP_WEB_WORKER, [ $this, 'process_tamara_stuck_orders' ] );
 			}
 		}
@@ -307,7 +307,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return array
 	 */
 	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
-		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings()->get_enabled() ) {
+		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings_vo()->get_enabled() ) {
 			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
@@ -431,7 +431,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
-		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->order_status_to_capture_tamara_payment;
+		$to_capture_status = $this->get_tamara_gateway_service()->get_settings_vo()->order_status_to_capture_tamara_payment;
 
 		if ( $to_capture_status !== 'wc-' . $status_to ) {
 			return;
@@ -462,7 +462,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
-		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->order_status_to_cancel_tamara_payment;
+		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings_vo()->order_status_to_cancel_tamara_payment;
 
 		if ( $to_cancel_status !== 'wc-' . $status_to ) {
 			return;
@@ -607,26 +607,30 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 */
 	protected function register_services(): void {
-		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
-
 		wp_app()->singleton(
 			Tamara_Client::class,
 			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
+			function ( WP_Application $app ) {
+				$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
 				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
 			}
 		);
 		wp_app()->singleton(
 			Tamara_Notification::class,
 			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
+			function ( WP_Application $app ) {
+				$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
 				return Tamara_Notification::instance( $gateway_settings->notification_key );
 			}
 		);
 		wp_app()->singleton(
 			Tamara_Widget::class,
 			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
+			function ( WP_Application $app ) {
+				$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
 				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
 			}
 		);

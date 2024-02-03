@@ -37,7 +37,7 @@ trait Tamara_Checkout_Trait {
 	}
 
 	protected function tamara_settings(): Tamara_WC_Payment_Gateway_Settings_VO {
-		return $this->tamara_gateway()->get_settings();
+		return $this->tamara_gateway()->get_settings_vo();
 	}
 
 	protected function default_payment_gateway_id(): string {

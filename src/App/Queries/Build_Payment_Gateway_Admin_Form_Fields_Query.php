@@ -7,25 +7,29 @@ namespace Tamara_Checkout\App\Queries;
 use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	use Executable_Trait;
 	use Tamara_Trans_Trait;
+	use Tamara_Checkout_Trait;
 
+	/**
+	 * @var Tamara_WC_Payment_Gateway_Settings_VO
+	 */
 	protected $current_settings;
 	protected $working_mode;
 
 	public function __construct( $settings ) {
-		$this->current_settings = $settings;
-		$this->working_mode = ! empty( $this->current_settings['environment'] ) ? $this->current_settings['environment'] : 'live_mode';
+		$this->current_settings = new Tamara_WC_Payment_Gateway_Settings_VO($settings);
+		$this->working_mode = $this->current_settings->environment;
 	}
 
 	public function handle(): array {
-		$custom_log_link = $this->get_debug_log_download_link();
-
 		return [
 			'enabled' => [
 				'title' => $this->_t( 'Enable/Disable' ),
@@ -315,12 +319,21 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'title' => $this->_t( 'Enable Tamara Custom Log Message' ),
 				'type' => 'checkbox',
 				// phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
-				'description' => $this->_t( 'In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory. The message log download link will be <strong>available below</strong>, after you <strong>enable this setting.</strong>' ) . '<br />' . $this->build_debug_log_download_link(),
+				'description' => $this->_t( 'In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory.' ),
+			],
+			'custom_log_message' => [
+				'title' => $this->_t( 'Tamara Custom Log file' ),
+				'type' => 'text',
+				'custom_attributes' => [
+					'readonly' => 'readonly',
+				],
+				// phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+				'description' => $this->_t( 'The log download link will be <strong>available below</strong>, if the value is not empty' ) . '<br />' . $this->build_debug_log_download_link(),
 			],
 			'plugin_version' => [
 				'type' => 'title',
 				'description' =>
-					'<p style="margin-top: 2.6rem;">' . sprintf( $this->_t( 'Tamara Checkout Plugin Version: %s' ), TAMARA_CHECKOUT_VERSION ) . '</p>',
+					'<p style="margin-top: 2.6rem;">' . sprintf( $this->_t( 'Tamara Checkout Plugin Version: %s' ), TAMARA_CHECKOUT_VERSION ) . ', ' . sprintf( $this->_t( 'WooCommece Version: %s' ), WC()->version ) . ', ' . sprintf( $this->_t( 'WordPress Version: %s' ), get_bloginfo( 'version' ) ) . ', ' . sprintf( $this->_t( 'PHP Version: %s' ), phpversion() ) . '</p>',
 			],
 		];
 	}
@@ -353,11 +366,12 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	}
 
 	protected function get_debug_log_download_link(): string {
-		return ! empty( $this->current_settings['custom_log_message'] ) ?
+		$custom_log_message = $this->current_settings->custom_log_message;
+		return ! empty( $custom_log_message ) ?
 			wp_app_route_wp_url(
 				'wp-app::tamara-download-log-file',
 				[
-					'filepath' => $this->current_settings['custom_log_message'],
+					'filepath' => $custom_log_message,
 				]
 			) :
 			'';
@@ -372,7 +386,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 	}
 
 	protected function get_tamara_webhook_id(): string {
-		return ! empty( $this->current_settings['tamara_webhook_id'] ) ? $this->current_settings['tamara_webhook_id'] : '';
+		return ! empty( $this->current_settings->tamara_webhook_id ) ? $this->current_settings->tamara_webhook_id : '';
 	}
 
 	protected function get_tamara_ipn_url(): string {
