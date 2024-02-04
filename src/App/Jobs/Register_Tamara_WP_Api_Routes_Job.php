@@ -18,5 +18,6 @@ class Register_Tamara_WP_Api_Routes_Job extends Base_Job {
 		Route::get( 'tamara/orders/{wc_order_id}/failure', [ Main_Controller::class, 'handle_tamara_failure' ] )->name( 'tamara-failure' );
 		Route::post( 'tamara/orders/{wc_order_id}/ipn', [ Main_Controller::class, 'handle_tamara_notification' ] )->name( 'tamara-ipn' );
 		Route::post( 'tamara/webhook', [ Main_Controller::class, 'handle_tamara_webhook' ] )->name( 'tamara-webhook' );
+		Route::post( 'tamara/solve-stuck-orders', [ Main_Controller::class, 'solve_stuck_orders' ] )->name( 'tamara-solve-stuck-orders' );
 	}
 }

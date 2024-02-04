@@ -10,12 +10,9 @@ use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use RuntimeException;
-use Tamara_Checkout\App\Jobs\Authorise_Tamara_Stuck_Approved_Orders_Job;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
-use Tamara_Checkout\App\Jobs\Capture_Tamara_Stuck_Authorised_Orders_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
@@ -23,6 +20,8 @@ use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
 use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses_Query;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
+use Tamara_Checkout\App\Repositories\WC_Order_Repository_Contract;
+use Tamara_Checkout\App\Repositories\WC_Order_Woo7_Repository;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
@@ -162,23 +161,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					2
 				);
 			}
-
-			// For WP App
-			if ( $this->get_tamara_gateway_service()->get_settings_vo()->cronjob_enabled ) {
-				add_action( App_Const::ACTION_WP_APP_WEB_WORKER, [ $this, 'process_tamara_stuck_orders' ] );
-			}
 		}
 	}
 
 	public function init_woocommerce() {
-		// Init default Tamara payment gateway
-		wp_app()->singleton(
-			Tamara_WC_Payment_Gateway::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
-		);
-
 		$this->register_services();
+		$this->manipulate_hooks_after_settings();
 	}
 
 	public function get_name(): string {
@@ -311,10 +299,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
+
 			$country_code = ! empty( $current_cart_info['country_code'] )
 				? $current_cart_info['country_code']
 				: Tamara_Checkout_Helper::DEFAULT_COUNTRY_CODE;
 			$currency_by_country_code = array_flip( Tamara_Checkout_Helper::get_currency_country_mappings() );
+
 			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
 				$currency_code = $currency_by_country_code[ $country_code ];
 				$order_total = new Money(
@@ -502,17 +492,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * We want to process Tamara orders that being updated to specific statuses
-	 *  but haven't had corresponding statuses on Tamara side
-	 * @return void
-	 * @throws BindingResolutionException
-	 */
-	public function process_tamara_stuck_orders(): void {
-		Authorise_Tamara_Stuck_Approved_Orders_Job::dispatchSync();
-		// Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
-	}
-
-	/**
 	 * As Phone field is mandatory for Tamara checking out
 	 *  therefore, we need to put back the default Phone field
 	 * @param mixed $fields
@@ -607,38 +586,55 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 */
 	protected function register_services(): void {
+		// Init default Tamara payment gateway
+		//	We need to do this first before other services
+		wp_app()->singleton(
+			Tamara_WC_Payment_Gateway::class,
+			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
+		);
 		wp_app()->singleton(
 			Tamara_Client::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) {
-				$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
-
-				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_client_instance' ] )
 		);
 		wp_app()->singleton(
 			Tamara_Notification::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) {
-				$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
-
-				return Tamara_Notification::instance( $gateway_settings->notification_key );
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_notification_instance' ] )
 		);
 		wp_app()->singleton(
 			Tamara_Widget::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) {
-				$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
-
-				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_widget_instance' ] )
 		);
-
-		$this->manipulate_hooks_after_settings();
+		wp_app()->singleton(
+			WC_Order_Repository_Contract::class,
+			Closure::fromCallable( [ $this, 'build_wc_order_repository_instance' ] )
+		);
 	}
 
 	protected function build_tamara_gateway_instance() {
 		return Tamara_WC_Payment_Gateway::instance();
+	}
+
+	protected function build_tamara_client_instance() {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
+		return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
+	}
+
+	protected function build_tamara_notification_instance() {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
+		return Tamara_Notification::instance( $gateway_settings->notification_key );
+	}
+
+	protected function build_tamara_widget_instance() {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
+		return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
+	}
+
+	protected function build_wc_order_repository_instance() {
+		if (version_compare(WC()->version, '8.0.0', '<')) {
+			return new WC_Order_Woo7_Repository( get_current_blog_id() );
+		}
 	}
 }

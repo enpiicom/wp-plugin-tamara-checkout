@@ -29,6 +29,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	use InteractsWithQueue;
 	use Queueable;
 	use SerializesModels;
+
 	use Config_Trait;
 	use Tamara_Trans_Trait;
 	use Tamara_Checkout_Trait;

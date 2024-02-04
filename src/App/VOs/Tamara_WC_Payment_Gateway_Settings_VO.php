@@ -32,7 +32,6 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property array $excluded_products array or products' Ids that should be excluded
  * @property array $excluded_product_categories array or terms' Ids
  *                  (from 'product_category' taxonomy) that should be excluded
- * @property bool $cronjob_enabled
  * @property bool $force_checkout_phone
  * @property bool $force_checkout_email
  * @property bool $popup_widget_disabled
@@ -78,7 +77,6 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 	protected $tamara_payment_capture;
 	protected $excluded_products;
 	protected $excluded_product_categories;
-	protected $cronjob_enabled;
 	protected $force_checkout_phone;
 	protected $force_checkout_email;
 	protected $popup_widget_disabled;
@@ -104,10 +102,6 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 
 	public function get_enabled(): bool {
 		return empty( $this->enabled ) || $this->enabled === 'no' ? false : true;
-	}
-
-	public function get_cronjob_enabled(): bool {
-		return empty( $this->cronjob_enabled ) || $this->cronjob_enabled === 'no' ? false : true;
 	}
 
 	public function get_force_checkout_phone(): bool {

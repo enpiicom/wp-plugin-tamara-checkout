@@ -222,12 +222,6 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				'description' => __( 'Configure Tamara Advanced Settings <br> <p class="tamara-highlight">Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.</p>' )
 				. '<div class="tamara-advanced-settings-manage button-primary">' . $this->_t( 'Show Tamara Advanced Settings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
-			'cronjob_enabled' => [
-				'title' => $this->_t( 'Enable Cron Job' ),
-				'type' => 'checkbox',
-				'description' => $this->_t( 'In you tick on this setting, Tamara will use a cron-job to find all completed orders that has not been verified but not authorised or not captured within 30 days and force them to be authorised or captured. It fires an asynchronous call on Admin request to perform this action.' ),
-				'default' => 'no',
-			],
 			'force_checkout_phone' => [
 				'title' => $this->_t( 'Force Enable Phone' ),
 				'label' => $this->_t( 'Enable Billing/Shipping Phone Field at Checkout step' ),
@@ -360,6 +354,7 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                             <li>' . $this->_t( 'For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->_t( 'For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->_t( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>
+                            <li>' . sprintf( $this->_t( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process.' ),  $this->build_solve_stuck_orders_link() ) . '</li>
                         </ul>
                     </div>
                 </div>';
@@ -375,6 +370,13 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 				]
 			) :
 			'';
+	}
+
+	protected function build_solve_stuck_orders_link(): string {
+		$api_token = $this->current_settings->api_token;
+		return !empty($api_token) ? '<a href="' . wp_app_route_wp_url(
+			'wp-api::tamara-solve-stuck-orders'
+		) . '" data-click-to-solve-stuck-orders="true"> ' . $this->_t( 'Solve Stuck Orders' ) . '</a>' : '';
 	}
 
 	protected function build_debug_log_download_link(): string {
@@ -444,6 +446,8 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
 			true
 		);
 		wp_enqueue_script( 'tamara-custom-admin' );
+
+		$success_message = esc_attr( $this->_t('Done! The script to resolve the Stuck Orders has been executed.') );
 
 		$js_script = <<<JS_SCRIPT
 			window.addEventListener('load', function() {
@@ -523,6 +527,35 @@ class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
                     sandbox_api_url_el.value = sandbox_api_url;
                 }
             }
+
+			document.querySelectorAll('[data-click-to-solve-stuck-orders="true"]').forEach((el) => {
+				el.addEventListener('click', function (event) {
+					// Don't follow the link
+					event.preventDefault();
+
+					var solve_stuck_orders_url = el.href;
+					const settings = {
+						method: 'POST',
+						headers: {
+							Accept: 'application/json',
+							'Content-Type': 'application/json',
+						}
+					};
+
+					const success_message = "{$success_message}";
+					const response = fetch(solve_stuck_orders_url, settings)
+						.then(function (response) {
+							alert(success_message);
+						})
+						.catch(function (err) {
+							// There was an error
+							console.warn('Something went wrong.', err);
+						});
+
+					// console.log(response);
+				}, false);
+			});
+
         }
 JS_SCRIPT;
 		if ( Tamara_Checkout_Helper::is_tamara_admin_settings_screen() ) {
