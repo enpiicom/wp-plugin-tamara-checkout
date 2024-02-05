@@ -4,8 +4,70 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ed1287b1dbafdad2b80dd6f9f86b7df7",
-    "packages": [],
+    "content-hash": "d0460cadad390bb47f02b1bca86238c8",
+    "packages": [
+        {
+            "name": "enpii/enpii-base",
+            "version": "dev-wp-release",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
+                "reference": "30bbb734669c4fa62c8ad60027f1d20721cfecc7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/30bbb734669c4fa62c8ad60027f1d20721cfecc7",
+                "reference": "30bbb734669c4fa62c8ad60027f1d20721cfecc7",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0.0"
+            },
+            "type": "wordpress-muplugin",
+            "extra": {
+                "exclude-from-files": [
+                    "laravel/framework/src/Illuminate/Foundation/helpers.php"
+                ]
+            },
+            "autoload": {
+                "files": [
+                    "./src/Foundation/Support/helpers-utils.php",
+                    "./src/Foundation/helpers-wp-app.php",
+                    "./src/Foundation/helpers-overrides.php",
+                    "./enpii-base-bootstrap.php",
+                    "./enpii-base-init.php"
+                ],
+                "psr-4": {
+                    "Enpii_Base\\": "src",
+                    "Enpii_Base\\Deps\\": "src-deps"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Trac Nguyen",
+                    "email": "npbtrac@yahoo.com",
+                    "homepage": "https://enpii.com/users/trac-nguyen",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Loi Le",
+                    "homepage": "https://enpii.com/users/loi-le",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The base plugin to have powerful Laravel development on WordPress",
+            "homepage": "https://enpii.com/wp-plugin-enpii-base",
+            "support": {
+                "issues": "https://github.com/enpiicom/wp-plugin-enpii-base/issues",
+                "source": "https://github.com/enpiicom/wp-plugin-enpii-base/tree/wp-release"
+            },
+            "time": "2024-02-05T15:25:04+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "automattic/vipwpcs",
@@ -286,16 +348,16 @@
         },
         {
             "name": "johnpbloch/wordpress-core",
-            "version": "6.4.2",
+            "version": "6.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/johnpbloch/wordpress-core.git",
-                "reference": "00ea636cf89fd17daacbc3862f368a2782267825"
+                "reference": "389a4e72f3e14a995f89fa4bc5a69c7cf75ae2a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/johnpbloch/wordpress-core/zipball/00ea636cf89fd17daacbc3862f368a2782267825",
-                "reference": "00ea636cf89fd17daacbc3862f368a2782267825",
+                "url": "https://api.github.com/repos/johnpbloch/wordpress-core/zipball/389a4e72f3e14a995f89fa4bc5a69c7cf75ae2a8",
+                "reference": "389a4e72f3e14a995f89fa4bc5a69c7cf75ae2a8",
                 "shasum": ""
             },
             "require": {
@@ -303,7 +365,7 @@
                 "php": ">=7.0.0"
             },
             "provide": {
-                "wordpress/core-implementation": "6.4.2"
+                "wordpress/core-implementation": "6.4.3"
             },
             "type": "wordpress-core",
             "notification-url": "https://packagist.org/downloads/",
@@ -330,7 +392,7 @@
                 "source": "https://core.trac.wordpress.org/browser",
                 "wiki": "https://codex.wordpress.org/"
             },
-            "time": "2023-12-06T16:30:44+00:00"
+            "time": "2024-01-30T19:31:14+00:00"
         },
         {
             "name": "phpcompatibility/php-compatibility",
@@ -766,30 +828,48 @@
         },
         {
             "name": "wp-plugins/woocommerce",
-            "version": "8.5.1",
+            "version": "8.5.2",
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce.8.5.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce.8.5.2.zip"
             },
             "type": "wordpress-plugin"
         },
         {
             "name": "wpackagist-plugin/query-monitor",
-            "version": "2.17.0",
+            "version": "3.15.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/query-monitor/",
-                "reference": "tags/2.17.0"
+                "reference": "tags/3.15.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/query-monitor.2.17.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/query-monitor.3.15.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
             },
             "type": "wordpress-plugin",
             "homepage": "https://wordpress.org/plugins/query-monitor/"
+        },
+        {
+            "name": "wpackagist-plugin/woocommerce-product-price-based-on-countries",
+            "version": "3.4.2",
+            "source": {
+                "type": "svn",
+                "url": "https://plugins.svn.wordpress.org/woocommerce-product-price-based-on-countries/",
+                "reference": "trunk"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://downloads.wordpress.org/plugin/woocommerce-product-price-based-on-countries.zip?timestamp=1704469309"
+            },
+            "require": {
+                "composer/installers": "^1.0 || ^2.0"
+            },
+            "type": "wordpress-plugin",
+            "homepage": "https://wordpress.org/plugins/woocommerce-product-price-based-on-countries/"
         },
         {
             "name": "wpackagist-theme/storefront",
@@ -812,12 +892,14 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "enpii/enpii-base": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.3|^8.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

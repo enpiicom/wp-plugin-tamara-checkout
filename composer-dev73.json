@@ -27,26 +27,16 @@
     }
   ],
   "require": {
+    "enpii/enpii-base": "dev-wp-release",
     "php": "^7.3|^8.0"
   },
-  "replace": {
-    "symfony/http-foundation": "^5.0.0",
-    "symfony/deprecation-contracts": "^2.5.0",
-    "symfony/contracts": "^2.5.0",
-    "symfony/options-resolver": "^5.4.0",
-    "symfony/error-handler": "^4.4.0",
-    "psr/log": "^1.1.4",
-    "psr/cache": "^1.0.1",
-    "psr/container": "1.1.0",
-    "symfony/string": "^5.4"
-  },
   "require-dev": {
-    "johnpbloch/wordpress-core": "~5.0.0",
+    "composer/installers": "~1.0",
+    "johnpbloch/wordpress-core": "~5.2.0",
+    "wpackagist-plugin/woocommerce-product-price-based-on-countries": "^3.0.0",
     "wpackagist-plugin/query-monitor": "^2.15",
     "wpackagist-theme/storefront": "^4.0",
-    "wp-plugins/woocommerce": "5.1.0",
-    "automattic/vipwpcs": "^3.0.0",
-    "phpcompatibility/php-compatibility": "^9.3.5"
+    "wp-plugins/woocommerce": "4.1.0"
   },
   "repositories": [
     {
@@ -61,11 +51,11 @@
       "type": "package",
       "package": {
         "name": "wp-plugins/woocommerce",
-        "version": "5.1.0",
+        "version": "4.1.0",
         "type": "wordpress-plugin",
         "dist": {
           "type": "zip",
-          "url": "https://downloads.wordpress.org/plugin/woocommerce.5.1.0.zip"
+          "url": "https://downloads.wordpress.org/plugin/woocommerce.4.1.0.zip"
         }
       }
     }
@@ -101,8 +91,11 @@
       "delete_vendor_directories": true
     },
     "installer-paths": {
+      "vendor/enpii/enpii-base": [
+        "enpii/enpii-base"
+      ],
       "dev-docker/wordpress/wp-content/mu-plugins/{$name}/": [
-
+        "type:wordpress-muplugin"
       ],
       "dev-docker/wordpress/wp-content/themes/{$name}/": [
         "type:wordpress-theme"

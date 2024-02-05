@@ -1,30 +1,53 @@
-### Use the docker to deploy the project locally
+# Development Guides
+
+## Use the docker to deploy the project locally
+
+### Using PHP 7.3 docker
 - Copy the environments and adjust the values to match your local
 ```
 cp .env.example .env
 ```
-- Install need dev stuff
+- Install need dev stuff for PHP 7.3
 ```
-XDEBUG_MODE=off COMPOSER=composer-dev.json composer73 install
+XDEBUG_MODE=off COMPOSER=composer-dev73.json composer73 install
 ```
 or if you don't have PHP 7.3 locally
 ```
-docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev.json -v $PWD:/app npbtrac/php73_cli composer install
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev73.json -v $PWD:/app npbtrac/php73_cli composer install
 ```
 - Start the docker
 ```
-docker-compose up -d
+docker-compose up -d wordpress73
 ```
-- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT}
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}73
 
-#### Troubleshooting
+### Using PHP 8.0 docker
+- Copy the environments and adjust the values to match your local
+```
+cp .env.example .env
+```
+- Install need dev stuff for PHP 8.0
+```
+XDEBUG_MODE=off COMPOSER=composer-dev80.json composer80 install
+```
+or if you don't have PHP 8.0 locally
+```
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev80.json -v $PWD:/app npbtrac/php80_cli composer install
+```
+- Start the docker
+```
+docker-compose up -d wordpress80
+```
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}73
+
+### Troubleshooting
 - If you see the errors, try to do:
 ```
 docker compose exec wordpress wp --allow-root enpii-base prepare
 docker compose exec wordpress wp --allow-root enpii-base artisan wp-app:setup
 ```
 
-### Update `wp-release` branch
+## Update `wp-release` branch
 - Use the following commands
   - Remove vendors
   ```
@@ -54,7 +77,7 @@ docker compose exec wordpress wp --allow-root enpii-base artisan wp-app:setup
   - Remove require stuff in composer.json
   - The add and commit everything
 
-### Codestyling (PHPCS)
+## Codestyling (PHPCS)
 Install/update dependencies (you should use PHP 8.0+)
 ```
 composer install
@@ -89,7 +112,7 @@ $foo = 'bar';
 // phpcs:enable
 ```
 
-### Running Unit Test
+## Running Unit Test
 Install/update dependencies (you should use PHP 8.0+)
 ```
 composer install
@@ -122,7 +145,7 @@ php80 ./vendor/bin/phpunit --verbose tests/unit/App/Support/Tamara_Checkout_Help
 php80 ./vendor/bin/codecept run unit
 ```
 
-#### Using Coverage report
+### Using Coverage report
 - Run Unit Test with Codeception (with coverage report)
 ```
 XDEBUG_MODE=coverage php80 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html unit

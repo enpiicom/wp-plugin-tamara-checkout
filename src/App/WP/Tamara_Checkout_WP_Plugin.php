@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP;
 
 use Closure;
-use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use RuntimeException;
-use Tamara_Checkout\App\Jobs\Authorise_Tamara_Stuck_Approved_Orders_Job;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
-use Tamara_Checkout\App\Jobs\Capture_Tamara_Stuck_Authorised_Orders_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
@@ -23,12 +19,16 @@ use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
 use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses_Query;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
+use Tamara_Checkout\App\Repositories\WC_Order_Repository;
+use Tamara_Checkout\App\Repositories\WC_Order_Repository_Contract;
+use Tamara_Checkout\App\Repositories\WC_Order_Woo7_Repository;
 use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
+use WC_Order;
 
 /**
  * @inheritDoc
@@ -75,17 +75,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return void
 	 */
 	public function manipulate_hooks_after_settings(): void {
-		if ( $this->get_tamara_gateway_service()->get_settings()->enabled ) {
+		if ( $this->get_tamara_gateway_service()->get_settings_vo()->enabled ) {
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
 			add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->popup_widget_disabled ) {
-				add_action( $this->get_tamara_gateway_service()->get_settings()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
+			if ( ! $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_disabled ) {
+				add_action( $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
 			}
 
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
 			add_shortcode( 'tamara_show_cart_popup', [ $this, 'fetch_tamara_cart_widget' ] );
-			if ( ! $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_disabled ) {
-				add_action( $this->get_tamara_gateway_service()->get_settings()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
+			if ( ! $this->get_tamara_gateway_service()->get_settings_vo()->cart_popup_widget_disabled ) {
+				add_action( $this->get_tamara_gateway_service()->get_settings_vo()->cart_popup_widget_position, [ $this, 'show_tamara_cart_widget' ] );
 			}
 
 			add_action(
@@ -133,7 +133,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				2
 			);
 
-			if ( $this->get_tamara_gateway_service()->get_settings()->force_checkout_phone ) {
+			if ( $this->get_tamara_gateway_service()->get_settings_vo()->force_checkout_phone ) {
 				add_filter(
 					'woocommerce_billing_fields',
 					[ $this, 'force_billing_address_phone_field' ],
@@ -148,7 +148,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				);
 			}
 
-			if ( $this->get_tamara_gateway_service()->get_settings()->force_checkout_email ) {
+			if ( $this->get_tamara_gateway_service()->get_settings_vo()->force_checkout_email ) {
 				add_filter(
 					'woocommerce_billing_fields',
 					[ $this, 'force_billing_address_email_field' ],
@@ -162,23 +162,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					2
 				);
 			}
-
-			// For WP App
-			if ( $this->get_tamara_gateway_service()->get_settings()->cronjob_enabled ) {
-				add_action( App_Const::ACTION_WP_APP_WEB_WORKER, [ $this, 'process_tamara_stuck_orders' ] );
-			}
 		}
 	}
 
 	public function init_woocommerce() {
-		// Init default Tamara payment gateway
-		wp_app()->singleton(
-			Tamara_WC_Payment_Gateway::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
-		);
-
 		$this->register_services();
+		$this->manipulate_hooks_after_settings();
 	}
 
 	public function get_name(): string {
@@ -195,10 +184,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function provides() {
 		return [
+			Tamara_WC_Payment_Gateway::class,
 			Tamara_Client::class,
 			Tamara_Notification::class,
 			Tamara_Widget::class,
-			Tamara_WC_Payment_Gateway::class,
+			WC_Order_Repository_Contract::class,
 		];
 	}
 
@@ -307,14 +297,16 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return array
 	 */
 	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
-		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings()->get_enabled() ) {
+		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings_vo()->get_enabled() ) {
 			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
+
 			$country_code = ! empty( $current_cart_info['country_code'] )
 				? $current_cart_info['country_code']
 				: Tamara_Checkout_Helper::DEFAULT_COUNTRY_CODE;
 			$currency_by_country_code = array_flip( Tamara_Checkout_Helper::get_currency_country_mappings() );
+
 			if ( ! empty( $currency_by_country_code[ $country_code ] ) ) {
 				$currency_code = $currency_by_country_code[ $country_code ];
 				$order_total = new Money(
@@ -431,7 +423,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function capture_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
-		$to_capture_status = $this->get_tamara_gateway_service()->get_settings()->order_status_to_capture_tamara_payment;
+		$to_capture_status = $this->get_tamara_gateway_service()->get_settings_vo()->order_status_to_capture_tamara_payment;
 
 		if ( $to_capture_status !== 'wc-' . $status_to ) {
 			return;
@@ -462,7 +454,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException|\Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
 	public function cancel_tamara_order_if_possible( $wc_order_id, $status_from, $status_to, $wc_order ) {
-		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings()->order_status_to_cancel_tamara_payment;
+		$to_cancel_status = $this->get_tamara_gateway_service()->get_settings_vo()->order_status_to_cancel_tamara_payment;
 
 		if ( $to_cancel_status !== 'wc-' . $status_to ) {
 			return;
@@ -499,17 +491,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		} catch ( Exception $e ) {
 			$this->enqueue_job_later( Refund_Tamara_Order_If_Possible_Job::dispatch( $args ) );
 		}
-	}
-
-	/**
-	 * We want to process Tamara orders that being updated to specific statuses
-	 *  but haven't had corresponding statuses on Tamara side
-	 * @return void
-	 * @throws BindingResolutionException
-	 */
-	public function process_tamara_stuck_orders(): void {
-		Authorise_Tamara_Stuck_Approved_Orders_Job::dispatchSync();
-		// Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
 	}
 
 	/**
@@ -607,34 +588,57 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 *
 	 */
 	protected function register_services(): void {
-		$gateway_settings = $this->get_tamara_gateway_service()->get_settings();
-
+		// Init default Tamara payment gateway
+		//  We need to do this first before other services
+		wp_app()->singleton(
+			Tamara_WC_Payment_Gateway::class,
+			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
+		);
 		wp_app()->singleton(
 			Tamara_Client::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_client_instance' ] )
 		);
 		wp_app()->singleton(
 			Tamara_Notification::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Notification::instance( $gateway_settings->notification_key );
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_notification_instance' ] )
 		);
 		wp_app()->singleton(
 			Tamara_Widget::class,
-			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-			function ( WP_Application $app ) use ( $gateway_settings ) {
-				return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
-			}
+			Closure::fromCallable( [ $this, 'build_tamara_widget_instance' ] )
 		);
-
-		$this->manipulate_hooks_after_settings();
+		wp_app()->singleton(
+			WC_Order_Repository_Contract::class,
+			Closure::fromCallable( [ $this, 'build_wc_order_repository_instance' ] )
+		);
 	}
 
-	protected function build_tamara_gateway_instance() {
+	protected function build_tamara_gateway_instance( WP_Application $app ) {
 		return Tamara_WC_Payment_Gateway::instance();
+	}
+
+	protected function build_tamara_client_instance() {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
+		return Tamara_Client::instance( $gateway_settings->api_token, $gateway_settings->api_url );
+	}
+
+	protected function build_tamara_notification_instance() {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
+		return Tamara_Notification::instance( $gateway_settings->notification_key );
+	}
+
+	protected function build_tamara_widget_instance() {
+		$gateway_settings = $this->get_tamara_gateway_service()->get_settings_vo();
+
+		return Tamara_Widget::instance( $gateway_settings->public_key, $gateway_settings->is_live_mode );
+	}
+
+	protected function build_wc_order_repository_instance() {
+		if ( version_compare( WC()->version, '8.0.0', '<' ) ) {
+			return new WC_Order_Woo7_Repository( get_current_blog_id() );
+		}
+
+		return new WC_Order_Repository( get_current_blog_id() );
 	}
 }

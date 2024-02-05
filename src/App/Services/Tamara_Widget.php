@@ -153,7 +153,7 @@ JS_SCRIPT;
 	 * @return string
 	 */
 	protected function get_view_and_pay_url(): string {
-		$base_url = $this->tamara_gateway()->get_settings()->is_live_mode ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
+		$base_url = $this->tamara_gateway()->get_settings_vo()->is_live_mode ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
 		$locale_suffix = Tamara_Checkout_Helper::get_current_language_code() === 'ar' ? '?locale=ar_SA' : '?locale=en_US';
 
 		return $base_url . $locale_suffix;
@@ -167,7 +167,7 @@ JS_SCRIPT;
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
 		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
-		if ( ! $this->tamara_gateway()->get_settings()->is_live_mode ) {
+		if ( ! $this->tamara_gateway()->get_settings_vo()->is_live_mode ) {
 			$description .= '<br/>' . $this->_t(
 				'SANDBOX ENABLED.
 							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide

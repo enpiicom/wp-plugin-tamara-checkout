@@ -15,6 +15,11 @@ use Enpii_Base\Foundation\Shared\Traits\Setter_Trait;
  * @property string $tamara_payment_type
  * @property string|int $tamara_instalments
  * @property string $tamara_payment_status
+ * @property string $tamara_cancel_id
+ * @property string $tamara_cancel_amount
+ * @property string $tamara_capture_id
+ * @property string $tamara_capture_amount
+ * @property string $tamara_refunds
  * @package Tamara_Checkout\App\DTOs
  */
 class WC_Order_Tamara_Meta_DTO extends Base_DTO {
@@ -28,6 +33,9 @@ class WC_Order_Tamara_Meta_DTO extends Base_DTO {
 	protected $tamara_instalments;
 	protected $tamara_payment_status;
 	protected $tamara_cancel_id;
+	protected $tamara_cancel_amount;
+	protected $tamara_capture_id;
+	protected $tamara_capture_amount;
 
 	protected $tamara_refunds;
 
