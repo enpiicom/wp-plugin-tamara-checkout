@@ -3,7 +3,7 @@
         'name' => 'tamara/tamara-checkout',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '86eb59c86e35de0da482fee2e87991425cc610a3',
+        'reference' => '7228a5142e662af801a6976e7dba24bcb773d6d3',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'tamara/tamara-checkout' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '86eb59c86e35de0da482fee2e87991425cc610a3',
+            'reference' => '7228a5142e662af801a6976e7dba24bcb773d6d3',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
