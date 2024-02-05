@@ -11,6 +11,8 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Authorise_Tamara_Stuck_Approved_Orders_Job;
+use Tamara_Checkout\App\Jobs\Capture_Tamara_Stuck_Authorised_Orders_Job;
 use Tamara_Checkout\App\Jobs\Update_Tamara_Webhook_Event_Job;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
@@ -128,6 +130,17 @@ class Main_Controller extends Base_Controller {
 				);
 				break;
 		}
+
+		return wp_app_response()->json(
+			[
+				'message' => 'success',
+			]
+		);
+	}
+
+	public function solve_stuck_orders(): JsonResponse {
+		$this->enqueue_job( Authorise_Tamara_Stuck_Approved_Orders_Job::dispatch() );
+		$this->enqueue_job( Capture_Tamara_Stuck_Authorised_Orders_Job::dispatch() );
 
 		return wp_app_response()->json(
 			[

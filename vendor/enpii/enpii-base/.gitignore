@@ -8,6 +8,7 @@ phpcs.cache
 /dev-*
 phpcs.xml
 codeception*
+.phpunit.cache/
 
 # WP-CLI
 /wp-cli.local.yml

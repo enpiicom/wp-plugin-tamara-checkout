@@ -269,7 +269,7 @@ class Tamara_Checkout_Helper {
 
 		$billing_customer_phone = ! empty( WC()->customer->get_billing_phone() ) ? WC()->customer->get_billing_phone() : '';
 		$cart_total = static::define_total_amount_to_calculate( $current_cart_total );
-		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ];
+		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ] ?? static::get_store_base_country_code();
 		$country_code = WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : $country_mapping;
 		$customer_phone = ! empty( $runtime_checkout_data['billing_phone'] ) ?
 			$runtime_checkout_data['billing_phone'] :
@@ -280,5 +280,15 @@ class Tamara_Checkout_Helper {
 			'customer_phone' => $customer_phone,
 			'country_code' => $country_code,
 		];
+	}
+
+	/**
+	 * Check if is Tamara Checkout settings page.
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_checkout_settings_page() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && $_GET['page'] === 'wc-settings' && $_GET['tab'] === 'checkout' && $_GET['section'] === static::DEFAULT_TAMARA_GATEWAY_ID;
 	}
 }

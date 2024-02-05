@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Enpii_Base\App\Providers\Support;
 
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Laravel\Telescope\TelescopeServiceProvider;
 
 class Telescope_Service_Provider extends TelescopeServiceProvider {
@@ -99,6 +100,7 @@ class Telescope_Service_Provider extends TelescopeServiceProvider {
 
 			'middleware' => [
 				'web',
+				'authenticate_is_wp_user_admin',
 			],
 
 			/*
@@ -118,6 +120,7 @@ class Telescope_Service_Provider extends TelescopeServiceProvider {
 
 			'ignore_paths' => [
 				'nova-api*',
+				'*wp-admin/admin/setup-app*',
 			],
 
 			'ignore_commands' => [
@@ -209,6 +212,11 @@ class Telescope_Service_Provider extends TelescopeServiceProvider {
 
 		if ( class_exists( \Laravel\Telescope\Watchers\ClientRequestWatcher::class ) ) {
 			$config['watchers'][ \Laravel\Telescope\Watchers\ClientRequestWatcher::class ] = env( 'WP_APP_TELESCOPE_CLIENT_REQUEST_WATCHER', true );
+		}
+
+		// We want to skip the watchers for setup app url
+		if ( Enpii_Base_Helper::at_setup_app_url() ) {
+			$config['enabled'] = false;
 		}
 
 		return $config;

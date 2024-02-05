@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
-use Enpii_Base\App\Models\WC_Order_Model;
+use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
-use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,6 +29,15 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 	use Config_Trait;
 	use Tamara_Trans_Trait;
 	use Tamara_Checkout_Trait;
+	use Queue_Trait;
+
+	protected $page;
+	protected $items_per_page = 2;
+
+	public function __construct( int $page = 1, int $items_per_page = 20 ) {
+		$this->page = $page;
+		$this->items_per_page = $items_per_page;
+	}
 
 	/**
 	 * We want to retry this job if it is not a succesful one
@@ -37,7 +45,7 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 	 * @return int
 	 */
 	public function backoff() {
-		return 49000;
+		return 7000;
 	}
 
 	/**
@@ -51,37 +59,58 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 	public function handle() {
 		$this->before_handle();
 
-		$site_id = (int) get_current_blog_id();
-
-		/** @var \Illuminate\Database\Eloquent\Builder $pending_orders_query */
 		$wc_status_pending = 'wc-pending';
-		$wc_status_payment_authorised_failed = $this->tamara_gateway()->get_settings()->order_status_when_tamara_authorisation_fails;
-		$pending_orders_query = WC_Order_Model::site( $site_id )->where(
-			[
-				[ 'type', 'shop_order' ],
-				[ 'date_created_gmt', '>=', now()->subDays( 30 )->startOfDay() ],
-				[ 'payment_method', 'LIKE', $this->default_payment_gateway_id() . '%' ],
-			]
-		)
-		->where(
-			function ( $query ) use ( $wc_status_pending, $wc_status_payment_authorised_failed ) {
-				/** @var \Illuminate\Database\Eloquent\Builder $query */
-				$query->where( 'status', $wc_status_pending )
-					->orWhere( 'status', $wc_status_payment_authorised_failed );
-			}
-		)
-		->orderBy( 'date_created_gmt', 'asc' )
-		->limit( 7 );
+		$wc_status_payment_authorised_failed = $this->tamara_gateway()->get_settings_vo()->order_status_when_tamara_authorisation_fails;
 
-		foreach ( $pending_orders_query->get() as $wc_order_model ) {
-			try {
+		$args = [
+			'type' => 'shop_order',
+			'date_created' => now()->subDays( 90 )->startOfDay()->timestamp . '...' . now()->timestamp,
+			'payment_method' => [
+				'tamara-gateway',
+				'tamara-gateway-pay-in-2',
+				'tamara-gateway-pay-in-3',
+				'tamara-gateway-pay-in-4',
+				'tamara-gateway-pay-in-5',
+				'tamara-gateway-pay-in-6',
+				'tamara-gateway-pay-in-7',
+				'tamara-gateway-pay-in-8',
+				'tamara-gateway-pay-in-9',
+				'tamara-gateway-pay-in-10',
+				'tamara-gateway-pay-in-11',
+				'tamara-gateway-pay-in-12',
+				'tamara-gateway-pay-later',
+				'tamara-gateway-pay-next-month',
+				'tamara-gateway-pay-now',
+				'tamara-gateway-single-checkout',
+			],
+			'status' => [
+				$wc_status_pending,
+				$wc_status_payment_authorised_failed,
+			],
+			'orderby' => 'date_created',
+			'order' => 'ASC',
+			'paged' => $this->page,
+			'limit' => $this->items_per_page,
+			'return' => 'ids',
+		];
+		$wc_orders = wc_get_orders( $args );
+
+		if ( ! empty( $wc_orders ) ) {
+			if ( count( $wc_orders ) === (int) $this->items_per_page ) {
+				$this->enqueue_job(
+					static::dispatch(
+						$this->page + 1,
+						$this->items_per_page,
+					) 
+				);
+			}
+
+			foreach ( $wc_orders as $wc_order_id ) {
 				Authorise_Tamara_Order_If_Possible_Job::dispatchSync(
 					[
-						'wc_order_id' => $wc_order_model->id,
+						'wc_order_id' => $wc_order_id,
 					]
 				);
-			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			} catch ( Exception $e ) {
 			}
 		}
 	}

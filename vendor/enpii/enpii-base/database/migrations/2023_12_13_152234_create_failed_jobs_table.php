@@ -12,6 +12,7 @@ class CreateFailedJobsTable extends Migration {
 	 * @return void
 	 */
 	public function up() {
+		Schema::dropIfExists( 'failed_jobs' );
 		Schema::create(
 			'failed_jobs',
 			function ( Blueprint $table ) {
@@ -22,6 +23,8 @@ class CreateFailedJobsTable extends Migration {
 				$table->longText( 'payload' );
 				$table->longText( 'exception' );
 				$table->timestamp( 'failed_at' )->useCurrent();
+
+				$table->unique( 'uuid' );
 			}
 		);
 	}

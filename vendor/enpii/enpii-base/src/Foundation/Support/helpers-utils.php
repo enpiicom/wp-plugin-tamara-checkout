@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Symfony\Component\VarDumper\Caster\ReflectionCaster;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use Symfony\Component\VarDumper\Dumper\CliDumper;
-use Symfony\Component\VarDumper\VarDumper;
 
 if ( ! function_exists( 'devd' ) ) {
 	/**
@@ -17,17 +17,18 @@ if ( ! function_exists( 'devd' ) ) {
 	 */
 	function devd( ...$vars ) {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-		$dev_trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 50 );
+		$dev_trace = debug_backtrace();
 
+		echo "=== start of dump ===\n";
+		dump( ...$vars );
+		echo esc_html( $dev_trace[0]['file'] ) . ':' . esc_html( $dev_trace[0]['line'] ) . ': ' . "\n";
 		// We want to put the file name and the 7 steps trace to know where
 		//  where the dump is produced
 		if ( ! enpii_base_is_console_mode() ) {
 			echo 'Traceback: ';
 			dump( $dev_trace );
 		}
-
-		echo '=== start of dump === ' . esc_html( $dev_trace[0]['file'] ) . ':' . esc_html( $dev_trace[0]['line'] ) . ': ' . "\n";
-		dump( ...$vars );
+		echo "\n=== end of dump === ";
 	}
 }
 
@@ -37,20 +38,29 @@ if ( ! function_exists( 'devdd' ) ) {
 	 */
 	function devdd( ...$vars ): void {
 		devd( ...$vars );
-		die( ' end of devdd ' );
+		die( 1 );
+	}
+}
+
+if ( ! function_exists( 'dev_var_dump' ) ) {
+	function dev_var_dump( $var_to_be_dumped, int $max_depth = 3 ): string {
+		$dumper = new CliDumper();
+		$cloner = new VarCloner();
+		$cloner->addCasters( ReflectionCaster::UNSET_CLOSURE_FILE_INFO );
+
+		return $dumper->dump( $cloner->cloneVar( $var_to_be_dumped )->withMaxDepth( $max_depth ), true );
 	}
 }
 
 if ( ! function_exists( 'dev_error_log' ) ) {
 	function dev_error_log( ...$vars ): void {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-		$dev_trace = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 1 );
-		$dumper = new CliDumper();
-		$cloner = new VarCloner();
-		$cloner->addCasters( ReflectionCaster::UNSET_CLOSURE_FILE_INFO );
+		$dev_trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 0 );
 
 		$log_message = '';
-		$log_message .= "Debugging dev_error_log \n======= Dev logging start here \n" . $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . " \n";
+		$log_message .= 'Debugging dev_error_log, url (' . Enpii_Base_Helper::get_current_url() . ") \n======= Dev logging start here \n" . $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . " \n";
+		unset( $dev_trace[0] );
+
 		foreach ( $vars as $index => $var ) {
 			$dump_content = null;
 			if ( $var === false ) {
@@ -59,10 +69,12 @@ if ( ! function_exists( 'dev_error_log' ) ) {
 				$type = is_object( $var ) ? get_class( $var ) : gettype( $var );
 
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
-				$dump_content = $dumper->dump( $cloner->cloneVar( $var ), true );
+				$dump_content = dev_var_dump( $var );
 			}
 			$log_message .= "Var no $index: type " . $type . ' - ' . $dump_content . " \n";
 		}
+		$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
+		$log_message .= "\n=====================================";
 		$log_message .= "\n======= Dev logging ends here\n\n\n\n";
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $log_message );
@@ -71,27 +83,28 @@ if ( ! function_exists( 'dev_error_log' ) ) {
 
 if ( ! function_exists( 'dev_logger' ) ) {
 	function dev_logger( ...$vars ): void {
-		$cloner = new VarCloner();
-		$cloner->addCasters( ReflectionCaster::UNSET_CLOSURE_FILE_INFO );
-		$dumper = new CliDumper();
-
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
-		$dev_trace = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 1 );
-
-		VarDumper::setHandler(
-			function ( $variable ) use ( $cloner, $dumper ) {
-				return $dumper->dump( $cloner->cloneVar( $variable ), true );
-			}
-		);
+		$dev_trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 0 );
 
 		$logger = wp_app_logger()->channel( 'single' );
 
 		$log_message = '';
-		$log_message .= "Debugging dev_logger \n======= Dev logging start here \n" . $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . " \n";
+		$log_message .= 'Debugging dev_error_log, url (' . Enpii_Base_Helper::get_current_url() . ") \n======= Dev logging start here \n" . $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . " \n";
+		unset( $dev_trace[0] );
 		foreach ( $vars as $index => $var ) {
-			$log_message .= "Var no $index: " . VarDumper::dump( $var ) . "\n";
+			$dump_content = null;
+			if ( $var === false ) {
+				$type = 'NULL';
+			} else {
+				$type = is_object( $var ) ? get_class( $var ) : gettype( $var );
 
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+				$dump_content = dev_var_dump( $var );
+			}
+			$log_message .= "Var no $index: type " . $type . ' - ' . $dump_content . " \n";
 		}
+		$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
+		$log_message .= "\n=====================================";
 		$log_message .= "\n======= Dev logging ends here\n\n\n\n";
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump

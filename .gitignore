@@ -4,6 +4,7 @@
 .env.*
 !.env.example
 phpcs.cache
+.phpunit.cache/
 
 # WP-CLI
 /wp-cli.local.yml

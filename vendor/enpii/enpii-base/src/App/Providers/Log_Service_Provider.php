@@ -92,7 +92,8 @@ class Log_Service_Provider extends LogServiceProvider {
 
 				'daily' => [
 					'driver' => 'daily',
-					'path' => ini_get( 'error_log' ) ? ini_get( 'error_log' ) : storage_path( 'logs/laravel.log' ),
+					// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					'path' => ini_get( 'error_log' ) ? ini_get( 'error_log' ) : storage_path( 'logs/' . date( 'Ymd' ) . '.log' ),
 					'level' => env( 'LOG_LEVEL', 'debug' ),
 					'days' => 14,
 					'replace_placeholders' => true,

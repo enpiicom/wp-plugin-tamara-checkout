@@ -6,6 +6,7 @@ namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Exception;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Log;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
@@ -45,6 +46,11 @@ class Tamara_Client {
 	protected $api_url;
 	protected $api_token;
 	protected $api_request_timeout;
+
+	/**
+	 * @var Logger
+	 */
+	protected $logger;
 
 	/**
 	 * @var null|Tamara_WC_Payment_Gateway_Settings_VO
@@ -198,9 +204,9 @@ class Tamara_Client {
 	}
 
 	protected function build_tamara_client( $api_token, $api_url, $api_request_timeout ): Client {
-		$logger = $this->build_logger();
-		$transport = new GuzzleHttpAdapter( $api_request_timeout, $logger );
-		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, $logger, $transport );
+		$this->logger = $this->build_logger();
+		$transport = new GuzzleHttpAdapter( $api_request_timeout, null );
+		$configuration = Configuration::create( $api_url, $api_token, $api_request_timeout, null, $transport );
 		return Client::create( $configuration );
 	}
 
@@ -212,19 +218,24 @@ class Tamara_Client {
 	 * @throws Exception
 	 */
 	protected function perform_remote_request( $remote_action, $client_request ) {
+		$this->log_message( sprintf( "Tamara API URL: %s, Tamara remote_action: %s, Tamara client_request: %s, Tamara API Token \n %s", dev_var_dump( $this->api_url ), dev_var_dump( $remote_action ), dev_var_dump( $client_request ), dev_var_dump( $this->api_token ) ) );
+
 		try {
 			$api_response = $this->api_client->$remote_action( $client_request );
+			$this->log_message( sprintf( 'Tamara API response: %s', dev_var_dump( $api_response ) ) );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
+			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump( $tamara_request_dispatcher_exception ) ), 'error' );
 		} catch ( Exception $tamara_checkout_exception ) {
 			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
+			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump( $tamara_checkout_exception ) ), 'error' );
 		}
 
 		if ( empty( $api_response ) ) {
 			return new Tamara_Api_Error_VO(
 				[
 					'error_message' => $error_message,
-				] 
+				]
 			);
 		}
 
@@ -235,7 +246,7 @@ class Tamara_Client {
 					'message' => $api_response->getMessage(),
 					'errors' => $api_response->getErrors(),
 					'status_code' => $api_response->getStatusCode(),
-				] 
+				]
 			);
 		}
 
@@ -263,10 +274,15 @@ class Tamara_Client {
 		return (string) $error_message;
 	}
 
+	/**
+	 * Build the logger for the client request
+	 *
+	 * @return Logger|null
+	 */
 	protected function build_logger() {
-		$settings = empty( $this->settings ) ? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings() : $this->settings;
+		$settings = empty( $this->settings ) ? Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_gateway_service()->get_settings_vo() : $this->settings;
 
-		if ( $settings->custom_log_message_enabled ) {
+		if ( $settings->custom_log_message_enabled && $settings->custom_log_message ) {
 			/** @var \Illuminate\Log\Logger $logger */
 			$logger = Log::build(
 				[
@@ -279,5 +295,11 @@ class Tamara_Client {
 		}
 
 		return $logger;
+	}
+
+	protected function log_message( $message, $context = 'info' ): void {
+		if ( ! empty( $this->logger ) ) {
+			$this->logger->$context( $message );
+		}
 	}
 }

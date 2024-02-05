@@ -63,6 +63,7 @@ class Database_Service_Provider extends DatabaseServiceProvider {
 
 		if ( ! empty( $wpdb->base_prefix ) ) {
 			$default_mysql_config['prefix'] = $wpdb->base_prefix;
+			$default_mysql_config['prefix_indexes'] = $wpdb->base_prefix;
 		}
 
 		if ( ! empty( $wpdb->charset ) ) {

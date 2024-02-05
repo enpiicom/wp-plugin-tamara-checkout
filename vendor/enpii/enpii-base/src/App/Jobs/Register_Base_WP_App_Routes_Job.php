@@ -35,11 +35,11 @@ class Register_Base_WP_App_Routes_Job extends Base_Job {
 					[
 						'prefix' => '/admin',
 						'middleware' => [
-							'wp_user_session_is_admin_user_validation',
+							'authenticate_is_wp_user_admin',
 						],
 					],
 					function () {
-						Route::get( 'setup_app', [ Admin_Main_Controller::class, 'setup_app' ] )->name( 'admin-setup-app' );
+						Route::get( 'setup-app', [ Admin_Main_Controller::class, 'setup_app' ] )->name( 'admin-setup-app' );
 					}
 				);
 			}

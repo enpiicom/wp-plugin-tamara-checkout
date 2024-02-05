@@ -22,7 +22,7 @@ class Post extends Model {
 	 * We may want to use Wpdb_Connection for the db
 	 * @var string
 	 */
-	protected $connection = 'wpdb';
+	protected $connection = 'mysql';
 
 	public static function insert( ...$params ) {
 		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found

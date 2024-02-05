@@ -61,7 +61,7 @@ class Queue_Service_Provider extends QueueServiceProvider {
 
 				'database' => [
 					'driver' => 'database',
-					'table' => 'jobs',
+					'table' => 'wp_app_jobs',
 					'queue' => 'default',
 					'retry_after' => 90,
 					'after_commit' => false,

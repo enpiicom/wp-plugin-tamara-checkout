@@ -1,51 +1,52 @@
 {
-    "name": "tamara/tamara-checkout",
-    "type": "wordpress-plugin",
-    "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
-    "license": "MIT",
-    "keywords": [
-      "wordpress",
-      "tamara",
-      "payment gateway",
-      "bnpl",
-      "mena",
-      "enpii",
-      "enpii-base",
-      "laravel",
-      "wordpress laravel"
-    ],
-    "authors": [
-      {
-        "name": "Tamara Team",
-        "email": "dev@tamara.co",
-        "homepage": "https://tamara.co"
-      },
-      {
-        "name": "Trac Nguyen",
-        "email": "npbtrac@yahoo.com",
-        "homepage": "https://github.com/npbtrac"
-      }
-    ],
-    "require": {
-      "php": "^7.3|^8.0"
+  "name": "tamara/tamara-checkout",
+  "type": "wordpress-plugin",
+  "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "tamara",
+    "payment gateway",
+    "bnpl",
+    "mena",
+    "enpii",
+    "enpii-base",
+    "laravel",
+    "wordpress laravel"
+  ],
+  "authors": [
+    {
+      "name": "Tamara Team",
+      "email": "dev@tamara.co",
+      "homepage": "https://tamara.co"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "autoload": {
-      "psr-4": {
-        "Tamara_Checkout\\": "src",
-        "Tamara_Checkout\\Deps\\": "src-deps",
-        "Tamara_Checkout\\Tests\\": "tests",
-        "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
-      }
-    },
-    "config": {
-      "platform-check": false,
-      "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "composer/installers": true
-        }
-    },
+    {
+      "name": "Trac Nguyen",
+      "email": "npbtrac@yahoo.com",
+      "homepage": "https://github.com/npbtrac"
+    }
+  ],
+  "require": {
+    "php": "^7.3|^8.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Tamara_Checkout\\": "src",
+      "Tamara_Checkout\\Deps\\": "src-deps",
+      "Tamara_Checkout\\Tests\\": "tests",
+      "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
+    }
+  },
+  "config": {
+    "platform-check": false,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true,
+      "mcaskill/composer-exclude-files": true
+    }
+  },
   "extra": {
     "mozart": {
       "dep_namespace": "Tamara_Checkout\\Deps\\",
