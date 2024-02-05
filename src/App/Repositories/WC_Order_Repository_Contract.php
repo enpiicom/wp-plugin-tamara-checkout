@@ -12,15 +12,15 @@ interface WC_Order_Repository_Contract {
 	 * @param int $site_id
 	 * @return mixed
 	 */
-	public function __construct(int $site_id);
+	public function __construct( int $site_id );
 
 	/**
 	 * We need this method to convert the data retrieved by the Repository
-	 * 	to the WC_Order_Entity
+	 *  to the WC_Order_Entity
 	 * @param mixed $subject
 	 * @return WC_Order_Entity
 	 */
-	public function convert_to_entity($subject): WC_Order_Entity;
+	public function convert_to_entity( $subject ): WC_Order_Entity;
 
 	/**
 	 * Get stuck approved orders
@@ -28,7 +28,7 @@ interface WC_Order_Repository_Contract {
 	 * @param int $items_per_page
 	 * @return WC_Order_Entity[]
 	 */
-	public function get_stuck_approved_wc_orders(int $page = 0, int $items_per_page = 20): array;
+	public function get_stuck_approved_wc_orders( int $page = 0, int $items_per_page = 20 ): array;
 
 	/**
 	 * Get stuck authorised orders
@@ -36,5 +36,5 @@ interface WC_Order_Repository_Contract {
 	 * @param int $items_per_page
 	 * @return WC_Order_Entity[]
 	 */
-	public function get_stuck_authorised_wc_orders(int $page = 0, int $items_per_page = 20): array;
+	public function get_stuck_authorised_wc_orders( int $page = 0, int $items_per_page = 20 ): array;
 }

@@ -36,8 +36,7 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 	protected $page;
 	protected $items_per_page = 20;
 
-	public function __construct($page = 0, $items_per_page = 20)
-	{
+	public function __construct( $page = 0, $items_per_page = 20 ) {
 		$this->page = $page;
 		$this->items_per_page = $items_per_page;
 	}
@@ -59,18 +58,18 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 		return [ 'site_id_' . $this->site_id, 'tamara:api', 'tamara_order:capture' ];
 	}
 
-	public function handle(WC_Order_Repository_Contract $wc_order_reposity) {
+	public function handle( WC_Order_Repository_Contract $wc_order_reposity ) {
 		$this->before_handle();
 
-		$wc_order_entities = $wc_order_reposity->get_stuck_authorised_wc_orders($this->page, $this->items_per_page);
+		$wc_order_entities = $wc_order_reposity->get_stuck_authorised_wc_orders( $this->page, $this->items_per_page );
 
-		if (!empty($wc_order_entities)) {
-			if (count($wc_order_entities) === (int) $this->items_per_page ) {
-				$this->enqueue_job( static::dispatch($this->page + 1, $this->items_per_page) );
+		if ( ! empty( $wc_order_entities ) ) {
+			if ( count( $wc_order_entities ) === (int) $this->items_per_page ) {
+				$this->enqueue_job( static::dispatch( $this->page + 1, $this->items_per_page ) );
 			}
 
-			foreach ($wc_order_entities as $wc_order_entity) {
-				Complete_Order_If_Tamara_Captured_Job::dispatchSync($wc_order_entity->id);
+			foreach ( $wc_order_entities as $wc_order_entity ) {
+				Complete_Order_If_Tamara_Captured_Job::dispatchSync( $wc_order_entity->id );
 			}
 		}
 	}

@@ -27,11 +27,13 @@
     }
   ],
   "require": {
+    "enpii/enpii-base": "dev-wp-release",
     "php": "^7.3|^8.0"
   },
   "require-dev": {
     "johnpbloch/wordpress-core": "^6.1.0",
-    "wpackagist-plugin/query-monitor": "^2.15",
+    "wpackagist-plugin/query-monitor": "^3.15",
+    "wpackagist-plugin/woocommerce-product-price-based-on-countries": "^3.0.0",
     "wpackagist-theme/storefront": "^4.0",
     "wp-plugins/woocommerce": "*",
     "automattic/vipwpcs": "^3.0.0",
@@ -50,11 +52,11 @@
       "type": "package",
       "package": {
         "name": "wp-plugins/woocommerce",
-        "version": "8.5.1",
+        "version": "8.5.2",
         "type": "wordpress-plugin",
         "dist": {
           "type": "zip",
-          "url": "https://downloads.wordpress.org/plugin/woocommerce.8.5.1.zip"
+          "url": "https://downloads.wordpress.org/plugin/woocommerce.8.5.2.zip"
         }
       }
     }
@@ -90,8 +92,11 @@
       "delete_vendor_directories": true
     },
     "installer-paths": {
+      "vendor/enpii/enpii-base": [
+        "enpii/enpii-base"
+      ],
       "dev-docker/wordpress/wp-content/mu-plugins/{$name}/": [
-
+        "type:wordpress-muplugin"
       ],
       "dev-docker/wordpress/wp-content/themes/{$name}/": [
         "type:wordpress-theme"

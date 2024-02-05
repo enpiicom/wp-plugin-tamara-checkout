@@ -288,6 +288,7 @@ class Tamara_Checkout_Helper {
 	 * @return bool
 	 */
 	public static function is_tamara_checkout_settings_page() {
-		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'checkout' === $_GET['tab'] && static::DEFAULT_TAMARA_GATEWAY_ID === $_GET['section'];
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && $_GET['page'] === 'wc-settings' && $_GET['tab'] === 'checkout' && $_GET['section'] === static::DEFAULT_TAMARA_GATEWAY_ID;
 	}
 }

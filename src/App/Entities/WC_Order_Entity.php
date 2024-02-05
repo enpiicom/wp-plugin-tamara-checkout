@@ -13,7 +13,7 @@ use Enpii_Base\Foundation\Shared\Traits\Getter_Trait;
  * @property int $id
  * @property string $status
  * @property string $payment_method
- * @property string $amount
+ * @property string $total_amount
  * @property string $currency
  * @property string $created_at
  * @property string $tamara_order_id
@@ -26,14 +26,13 @@ class WC_Order_Entity {
 	protected $status;
 	protected $created_at;
 	protected $updated_at;
-	protected $amount;
+	protected $total_amount;
 	protected $currency;
 	protected $payment_method;
 	protected $tamara_order_id;
 
-	public function __construct(array $config)
-	{
-		$this->bind_config($config);
+	public function __construct( array $config ) {
+		$this->bind_config( $config );
 	}
 
 	public function get_id(): int {

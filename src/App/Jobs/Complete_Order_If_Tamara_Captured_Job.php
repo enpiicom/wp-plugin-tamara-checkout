@@ -84,7 +84,7 @@ class Complete_Order_If_Tamara_Captured_Job extends Base_Job implements ShouldQu
 			return false;
 		}
 
-		if ($this->tamara_wc_order->get_tamara_meta('tamara_payment_status') !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_FULLY_CAPTURED) {
+		if ( $this->tamara_wc_order->get_tamara_meta( 'tamara_payment_status' ) !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_FULLY_CAPTURED ) {
 			return false;
 		}
 

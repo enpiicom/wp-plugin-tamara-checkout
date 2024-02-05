@@ -213,11 +213,11 @@ class Tamara_WC_Order {
 	public function reupdate_tamara_meta_from_remote(): void {
 		$tamara_client_response = $this->get_tamara_order_by_reference_id();
 		if ( $tamara_client_response->isSuccess() ) {
-			$this->update_tamara_meta('tamara_order_id', $tamara_client_response->getOrderId() );
-			$this->update_tamara_meta('tamara_order_number', $tamara_client_response->getOrderNumber() );
-			$this->update_tamara_meta('tamara_payment_type', $tamara_client_response->getPaymentType() );
-			$this->update_tamara_meta('tamara_instalments', $tamara_client_response->getInstalments() );
-			$this->update_tamara_meta('tamara_payment_status', $tamara_client_response->getStatus() );
+			$this->update_tamara_meta( 'tamara_order_id', $tamara_client_response->getOrderId() );
+			$this->update_tamara_meta( 'tamara_order_number', $tamara_client_response->getOrderNumber() );
+			$this->update_tamara_meta( 'tamara_payment_type', $tamara_client_response->getPaymentType() );
+			$this->update_tamara_meta( 'tamara_instalments', $tamara_client_response->getInstalments() );
+			$this->update_tamara_meta( 'tamara_payment_status', $tamara_client_response->getStatus() );
 
 			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
 			$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
@@ -236,7 +236,7 @@ class Tamara_WC_Order {
 			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\RefundItem[] $refund_items */
 			$refund_items = $tamara_client_response->getTransactions()->getRefunds();
 			if ( ! empty( $refund_items ) ) {
-				foreach ($refund_items as $refund_item) {
+				foreach ( $refund_items as $refund_item ) {
 					$this->add_tamara_refund_meta( $refund_item->getRefundId(), $refund_item->getCaptureId() );
 				}
 			}

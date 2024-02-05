@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\WP;
 
 use Closure;
-use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
@@ -20,6 +19,7 @@ use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
 use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses_Query;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
+use Tamara_Checkout\App\Repositories\WC_Order_Repository;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository_Contract;
 use Tamara_Checkout\App\Repositories\WC_Order_Woo7_Repository;
 use Tamara_Checkout\App\Services\Tamara_Client;
@@ -28,6 +28,7 @@ use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
+use WC_Order;
 
 /**
  * @inheritDoc
@@ -183,10 +184,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function provides() {
 		return [
+			Tamara_WC_Payment_Gateway::class,
 			Tamara_Client::class,
 			Tamara_Notification::class,
 			Tamara_Widget::class,
-			Tamara_WC_Payment_Gateway::class,
+			WC_Order_Repository_Contract::class,
 		];
 	}
 
@@ -587,7 +589,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 */
 	protected function register_services(): void {
 		// Init default Tamara payment gateway
-		//	We need to do this first before other services
+		//  We need to do this first before other services
 		wp_app()->singleton(
 			Tamara_WC_Payment_Gateway::class,
 			Closure::fromCallable( [ $this, 'build_tamara_gateway_instance' ] )
@@ -610,7 +612,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		);
 	}
 
-	protected function build_tamara_gateway_instance() {
+	protected function build_tamara_gateway_instance( WP_Application $app ) {
 		return Tamara_WC_Payment_Gateway::instance();
 	}
 
@@ -633,8 +635,10 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	protected function build_wc_order_repository_instance() {
-		if (version_compare(WC()->version, '8.0.0', '<')) {
+		if ( version_compare( WC()->version, '8.0.0', '<' ) ) {
 			return new WC_Order_Woo7_Repository( get_current_blog_id() );
 		}
+
+		return new WC_Order_Repository( get_current_blog_id() );
 	}
 }

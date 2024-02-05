@@ -61,7 +61,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 
 		if ( Tamara_Checkout_Helper::is_tamara_checkout_settings_page() ) {
 			// TODO: we need to find a good hook to init settings form fields
-			//	rather than init in the constructor like this
+			//  rather than init in the constructor like this
 			$this->init_form_fields();
 		}
 	}
@@ -114,11 +114,10 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 			if ( empty( $this->get_option( 'custom_log_message' ) ) ) {
 				$this->update_option( 'custom_log_message', wp_app_storage_path( 'logs/tamara-custom' . uniqid() . '.log' ) );
 			}
-		} else {
-			if ( ! empty( $this->get_option( 'custom_log_message' ) ) ) {
-				@unlink($this->get_option( 'custom_log_message' ));
-				$this->update_option( 'custom_log_message', '' );
-			}
+		} elseif ( ! empty( $this->get_option( 'custom_log_message' ) ) ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_unlink
+			@unlink( $this->get_option( 'custom_log_message' ) );
+			$this->update_option( 'custom_log_message', '' );
 		}
 
 		$this->init_form_fields();

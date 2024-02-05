@@ -218,17 +218,17 @@ class Tamara_Client {
 	 * @throws Exception
 	 */
 	protected function perform_remote_request( $remote_action, $client_request ) {
-		$this->log_message( sprintf( "Tamara API URL: %s, Tamara remote_action: %s, Tamara client_request: %s, Tamara API Token \n %s", dev_var_dump($this->api_url), dev_var_dump($remote_action), dev_var_dump($client_request), dev_var_dump($this->api_token) ) );
+		$this->log_message( sprintf( "Tamara API URL: %s, Tamara remote_action: %s, Tamara client_request: %s, Tamara API Token \n %s", dev_var_dump( $this->api_url ), dev_var_dump( $remote_action ), dev_var_dump( $client_request ), dev_var_dump( $this->api_token ) ) );
 
 		try {
 			$api_response = $this->api_client->$remote_action( $client_request );
-			$this->log_message( sprintf( 'Tamara API response: %s', dev_var_dump($api_response)) );
+			$this->log_message( sprintf( 'Tamara API response: %s', dev_var_dump( $api_response ) ) );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
 			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
-			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump($tamara_request_dispatcher_exception)), 'error' );
+			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump( $tamara_request_dispatcher_exception ) ), 'error' );
 		} catch ( Exception $tamara_checkout_exception ) {
 			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
-			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump($tamara_checkout_exception)), 'error' );
+			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump( $tamara_checkout_exception ) ), 'error' );
 		}
 
 		if ( empty( $api_response ) ) {
@@ -297,8 +297,8 @@ class Tamara_Client {
 		return $logger;
 	}
 
-	protected function log_message( $message, $context = 'info'): void {
-		if (!empty($this->logger)) {
+	protected function log_message( $message, $context = 'info' ): void {
+		if ( ! empty( $this->logger ) ) {
 			$this->logger->$context( $message );
 		}
 	}
