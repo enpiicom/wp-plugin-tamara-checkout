@@ -53,7 +53,6 @@ class WC_Order_Woo7_Repository implements WC_Order_Repository_Contract {
 			[
 				[ 'post_type', 'shop_order' ],
 				[ 'post_date_gmt', '>=', now()->subDays( 90 )->startOfDay() ],
-				[ 'post_date_gmt', '<=', now()->subDays( 15 )->startOfDay() ],
 				[ 'postmeta.meta_value', 'LIKE', $this->default_payment_gateway_id() . '%' ],
 			]
 		)
@@ -103,7 +102,6 @@ class WC_Order_Woo7_Repository implements WC_Order_Repository_Contract {
 			[
 				[ 'post_type', 'shop_order' ],
 				[ 'post_date_gmt', '>=', now()->subDays( 90 )->startOfDay() ],
-				[ 'post_date_gmt', '<=', now()->subDays( 15 )->startOfDay() ],
 				[ 'postmeta.meta_value', 'LIKE', $this->default_payment_gateway_id() . '%' ],
 			]
 		)

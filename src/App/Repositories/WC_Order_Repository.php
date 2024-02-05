@@ -47,7 +47,6 @@ class WC_Order_Repository implements WC_Order_Repository_Contract {
 			[
 				[ 'type', 'shop_order' ],
 				[ 'date_created_gmt', '>=', now()->subDays( 90 )->startOfDay() ],
-				[ 'date_created_gmt', '<=', now()->subDays( 15 )->startOfDay() ],
 				[ 'payment_method', 'LIKE', $this->default_payment_gateway_id() . '%' ],
 			]
 		)
@@ -86,7 +85,6 @@ class WC_Order_Repository implements WC_Order_Repository_Contract {
 			[
 				[ 'type', 'shop_order' ],
 				[ 'date_created_gmt', '>=', now()->subDays( 90 )->startOfDay() ],
-				[ 'date_created_gmt', '<=', now()->subDays( 15 )->startOfDay() ],
 				[ 'payment_method', 'LIKE', $this->default_payment_gateway_id() . '%' ],
 			]
 		)

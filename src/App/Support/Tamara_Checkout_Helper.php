@@ -269,7 +269,7 @@ class Tamara_Checkout_Helper {
 
 		$billing_customer_phone = ! empty( WC()->customer->get_billing_phone() ) ? WC()->customer->get_billing_phone() : '';
 		$cart_total = static::define_total_amount_to_calculate( $current_cart_total );
-		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ];
+		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ] ?? static::get_store_base_country_code();
 		$country_code = WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : $country_mapping;
 		$customer_phone = ! empty( $runtime_checkout_data['billing_phone'] ) ?
 			$runtime_checkout_data['billing_phone'] :
