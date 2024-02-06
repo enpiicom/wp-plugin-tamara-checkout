@@ -13,12 +13,12 @@ use RuntimeException;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses_Job;
+use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
-use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses_Query;
-use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
+use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes;
+use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes;
+use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses;
+use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository_Contract;
 use Tamara_Checkout\App\Repositories\WC_Order_Woo7_Repository;
@@ -227,11 +227,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function tamara_gateway_register_wp_app_routes(): void {
-		Register_Tamara_WP_App_Routes_Job::execute_now();
+		Register_Tamara_WP_App_Routes::execute_now();
 	}
 
 	public function tamara_gateway_register_wp_api_routes(): void {
-		Register_Tamara_WP_Api_Routes_Job::execute_now();
+		Register_Tamara_WP_Api_Routes::execute_now();
 	}
 
 	/**
@@ -313,7 +313,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					Tamara_Checkout_Helper::format_price_number( $cart_total, $currency_code ),
 					$currency_code
 				);
-				return Get_Tamara_Payment_Options_Query::execute_now(
+				return Get_Tamara_Payment_Options::execute_now(
 					[
 						'available_gateways' => $available_gateways,
 						'order_total' => $order_total,
@@ -364,7 +364,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function register_tamara_custom_order_statuses() {
-		Register_Tamara_Custom_Order_Statuses_Job::execute_now();
+		Register_Tamara_Custom_Order_Statuses::execute_now();
 	}
 
 	/**
@@ -376,7 +376,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function add_tamara_custom_order_statuses( array $order_statuses ): array {
-		return Add_Tamara_Custom_Statuses_Query::execute_now( $order_statuses );
+		return Add_Tamara_Custom_Statuses::execute_now( $order_statuses );
 	}
 
 	/**

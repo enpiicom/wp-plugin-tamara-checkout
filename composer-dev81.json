@@ -36,6 +36,9 @@
     "wpackagist-plugin/woocommerce-product-price-based-on-countries": "^3.0.0",
     "wpackagist-theme/storefront": "^4.0",
     "wp-plugins/woocommerce": "*",
+    "codeception/codeception": "^5.0.0",
+    "codeception/module-asserts": "^3.0",
+    "codeception/module-phpbrowser": "^3.0",
     "automattic/vipwpcs": "^3.0.0",
     "phpcompatibility/php-compatibility": "^9.3.5"
   },

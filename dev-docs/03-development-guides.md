@@ -21,30 +21,33 @@ docker-compose up -d wordpress73
 ```
 - Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}73
 
-### Using PHP 8.0 docker
+### Using PHP 8.1 docker
 - Copy the environments and adjust the values to match your local
 ```
 cp .env.example .env
 ```
-- Install need dev stuff for PHP 8.0
+- Install need dev stuff for PHP 8.1
 ```
-XDEBUG_MODE=off COMPOSER=composer-dev80.json composer80 install
+XDEBUG_MODE=off COMPOSER=composer-dev81.json composer81 install
 ```
 or if you don't have PHP 8.0 locally
 ```
-docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev80.json -v $PWD:/app npbtrac/php80_cli composer install
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev81.json -v $PWD:/app npbtrac/php81_cli composer install
 ```
 - Start the docker
 ```
-docker-compose up -d wordpress80
+docker-compose up -d wordpress81
 ```
-- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}73
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}81
 
 ### Troubleshooting
 - If you see the errors, try to do:
 ```
-docker compose exec wordpress wp --allow-root enpii-base prepare
-docker compose exec wordpress wp --allow-root enpii-base artisan wp-app:setup
+docker compose exec wordpress81 wp --allow-root enpii-base prepare
+```
+or without the root
+```
+docker compose exec wordpress81 --user=webuser wp enpii-base artisan wp-app:setup
 ```
 
 ## Update `wp-release` branch

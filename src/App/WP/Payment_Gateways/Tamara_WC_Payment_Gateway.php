@@ -6,14 +6,12 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
-use Tamara_Checkout\App\Queries\Build_Payment_Gateway_Admin_Form_Fields_Query;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Contracts\Tamara_Payment_Gateway_Contract;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use WC_Payment_Gateway;
-use WP_Screen;
 
 /**
  * Base payment gateway method for Tamara
@@ -34,10 +32,11 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public const LIVE_API_URL = 'https://api.tamara.co';
 	public const SANDBOX_API_URL = 'https://api-sandbox.tamara.co';
 
-	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS',
-				PAYMENT_TYPE_PAY_LATER = 'PAY_BY_LATER',
-				PAYMENT_TYPE_PAY_NOW = 'PAY_NOW',
-				PAYMENT_TYPE_PAY_NEXT_MONTH = 'PAY_NEXT_MONTH';
+	public const
+		PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS',
+		PAYMENT_TYPE_PAY_LATER = 'PAY_BY_LATER',
+		PAYMENT_TYPE_PAY_NOW = 'PAY_NOW',
+		PAYMENT_TYPE_PAY_NEXT_MONTH = 'PAY_NEXT_MONTH';
 
 	public $id = 'tamara-gateway';
 
@@ -93,7 +92,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 */
 	public function init_form_fields() {
 		$this->init_settings();
-		$this->form_fields = Build_Payment_Gateway_Admin_Form_Fields_Query::execute_now( $this->settings );
+		$this->form_fields = Build_Payment_Gateway_Admin_Form_Fields::execute_now( $this->settings );
 	}
 
 	/**
