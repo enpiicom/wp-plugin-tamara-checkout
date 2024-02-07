@@ -26,6 +26,7 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
 use WC_Order;
@@ -60,6 +61,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			11
 		);
 
+		// Registers WooCommerce Blocks integration.
+		add_action( 'woocommerce_blocks_loaded', [ $this, 'add_block_support_for_payment_methods' ] );
+
 		// Add Tamara custom statuses to wc order status list
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
@@ -77,6 +81,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function manipulate_hooks_after_settings(): void {
 		if ( $this->get_tamara_gateway_service()->get_settings_vo()->enabled ) {
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
+
 			add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
 			if ( ! $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_disabled ) {
 				add_action( $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
@@ -579,6 +584,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		}
 
 		return $fields;
+	}
+
+	public function add_block_support_for_payment_methods() {
+		if ( class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			add_action(
+				'woocommerce_blocks_payment_method_type_registration',
+				function ( \Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+					$payment_method_registry->register( new Tamara_Block_Support_WC_Payment_Method() );
+				}
+			);
+		}
 	}
 
 	/**
