@@ -6,6 +6,9 @@
 phpcs.cache
 .phpunit.cache
 
+# public assets bundled
+/public-assets/dist/*
+
 # WP-CLI
 /wp-cli.local.yml
 
@@ -69,6 +72,3 @@ config.codekit
 
 #robot file
 /robots.txt
-
-# public assets bundled
-/public-assets/dist/*

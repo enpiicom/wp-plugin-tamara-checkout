@@ -4,7 +4,17 @@
   "description": "Tamara Checkout Package",
   "scripts": {
     "build": "webpack --mode production",
-    "dev": "webpack --watch --mode development"
+    "dev": "webpack --watch --mode development",
+    "build-blocks": "webpack --config webpack-blocks.config.js --mode production",
+    "dev-blocks": "webpack --config webpack-blocks.config.js --watch --mode development",
+    "wp-start": "wp-scripts start",
+		"wp-build": "wp-scripts build && npm run i18n:build",
+		"i18n": "npm run i18n:build",
+		"i18n:build": "npm run i18n:pot && ./bin/build_i18n.sh",
+		"i18n:pot": "php -d xdebug.max_nesting_level=512 $(which wp) i18n make-pot --exclude=\"node_modules/,languages/,assets/\" --headers='{\"Report-Msgid-Bugs-To\":\"https://woocommerce.com/my-account/create-a-ticket/\", \"language-team\":\"LANGUAGE <EMAIL@ADDRESS>\"}' . languages/woocommerce-gateway-dummy.pot",
+		"i18n:json": "$(which wp) i18n make-json languages --no-purge",
+		"packages-update": "wp-scripts packages-update",
+		"check-engines": "wp-scripts check-engines"
   },
   "author": "dev@tamara.co",
   "license": "ISC",
@@ -28,6 +38,9 @@
     "sass-loader": "^8.0.2",
     "style-loader": "^1.1.3",
     "webpack-build-notifier": "^2.0.0",
+    "@woocommerce/dependency-extraction-webpack-plugin": "^2.2.0",
+		"@wordpress/scripts": "^26.10.0",
+		"cross-env": "7.0.3",
     "yarn": "^1.22.21"
   },
   "devDependencies": {

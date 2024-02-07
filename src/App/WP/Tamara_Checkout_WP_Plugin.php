@@ -18,6 +18,7 @@ use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes;
 use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes;
 use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses;
+use Tamara_Checkout\App\Queries\Get_Cart_Products;
 use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository_Contract;
@@ -302,7 +303,28 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return array
 	 */
 	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
-		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings_vo()->get_enabled() ) {
+		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings_vo()->enabled ) {
+			list($cart_product_ids, $cart_product_category_ids) = Get_Cart_Products::execute_now();
+
+			$product_valid = ( count(
+				array_intersect(
+					$cart_product_ids,
+					$this->get_tamara_gateway_service()->get_settings_vo()->excluded_products
+				)
+			) < 1 );
+			$product_category_valid = ( count(
+				array_intersect(
+					$cart_product_category_ids,
+					$this->get_tamara_gateway_service()->get_settings_vo()->excluded_product_categories
+				)
+			) < 1 );
+
+			if ( ! $product_valid || ! $product_category_valid ) {
+				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
+
+				return $available_gateways;
+			}
+
 			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
@@ -326,9 +348,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 						'customer_phone' => $customer_phone,
 					]
 				);
-			} else {
-				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
 			}
+
+			unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
 		}
 
 		return $available_gateways;

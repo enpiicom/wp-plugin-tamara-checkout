@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
