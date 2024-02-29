@@ -29,10 +29,11 @@ const Label = ( props ) => {
 };
 
 /**
- * Dummy payment method config object.
+ * Tamara payment method config object.
  */
-const TamaraPaymentMethodDefault = {
-	name: "tamara-payment-method-default",
+const TamaraGateway = {
+	// The name must match the id of the payment gateway
+	name: "tamara-gateway",
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
@@ -43,4 +44,4 @@ const TamaraPaymentMethodDefault = {
 	},
 };
 
-registerPaymentMethod( TamaraPaymentMethodDefault );
+registerPaymentMethod( TamaraGateway );

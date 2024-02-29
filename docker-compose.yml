@@ -80,7 +80,7 @@ services:
   wordpress80:
     build:
       context: .
-      dockerfile: ./dev-docker/Dockerfile81
+      dockerfile: ./dev-docker/Dockerfile80
     ports:
       - ${HTTP_EXPOSING_PORT_PREFIX}80:80
     extra_hosts:

@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "30bbb734669c4fa62c8ad60027f1d20721cfecc7"
+                "reference": "a3b07e11e8d9f987025d2b65b661b1a6101fca2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/30bbb734669c4fa62c8ad60027f1d20721cfecc7",
-                "reference": "30bbb734669c4fa62c8ad60027f1d20721cfecc7",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/a3b07e11e8d9f987025d2b65b661b1a6101fca2c",
+                "reference": "a3b07e11e8d9f987025d2b65b661b1a6101fca2c",
                 "shasum": ""
             },
             "require": {
@@ -65,7 +65,7 @@
                 "issues": "https://github.com/enpiicom/wp-plugin-enpii-base/issues",
                 "source": "https://github.com/enpiicom/wp-plugin-enpii-base/tree/wp-release"
             },
-            "time": "2024-02-05T15:25:04+00:00"
+            "time": "2024-01-09T09:25:04+00:00"
         }
     ],
     "packages-dev": [],

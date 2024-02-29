@@ -49,7 +49,7 @@ class Tamara_Block_Support_WC_Payment_Method extends AbstractPaymentMethodType {
 		$script_path = '/public-assets/dist/blocks/js/frontend/blocks.js';
 		$script_asset_path = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_path() . '/public-assets/dist/blocks/js/frontend/blocks.asset.php';
 		$script_asset = file_exists( $script_asset_path )
-			? require $script_asset_path 
+			? require $script_asset_path
 			: [
 				'dependencies' => [],
 				'version' => TAMARA_CHECKOUT_VERSION,
@@ -57,7 +57,7 @@ class Tamara_Block_Support_WC_Payment_Method extends AbstractPaymentMethodType {
 		$script_url = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . $script_path;
 
 		wp_register_script(
-			'wc-tamara-checkout-blocks',
+			'wc-tamara-gateway-payments-blocks',
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
@@ -65,10 +65,10 @@ class Tamara_Block_Support_WC_Payment_Method extends AbstractPaymentMethodType {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-tamara-checkout-blocks', 'woocommerce-gateway-dummy', Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_path() . '/languages/' );
+			wp_set_script_translations( 'wc-tamara-gateway-payments-blocks', 'woocommerce-gateway-tamara-gateway', Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_path() . '/languages/' );
 		}
 
-		return [ 'wc-tamara-checkout-blocks' ];
+		return [ 'wc-tamara-gateway-payments-blocks' ];
 	}
 
 	/**

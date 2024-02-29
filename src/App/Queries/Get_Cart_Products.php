@@ -12,6 +12,10 @@ class Get_Cart_Products {
 	use Tamara_Trans_Trait;
 
 	public function handle() {
+		if ( empty(WC()->cart) ) {
+			return [ [], [] ];
+		}
+
 		$cart_items = WC()->cart->get_cart();
 		$product_ids = [];
 		$product_category_ids = [];
