@@ -1,5 +1,11 @@
 # Development Guides
 
+## Basic guides
+- Generate Block theme blocks (e.g. Payment options block...)
+```
+yarn build-blocks
+```
+
 ## Use the docker to deploy the project locally
 
 ### Using PHP 7.3 docker

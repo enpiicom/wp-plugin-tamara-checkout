@@ -249,7 +249,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function add_payment_gateways( $gateways ): array {
 		$gateways[] = $this->get_tamara_gateway_service();
 
-		return $gateways;
+		return $this->adjust_tamara_payment_types_on_checkout( $gateways );
 	}
 
 	public function enqueue_tamara_general_scripts(): void {
@@ -340,6 +340,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					Tamara_Checkout_Helper::format_price_number( $cart_total, $currency_code ),
 					$currency_code
 				);
+				// return $available_gateways;
 				return Get_Tamara_Payment_Options::execute_now(
 					[
 						'available_gateways' => $available_gateways,
