@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use Exception;
 use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
-use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment_Query;
+use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
@@ -418,9 +418,7 @@ class Tamara_WC_Order {
 		$order->setShippingAddress( $this->build_tamara_shipping_address() );
 		$order->setConsumer( $this->build_tamara_consumer() );
 		$order->setRiskAssessment(
-			Build_Tamara_Order_Risk_Assessment_Query::execute_now(
-				$wc_order
-			)
+			Build_Tamara_Order_Risk_Assessment::execute_now( $wc_order )
 		);
 
 		$order->setItems( $this->build_tamara_order_items() );

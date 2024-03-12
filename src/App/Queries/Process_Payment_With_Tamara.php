@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
-use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use InvalidArgumentException;
@@ -16,7 +15,7 @@ use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CreateCheckoutRequest;
 use WC_Order;
 
-class Process_Payment_With_Tamara_Query extends Base_Query {
+class Process_Payment_With_Tamara {
 	use Executable_Trait;
 
 	/**

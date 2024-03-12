@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
-use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
@@ -13,7 +12,7 @@ use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
-class Build_Payment_Gateway_Admin_Form_Fields_Query extends Base_Query {
+class Build_Payment_Gateway_Admin_Form_Fields {
 	use Executable_Trait;
 	use Tamara_Trans_Trait;
 	use Tamara_Checkout_Trait;

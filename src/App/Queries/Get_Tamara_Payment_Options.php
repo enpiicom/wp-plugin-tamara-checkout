@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
-use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
@@ -26,7 +25,7 @@ use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Checkout\PaymentOptionsAvailability;
 use Tamara_Checkout\Deps\Tamara\Request\Checkout\CheckPaymentOptionsAvailabilityRequest;
 
-class Get_Tamara_Payment_Options_Query extends Base_Query {
+class Get_Tamara_Payment_Options {
 	use Executable_Trait;
 	use Config_Trait;
 	use Tamara_Checkout_Trait;
