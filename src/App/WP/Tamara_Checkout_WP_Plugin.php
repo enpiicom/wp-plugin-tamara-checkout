@@ -62,9 +62,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			11
 		);
 
-		// Registers WooCommerce Blocks integration.
-		add_action( 'woocommerce_blocks_loaded', [ $this, 'add_block_support_for_payment_methods' ] );
-
 		// Add Tamara custom statuses to wc order status list
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
