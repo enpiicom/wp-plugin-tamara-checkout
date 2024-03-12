@@ -21,7 +21,8 @@ if ( ! function_exists( 'devd' ) ) {
 
 		echo "=== start of dump ===\n";
 		dump( ...$vars );
-		echo esc_html( $dev_trace[0]['file'] ) . ':' . esc_html( $dev_trace[0]['line'] ) . ': ' . "\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . ': ' . "\n";
 		// We want to put the file name and the 7 steps trace to know where
 		//  where the dump is produced
 		if ( ! enpii_base_is_console_mode() ) {
@@ -63,7 +64,7 @@ if ( ! function_exists( 'dev_error_log' ) ) {
 
 		foreach ( $vars as $index => $var ) {
 			$dump_content = null;
-			if ( $var === false ) {
+			if ( $var === null ) {
 				$type = 'NULL';
 			} else {
 				$type = is_object( $var ) ? get_class( $var ) : gettype( $var );
@@ -74,8 +75,9 @@ if ( ! function_exists( 'dev_error_log' ) ) {
 			$log_message .= "Var no $index: type " . $type . ' - ' . $dump_content . " \n";
 		}
 		$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
-		$log_message .= "\n=====================================";
-		$log_message .= "\n======= Dev logging ends here\n\n\n\n";
+		$log_message .= "\n======= Dev logging ends here =======\n";
+		$log_message .= "\n=====================================\n\n\n\n";
+
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $log_message );
 	}
@@ -104,8 +106,8 @@ if ( ! function_exists( 'dev_logger' ) ) {
 			$log_message .= "Var no $index: type " . $type . ' - ' . $dump_content . " \n";
 		}
 		$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
-		$log_message .= "\n=====================================";
-		$log_message .= "\n======= Dev logging ends here\n\n\n\n";
+		$log_message .= "\n======= Dev logging ends here =======\n";
+		$log_message .= "\n=====================================\n\n\n\n";
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 		$logger->debug( $log_message );

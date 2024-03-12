@@ -43,6 +43,10 @@ class Enpii_Base_Helper {
 		return 'wp-app/wp-admin/admin/setup-app?force_app_running_in_console=1';
 	}
 
+	public static function get_wp_login_url( $return_url = '', $force_reauth = false ): string {
+		return wp_login_url( $return_url, $force_reauth );
+	}
+
 	public static function at_setup_app_url(): bool {
 		$current_url = static::get_current_url();
 		$redirect_uri = static::get_setup_app_uri();
@@ -50,9 +54,16 @@ class Enpii_Base_Helper {
 		return ( strpos( $current_url, $redirect_uri ) !== false );
 	}
 
+	public static function at_wp_login_url(): bool {
+		$current_url = static::get_current_url();
+		$login_url = wp_login_url();
+
+		return ( strpos( $current_url, $login_url ) !== false );
+	}
+
 	public static function redirect_to_setup_url(): void {
 		$redirect_uri = static::get_setup_app_uri();
-		if ( ! static::at_setup_app_url() ) {
+		if ( ! static::at_setup_app_url() && ! static::at_wp_login_url() ) {
 			$redirect_url = add_query_arg(
 				[
 					'return_url' => urlencode( static::get_current_url() ),

@@ -16,7 +16,7 @@ class Authenticate extends Middleware {
 	 * @return string|null
 	 */
 	protected function redirectTo( $request ) {
-		return $request->expectsJson() ? null : wp_login_url( Enpii_Base_Helper::get_current_url() );
+		return $request->expectsJson() ? null : Enpii_Base_Helper::get_wp_login_url( Enpii_Base_Helper::get_current_url() );
 	}
 
 	/**

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\Queries;
 
-use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Illuminate\Foundation\Application;
 
-class Get_WP_App_Info extends Base_Query {
+class Get_WP_App_Info {
 	use Executable_Trait;
 
 	public function handle(): array {

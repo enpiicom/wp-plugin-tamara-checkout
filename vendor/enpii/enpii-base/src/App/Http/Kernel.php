@@ -134,4 +134,21 @@ class Kernel extends HttpKernel {
 		$this->app->instance( 'request', \Enpii_Base\App\Http\Request::capture() );
 		Facade::clearResolvedInstance( 'request' );
 	}
+
+	/**
+	 * Get the bootstrap classes for the application.
+	 *
+	 * @return array
+	 */
+	protected function bootstrappers() {
+		$bootstrappers = $this->bootstrappers;
+		$script_name = ! empty( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( $_SERVER['SCRIPT_NAME'] ) : '';
+		if ( strpos( $script_name, '/wp-admin/customize.php' ) !== false ) {
+			// We need to exclude the HandleException bootstrapper
+			//  provided that, it's at the index 0
+			array_shift( $bootstrappers );
+		}
+
+		return $bootstrappers;
+	}
 }

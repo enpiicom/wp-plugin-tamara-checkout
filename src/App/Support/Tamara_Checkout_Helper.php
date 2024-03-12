@@ -264,6 +264,10 @@ class Tamara_Checkout_Helper {
 	 * @return array
 	 */
 	public static function get_current_cart_info(): array {
+		if ( empty( WC()->customer) ) {
+			return [];
+		}
+
 		$current_cart_total = ! empty( WC()->cart->total ) ? WC()->cart->total : 0;
 		$runtime_checkout_data = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_checkout_data_on_runtime();
 

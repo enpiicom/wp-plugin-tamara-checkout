@@ -54,7 +54,7 @@ if ( ! function_exists( 'enpii_base_wp_app_prepare_folders' ) ) {
 		foreach ( $filepaths as $filepath ) {
 			$file_system->ensureDirectoryExists( $filepath, $chmod );
 			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
-			chmod( $filepath, $chmod );
+			@chmod( $filepath, $chmod );
 		}
 	}
 }

@@ -66,7 +66,7 @@ return [
 	|
 	*/
 
-	'timezone' => get_option( 'timezone_string', ( defined( 'WP_APP_TIMEZONE' ) ? WP_APP_TIMEZONE : 'UTC' ) ),
+	'timezone' => wp_timezone()->getName() ? wp_timezone()->getName() : ( defined( 'WP_APP_TIMEZONE' ) ? WP_APP_TIMEZONE : 'UTC' ),
 
 	/**
 	|--------------------------------------------------------------------------

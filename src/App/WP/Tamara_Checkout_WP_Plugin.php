@@ -13,12 +13,13 @@ use RuntimeException;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses_Job;
+use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes_Job;
-use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes_Job;
-use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses_Query;
-use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options_Query;
+use Tamara_Checkout\App\Jobs\Register_Tamara_WP_Api_Routes;
+use Tamara_Checkout\App\Jobs\Register_Tamara_WP_App_Routes;
+use Tamara_Checkout\App\Queries\Add_Tamara_Custom_Statuses;
+use Tamara_Checkout\App\Queries\Get_Cart_Products;
+use Tamara_Checkout\App\Queries\Get_Tamara_Payment_Options;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository;
 use Tamara_Checkout\App\Repositories\WC_Order_Repository_Contract;
 use Tamara_Checkout\App\Repositories\WC_Order_Woo7_Repository;
@@ -26,9 +27,9 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
-use WC_Order;
 
 /**
  * @inheritDoc
@@ -77,6 +78,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function manipulate_hooks_after_settings(): void {
 		if ( $this->get_tamara_gateway_service()->get_settings_vo()->enabled ) {
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_widget_client_scripts' ], 5 );
+
 			add_shortcode( 'tamara_show_popup', [ $this, 'fetch_tamara_pdp_widget' ] );
 			if ( ! $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_disabled ) {
 				add_action( $this->get_tamara_gateway_service()->get_settings_vo()->popup_widget_position, [ $this, 'show_tamara_pdp_widget' ] );
@@ -227,11 +229,11 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function tamara_gateway_register_wp_app_routes(): void {
-		Register_Tamara_WP_App_Routes_Job::execute_now();
+		Register_Tamara_WP_App_Routes::execute_now();
 	}
 
 	public function tamara_gateway_register_wp_api_routes(): void {
-		Register_Tamara_WP_Api_Routes_Job::execute_now();
+		Register_Tamara_WP_Api_Routes::execute_now();
 	}
 
 	/**
@@ -243,7 +245,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	public function add_payment_gateways( $gateways ): array {
 		$gateways[] = $this->get_tamara_gateway_service();
 
-		return $gateways;
+		return $this->adjust_tamara_payment_types_on_checkout( $gateways );
 	}
 
 	public function enqueue_tamara_general_scripts(): void {
@@ -297,7 +299,28 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @return array
 	 */
 	public function adjust_tamara_payment_types_on_checkout( $available_gateways ): array {
-		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings_vo()->get_enabled() ) {
+		if ( is_checkout() && $this->get_tamara_gateway_service()->get_settings_vo()->enabled ) {
+			list($cart_product_ids, $cart_product_category_ids) = Get_Cart_Products::execute_now();
+
+			$product_valid = ( count(
+				array_intersect(
+					$cart_product_ids,
+					$this->get_tamara_gateway_service()->get_settings_vo()->excluded_products
+				)
+			) < 1 );
+			$product_category_valid = ( count(
+				array_intersect(
+					$cart_product_category_ids,
+					$this->get_tamara_gateway_service()->get_settings_vo()->excluded_product_categories
+				)
+			) < 1 );
+
+			if ( ! $product_valid || ! $product_category_valid ) {
+				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
+
+				return $available_gateways;
+			}
+
 			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
@@ -313,7 +336,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 					Tamara_Checkout_Helper::format_price_number( $cart_total, $currency_code ),
 					$currency_code
 				);
-				return Get_Tamara_Payment_Options_Query::execute_now(
+				// return $available_gateways;
+				return Get_Tamara_Payment_Options::execute_now(
 					[
 						'available_gateways' => $available_gateways,
 						'order_total' => $order_total,
@@ -321,9 +345,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 						'customer_phone' => $customer_phone,
 					]
 				);
-			} else {
-				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
 			}
+
+			unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
 		}
 
 		return $available_gateways;
@@ -364,7 +388,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function register_tamara_custom_order_statuses() {
-		Register_Tamara_Custom_Order_Statuses_Job::execute_now();
+		Register_Tamara_Custom_Order_Statuses::execute_now();
 	}
 
 	/**
@@ -376,7 +400,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws \Exception
 	 */
 	public function add_tamara_custom_order_statuses( array $order_statuses ): array {
-		return Add_Tamara_Custom_Statuses_Query::execute_now( $order_statuses );
+		return Add_Tamara_Custom_Statuses::execute_now( $order_statuses );
 	}
 
 	/**
@@ -579,6 +603,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		}
 
 		return $fields;
+	}
+
+	public function add_block_support_for_payment_methods() {
+		if ( class_exists( '\Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			add_action(
+				'woocommerce_blocks_payment_method_type_registration',
+				function ( \Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+					$payment_method_registry->register( new Tamara_Block_Support_WC_Payment_Method() );
+				}
+			);
+		}
 	}
 
 	/**

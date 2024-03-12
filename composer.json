@@ -1,7 +1,7 @@
 {
   "name": "tamara/tamara-checkout",
   "type": "wordpress-plugin",
-  "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
+  "description": "The WordPress plugin for Tamara payment gateway http://tamara.co. Based on Enpii Base plugin",
   "license": "MIT",
   "keywords": [
     "wordpress",

@@ -25,7 +25,7 @@ defined( 'ENPII_BASE_WP_API_PREFIX' ) || define(
 
 defined( 'ENPII_BASE_SETUP_HOOK_NAME' ) || define(
 	'ENPII_BASE_SETUP_HOOK_NAME',
-	!empty( getenv( 'ENPII_BASE_SETUP_HOOK_NAME' ) ) ? : 'after_setup_theme'
+	!empty( getenv( 'ENPII_BASE_SETUP_HOOK_NAME' ) ) ? : 'plugins_loaded'
 );
 
 require_once __DIR__ . DIR_SEP . 'src' . DIR_SEP . 'helpers.php';

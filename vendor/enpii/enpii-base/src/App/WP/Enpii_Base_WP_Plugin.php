@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace Enpii_Base\App\WP;
 
 use Enpii_Base\App\Http\Response;
-use Enpii_Base\App\Jobs\Bootstrap_WP_App_Job;
+use Enpii_Base\App\Jobs\Bootstrap_WP_App;
 use Enpii_Base\App\Jobs\Login_WP_App_User;
 use Enpii_Base\App\Jobs\Logout_WP_App_User;
-use Enpii_Base\App\Jobs\Perform_Setup_WP_App_Job;
-use Enpii_Base\App\Jobs\Perform_Web_Worker_Job;
-use Enpii_Base\App\Jobs\Process_WP_Api_Request_Job;
-use Enpii_Base\App\Jobs\Process_WP_App_Request_Job;
-use Enpii_Base\App\Jobs\Register_Base_WP_Api_Routes_Job;
-use Enpii_Base\App\Jobs\Register_Base_WP_App_Routes_Job;
-use Enpii_Base\App\Jobs\Schedule_Run_Backup_Job;
-use Enpii_Base\App\Jobs\Show_Admin_Notice_From_Flash_Messages_Job;
-use Enpii_Base\App\Jobs\Write_Setup_Client_Script_Job;
-use Enpii_Base\App\Jobs\Write_Web_Worker_Script_Job;
-use Enpii_Base\App\Queries\Add_More_Providers_Query;
+use Enpii_Base\App\Jobs\Perform_Setup_WP_App;
+use Enpii_Base\App\Jobs\Perform_Web_Worker;
+use Enpii_Base\App\Jobs\Process_WP_Api_Request;
+use Enpii_Base\App\Jobs\Process_WP_App_Request;
+use Enpii_Base\App\Jobs\Register_Base_WP_Api_Routes;
+use Enpii_Base\App\Jobs\Register_Base_WP_App_Routes;
+use Enpii_Base\App\Jobs\Schedule_Run_Backup;
+use Enpii_Base\App\Jobs\Show_Admin_Notice_From_Flash_Messages;
+use Enpii_Base\App\Jobs\Write_Setup_Client_Script;
+use Enpii_Base\App\Jobs\Write_Web_Worker_Script;
+use Enpii_Base\App\Queries\Add_More_Providers;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
@@ -94,7 +94,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 		add_action(
 			App_Const::ACTION_WP_APP_BOOTSTRAP,
 			function () {
-				Bootstrap_WP_App_Job::execute_now();
+				Bootstrap_WP_App::execute_now();
 			},
 			5
 		);
@@ -156,27 +156,27 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	public function setup_app(): void {
-		Perform_Setup_WP_App_Job::dispatchSync();
+		Perform_Setup_WP_App::execute_now();
 	}
 
 	public function bootstrap_wp_app(): void {
-		Bootstrap_WP_App_Job::execute_now();
+		Bootstrap_WP_App::execute_now();
 	}
 
 	public function write_setup_wp_app_client_script(): void {
-		Write_Setup_Client_Script_Job::execute_now();
+		Write_Setup_Client_Script::execute_now();
 	}
 
 	public function write_web_worker_client_script(): void {
-		Write_Web_Worker_Script_Job::execute_now();
+		Write_Web_Worker_Script::execute_now();
 	}
 
 	public function register_base_wp_app_routes(): void {
-		Register_Base_WP_App_Routes_Job::execute_now();
+		Register_Base_WP_App_Routes::execute_now();
 	}
 
 	public function register_base_wp_api_routes(): void {
-		Register_Base_WP_Api_Routes_Job::execute_now();
+		Register_Base_WP_Api_Routes::execute_now();
 	}
 
 	public function register_wp_cli_commands(): void {
@@ -191,11 +191,11 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	public function process_wp_app_request(): void {
-		Process_WP_App_Request_Job::execute_now();
+		Process_WP_App_Request::execute_now();
 	}
 
 	public function process_wp_api_request(): void {
-		Process_WP_Api_Request_Job::execute_now();
+		Process_WP_Api_Request::execute_now();
 	}
 
 	/**
@@ -239,7 +239,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	public function register_more_providers( $providers ) {
-		return Add_More_Providers_Query::execute_now( $providers );
+		return Add_More_Providers::execute_now( $providers );
 	}
 
 	/**
@@ -249,7 +249,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	 * @throws BindingResolutionException
 	 */
 	public function handle_admin_head() {
-		Show_Admin_Notice_From_Flash_Messages_Job::execute_now();
+		Show_Admin_Notice_From_Flash_Messages::execute_now();
 	}
 
 	/**
@@ -258,7 +258,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	 * @throws BindingResolutionException
 	 */
 	public function web_worker() {
-		Perform_Web_Worker_Job::dispatchSync();
+		Perform_Web_Worker::execute_now();
 	}
 
 	/**
@@ -269,7 +269,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	 * @throws InvalidArgumentException
 	 */
 	public function schedule_run_backup( Schedule $schedule ) {
-		Schedule_Run_Backup_Job::execute_now( $schedule );
+		Schedule_Run_Backup::execute_now( $schedule );
 	}
 
 	/**
