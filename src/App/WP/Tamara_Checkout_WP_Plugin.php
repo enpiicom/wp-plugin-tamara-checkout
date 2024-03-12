@@ -30,7 +30,6 @@ use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
-use WC_Order;
 
 /**
  * @inheritDoc
