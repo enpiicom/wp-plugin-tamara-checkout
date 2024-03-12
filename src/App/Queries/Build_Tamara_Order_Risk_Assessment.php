@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
-use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\Deps\Tamara\Model\Order\RiskAssessment;
 use WC_Order;
 
-class Build_Tamara_Order_Risk_Assessment_Query extends Base_Query {
+class Build_Tamara_Order_Risk_Assessment {
 	use Executable_Trait;
 
 	/**

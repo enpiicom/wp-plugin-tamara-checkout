@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
-use Enpii_Base\Foundation\Shared\Base_Query;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 
-class Add_Tamara_Custom_Statuses_Query extends Base_Query {
+class Add_Tamara_Custom_Statuses {
 	use Executable_Trait;
 	use Tamara_Trans_Trait;
 

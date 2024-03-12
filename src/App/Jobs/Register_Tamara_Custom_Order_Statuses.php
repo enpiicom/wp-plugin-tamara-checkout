@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
-use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 
-class Register_Tamara_Custom_Order_Statuses_Job extends Base_Job {
+class Register_Tamara_Custom_Order_Statuses {
 	use Executable_Trait;
 	use Tamara_Trans_Trait;
 
