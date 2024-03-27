@@ -12,7 +12,7 @@ class Get_Cart_Products {
 	use Tamara_Trans_Trait;
 
 	public function handle() {
-		if ( empty(WC()->cart) ) {
+		if ( empty( WC()->cart ) ) {
 			return [ [], [] ];
 		}
 

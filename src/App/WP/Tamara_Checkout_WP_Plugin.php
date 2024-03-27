@@ -316,7 +316,12 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			) < 1 );
 
 			if ( ! $product_valid || ! $product_category_valid ) {
-				unset( $available_gateways[ Tamara_Checkout_Helper::DEFAULT_TAMARA_GATEWAY_ID ] );
+				$tamara_default_gateway_instance = $this->get_tamara_gateway_service();
+				$tamara_default_gateway_index = (int) array_search(
+					$tamara_default_gateway_instance,
+					$available_gateways
+				);
+				unset( $available_gateways[ $tamara_default_gateway_index ] );
 
 				return $available_gateways;
 			}

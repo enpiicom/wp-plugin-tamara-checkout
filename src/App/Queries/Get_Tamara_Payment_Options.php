@@ -93,7 +93,7 @@ class Get_Tamara_Payment_Options {
 			if ( ! empty( $mappings[ $payment_type['to_map'] ] ) ) {
 				$class_name = $mappings[ $payment_type['to_map'] ];
 				$tmp_payment_method = new $class_name( $payment_type );
-				$payment_methods[ $tmp_payment_method->id ] = $tmp_payment_method;
+				$payment_methods[] = $tmp_payment_method;
 			}
 		}
 
@@ -107,17 +107,17 @@ class Get_Tamara_Payment_Options {
 	 */
 	protected function process_available_gateways( array $remote_payment_methods ): array {
 		$available_gateways = $this->available_gateways;
-		$tamara_default_gateway_key = $this->default_payment_gateway_id();
-		$tamara_default_gateway_offset = array_search(
-			$tamara_default_gateway_key,
-			array_keys( $available_gateways )
+		$tamara_default_gateway_instance = $this->tamara_gateway();
+		$tamara_default_gateway_index = (int) array_search(
+			$tamara_default_gateway_instance,
+			$available_gateways
 		);
 		$available_gateways = array_merge(
-			array_slice( $available_gateways, 0, $tamara_default_gateway_offset ),
+			array_slice( $available_gateways, 0, $tamara_default_gateway_index ),
 			$remote_payment_methods,
-			array_slice( $available_gateways, $tamara_default_gateway_offset, null )
+			array_slice( $available_gateways, $tamara_default_gateway_index, null )
 		);
-		unset( $available_gateways[ $tamara_default_gateway_key ] );
+		unset( $available_gateways[ $tamara_default_gateway_index ] );
 
 		return $available_gateways;
 	}
@@ -127,8 +127,11 @@ class Get_Tamara_Payment_Options {
 	 */
 	protected function get_payment_type_to_service_mappings(): array {
 		return [
+			'PAY_LATER_' => Tamara_WC_Payment_Gateway::class,
 			'PAY_LATER_0' => Tamara_WC_Payment_Gateway::class,
+			'PAY_NOW_' => Pay_Now_WC_Payment_Gateway::class,
 			'PAY_NOW_0' => Pay_Now_WC_Payment_Gateway::class,
+			'PAY_NEXT_MONTH_' => Pay_Next_Month_WC_Payment_Gateway::class,
 			'PAY_NEXT_MONTH_0' => Pay_Next_Month_WC_Payment_Gateway::class,
 			'PAY_BY_INSTALMENTS_2' => Pay_In_2_WC_Payment_Gateway::class,
 			'PAY_BY_INSTALMENTS_3' => Pay_In_3_WC_Payment_Gateway::class,

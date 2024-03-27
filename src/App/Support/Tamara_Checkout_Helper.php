@@ -36,11 +36,11 @@ class Tamara_Checkout_Helper {
 	}
 
 	public static function check_enpii_base_plugin(): bool {
-		return ! ! class_exists( \Enpii_Base\App\WP\WP_Application::class );
+		return (bool) class_exists( \Enpii_Base\App\WP\WP_Application::class );
 	}
 
 	public static function check_woocommerce_plugin(): bool {
-		return ! ! class_exists( \WooCommerce::class );
+		return (bool) class_exists( \WooCommerce::class );
 	}
 
 	/**
@@ -181,7 +181,7 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function is_tamara_admin_settings_screen(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return ! ! ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+		return (bool) ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&& ( $_GET['page'] === 'wc-settings' )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -197,7 +197,7 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function is_shop_order_screen(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return ! ! ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
+		return (bool) ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
 	}
 
 	/**
@@ -264,7 +264,7 @@ class Tamara_Checkout_Helper {
 	 * @return array
 	 */
 	public static function get_current_cart_info(): array {
-		if ( empty( WC()->customer) ) {
+		if ( empty( WC()->customer ) ) {
 			return [];
 		}
 

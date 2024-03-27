@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
+use Tamara_Checkout\App\Queries\Get_Cart_Products;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
@@ -77,6 +78,34 @@ JS_SCRIPT;
 			return '';
 		}
 
+		// Todo: we need to find a way to refactor this and the snippet in
+		//  Tamara_Checkout_WP_Plugin::adjust_tamara_payment_types_on_checkout
+		$product_id = wc_get_product()->get_id();
+		$product_ids = [];
+		$product_category_ids = [];
+
+		if ( $product_id ) {
+			$product_ids[] = $product_id;
+			$product_category_ids = array_merge( $product_category_ids, wc_get_product_cat_ids( $product_id ) );
+		}
+
+		$product_valid = ( count(
+			array_intersect(
+				$product_ids,
+				$this->tamara_settings()->excluded_products
+			)
+		) < 1 );
+		$product_category_valid = ( count(
+			array_intersect(
+				$product_category_ids,
+				$this->tamara_settings()->excluded_product_categories
+			)
+		) < 1 );
+
+		if ( ! $product_valid || ! $product_category_valid ) {
+			return '';
+		}
+
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 			'blocks/tamara-widget',
 			compact( 'widget_inline_type', 'widget_amount' )
@@ -90,6 +119,27 @@ JS_SCRIPT;
 		$widget_inline_type = 3;
 
 		if ( ! $widget_amount ) {
+			return '';
+		}
+
+		// Todo: we need to find a way to refactor this and the snippet in
+		//  Tamara_Checkout_WP_Plugin::adjust_tamara_payment_types_on_checkout
+		list($cart_product_ids, $cart_product_category_ids) = Get_Cart_Products::execute_now();
+
+		$product_valid = ( count(
+			array_intersect(
+				$cart_product_ids,
+				$this->tamara_settings()->excluded_products
+			)
+		) < 1 );
+		$product_category_valid = ( count(
+			array_intersect(
+				$cart_product_category_ids,
+				$this->tamara_settings()->excluded_product_categories
+			)
+		) < 1 );
+
+		if ( ! $product_valid || ! $product_category_valid ) {
 			return '';
 		}
 
