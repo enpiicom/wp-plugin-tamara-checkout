@@ -93,7 +93,7 @@ class Get_Tamara_Payment_Options {
 			if ( ! empty( $mappings[ $payment_type['to_map'] ] ) ) {
 				$class_name = $mappings[ $payment_type['to_map'] ];
 				$tmp_payment_method = new $class_name( $payment_type );
-				$payment_methods[] = $tmp_payment_method;
+				$payment_methods[ $tmp_payment_method->id ] = $tmp_payment_method;
 			}
 		}
 
