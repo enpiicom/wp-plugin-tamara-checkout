@@ -61,7 +61,7 @@ class Build_Tamara_Order_Risk_Assessment {
 			];
 			$order_completed = count( wc_get_orders( $args ) );
 
-			return ! ! $order_completed > 0;
+			return (bool) $order_completed > 0;
 		} else {
 			return false;
 		}

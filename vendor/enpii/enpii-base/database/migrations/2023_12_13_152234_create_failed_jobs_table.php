@@ -5,19 +5,20 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateFailedJobsTable extends Migration {
-
 	/**
 	 * Run the migrations.
 	 *
 	 * @return void
 	 */
 	public function up() {
-		Schema::dropIfExists( 'failed_jobs' );
+		Schema::dropIfExists( 'wp_app_failed_jobs' );
 		Schema::create(
-			'failed_jobs',
+			'wp_app_failed_jobs',
 			function ( Blueprint $table ) {
+				$table->charset = defined( 'DB_CHARSET' ) && DB_CHARSET ? DB_CHARSET : 'utf8mb4';
+
 				$table->bigIncrements( 'id' );
-				$table->uuid('uuid')->nullable();
+				$table->uuid( 'uuid' )->nullable();
 				$table->text( 'connection' );
 				$table->text( 'queue' );
 				$table->longText( 'payload' );
@@ -35,6 +36,6 @@ class CreateFailedJobsTable extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		Schema::dropIfExists( 'failed_jobs' );
+		Schema::dropIfExists( 'wp_app_failed_jobs' );
 	}
 }

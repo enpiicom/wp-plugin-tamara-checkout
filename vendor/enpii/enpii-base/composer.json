@@ -2,8 +2,8 @@
   "name": "enpii/enpii-base",
   "type": "wordpress-muplugin",
   "description": "The base plugin to have powerful Laravel development on WordPress",
-  "version": "v0.4.0",
-  "time": "2024-01-09 09:25:04",
+  "version": "v0.5.0",
+  "time": "2024-03-27 12:14:04",
   "homepage": "https://enpii.com/wp-plugin-enpii-base",
   "license": "MIT",
   "authors": [

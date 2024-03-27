@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Enpii_Base\App\Jobs\Mark_Setup_WP_App_Done;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Enpii_Base_Helper;
 
@@ -94,10 +95,12 @@ if ( ! function_exists( 'enpii_base_maybe_redirect_to_setup_app' ) ) {
 	 * @return bool
 	 */
 	function enpii_base_maybe_redirect_to_setup_app(): void {
-		$version_in_opton = get_option( Enpii_Base_Helper::VERSION_OPTION_FIELD );
-
-		if ( ( empty( $version_in_opton ) ) ) {
-			Enpii_Base_Helper::redirect_to_setup_url();
+		$version_option = get_option( App_Const::OPTION_VERSION );
+		if ( ( empty( $version_option ) ) ) {
+			// We only want to redirect if the setup did not fail previously
+			if ( ! enpii_base_wp_app_setup_failed() ) {
+				Enpii_Base_Helper::redirect_to_setup_url();
+			}
 		}
 	}
 }
@@ -108,36 +111,67 @@ if ( ! function_exists( 'enpii_base_wp_app_check' ) ) {
 	 * @return bool
 	 */
 	function enpii_base_wp_app_check(): bool {
-		$error_message = '';
+		if ( ! isset( $GLOBALS['wp_app_setup_errors'] ) ) {
+			$GLOBALS['wp_app_setup_errors'] = [];
+		}
 		$wp_app_base_path = enpii_base_wp_app_get_base_path();
 		if ( ! file_exists( $wp_app_base_path ) ) {
 			enpii_base_wp_app_prepare_folders();
 
 			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_is_writable
 			if ( ! is_writable( dirname( $wp_app_base_path ) ) ) {
-				$error_message .= sprintf(
+				$error_message = sprintf(
 					// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain, WordPress.WP.I18n.MissingTranslatorsComment
 					__( 'Folder <strong>%s</strong> must be writable, please make it 0777.', Enpii_Base_Helper::TEXT_DOMAIN ),
 					dirname( $wp_app_base_path )
 				);
+				if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
+					$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
+				}
 			}
 		}
 
-		if ( $error_message ) {
+		if ( enpii_base_wp_app_setup_failed() && ! Enpii_Base_Helper::at_setup_app_url() && ! Enpii_Base_Helper::at_admin_setup_app_url() ) {
+			$error_message = sprintf(
+				// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain, WordPress.WP.I18n.MissingTranslatorsComment
+				__( 'The setup has not been done correctly. Please go to this URL <a href="%1$s">%1$s</a> to complete the setup', Enpii_Base_Helper::TEXT_DOMAIN ),
+				Enpii_Base_Helper::get_admin_setup_app_uri( true )
+			);
+			if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
+				$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
+			}
+		}
+
+		if ( ! empty( $GLOBALS['wp_app_setup_errors'] ) ) {
 			add_action(
 				'admin_notices',
-				function () use ( $error_message ) {
-					?>
-					<div class="notice notice-error">
-						<p><?php echo wp_kses_post( $error_message ); ?></p>
-					</div>
-					<?php
+				function () {
+					$error_content = '';
+					foreach ( (array) $GLOBALS['wp_app_setup_errors'] as $error_message => $displayed ) {
+						if ( ! $displayed && $error_message ) {
+							$error_content .= '<p>' . $error_message . '</p>';
+							$GLOBALS['wp_app_setup_errors'][ $error_message ] = true;
+						}
+					}
+					if ( $error_content ) {
+						echo '<div class="notice notice-error">' . wp_kses_post( $error_content ) . '</div>';
+					}
 				}
 			);
 
-			return false;
+			return apply_filters( App_Const::FILTER_WP_APP_CHECK, false );
 		}
 
-		return true;
+		return apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
+	}
+}
+
+if ( ! function_exists( 'enpii_base_wp_app_setup_failed' ) ) {
+	/**
+	 * Check the mandatory prerequisites for the WP App
+	 * @return bool
+	 */
+	function enpii_base_wp_app_setup_failed(): bool {
+		return (string) get_option( App_Const::OPTION_SETUP_INFO ) === 'failed';
 	}
 }

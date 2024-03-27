@@ -5,7 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class AlterUsersTableAddRememberTokenColumn extends Migration {
-
 	/**
 	 * Run the migrations.
 	 *
@@ -16,7 +15,7 @@ class AlterUsersTableAddRememberTokenColumn extends Migration {
 			'users',
 			function ( Blueprint $table ) {
 				$table->dateTime( 'user_registered' )->nullable()->default( null )->change();
-				if ( ! Schema::hasColumn( 'users', 'remember_token')) {
+				if ( ! Schema::hasColumn( 'users', 'remember_token' ) ) {
 					$table->string( 'remember_token' )->nullable();
 				}
 			}
@@ -32,7 +31,7 @@ class AlterUsersTableAddRememberTokenColumn extends Migration {
 		Schema::table(
 			'users',
 			function ( Blueprint $table ) {
-				if ( Schema::hasColumn( 'users', 'remember_token')) {
+				if ( Schema::hasColumn( 'users', 'remember_token' ) ) {
 					$table->dropColumn( 'remember_token' );
 				}
 			}

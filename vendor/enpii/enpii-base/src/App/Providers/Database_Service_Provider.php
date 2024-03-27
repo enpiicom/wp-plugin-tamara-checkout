@@ -128,7 +128,7 @@ class Database_Service_Provider extends DatabaseServiceProvider {
 			| the migrations on disk haven't actually been run in the database.
 			|
 			*/
-			'migrations'  => 'migrations',
+			'migrations'  => 'wp_app_migrations',
 		];
 
 		return $config;

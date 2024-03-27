@@ -19,8 +19,9 @@ class Register_Base_WP_App_Routes {
 	public function handle(): void {
 		// For Frontend
 		Route::get( '/', [ Main_Controller::class, 'index' ] );
+		Route::get( 'setup-app', [ Main_Controller::class, 'setup_app' ] )->name( 'setup-app' );
 
-		// For Admin
+		// For Logged in User and redirect to login if not logged in
 		Route::group(
 			[
 				'prefix' => '/wp-admin',
@@ -30,17 +31,19 @@ class Register_Base_WP_App_Routes {
 			],
 			function () {
 				Route::get( '/', [ Admin_Main_Controller::class, 'home' ] );
-				Route::group(
-					[
-						'prefix' => '/admin',
-						'middleware' => [
-							'authenticate_is_wp_user_admin',
-						],
-					],
-					function () {
-						Route::get( 'setup-app', [ Admin_Main_Controller::class, 'setup_app' ] )->name( 'admin-setup-app' );
-					}
-				);
+			}
+		);
+
+		// For Admin, if not, throw 403
+		Route::group(
+			[
+				'prefix' => '/admin',
+				'middleware' => [
+					'authenticate_is_wp_user_admin',
+				],
+			],
+			function () {
+				Route::get( 'setup-app', [ Admin_Main_Controller::class, 'setup_app' ] )->name( 'admin-setup-app' );
 			}
 		);
 

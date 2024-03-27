@@ -111,7 +111,7 @@ class Queue_Service_Provider extends QueueServiceProvider {
 
 			'batching' => [
 				'database' => env( 'DB_CONNECTION', 'mysql' ),
-				'table' => 'job_batches',
+				'table' => 'wp_app_job_batches',
 			],
 
 			/*
@@ -128,7 +128,7 @@ class Queue_Service_Provider extends QueueServiceProvider {
 			'failed' => [
 				'driver' => env( 'QUEUE_FAILED_DRIVER', 'database-uuids' ),
 				'database' => env( 'DB_CONNECTION', 'mysql' ),
-				'table' => 'failed_jobs',
+				'table' => 'wp_app_failed_jobs',
 			],
 
 		];

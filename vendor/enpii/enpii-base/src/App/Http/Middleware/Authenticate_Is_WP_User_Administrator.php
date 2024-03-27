@@ -20,7 +20,7 @@ class Authenticate_Is_WP_User_Administrator {
 	public function handle( Request $request, Closure $next ): Response {
 		// phpcs:ignore WordPress.WP.Capabilities.RoleFound
 		if ( ! current_user_can( 'administrator' ) ) {
-			wp_app_abort( 403, 'Access Denied, Administrator Permission required to perform the setup!' );
+			wp_app_abort( 403, 'Access Denied! Administrator Permission required to perform the setup!' );
 		}
 
 		return $next( $request );

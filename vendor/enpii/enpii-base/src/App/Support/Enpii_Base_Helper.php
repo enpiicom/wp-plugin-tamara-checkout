@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Enpii_Base\App\Support;
 
 class Enpii_Base_Helper {
-	const VERSION_OPTION_FIELD = 'enpii_base_version';
 	const TEXT_DOMAIN = 'enpii';
 
 	public static function get_current_url(): string {
@@ -39,8 +38,16 @@ class Enpii_Base_Helper {
 		return $current_url;
 	}
 
-	public static function get_setup_app_uri(): string {
-		return 'wp-app/wp-admin/admin/setup-app?force_app_running_in_console=1';
+	public static function get_setup_app_uri( $full_url = false ): string {
+		$uri = 'wp-app/setup-app?force_app_running_in_console=1';
+
+		return $full_url ? home_url() . '/' . $uri : $uri;
+	}
+
+	public static function get_admin_setup_app_uri( $full_url = false ): string {
+		$uri = 'wp-app/admin/setup-app?force_app_running_in_console=1';
+
+		return $full_url ? home_url() . '/' . $uri : $uri;
 	}
 
 	public static function get_wp_login_url( $return_url = '', $force_reauth = false ): string {
@@ -54,6 +61,13 @@ class Enpii_Base_Helper {
 		return ( strpos( $current_url, $redirect_uri ) !== false );
 	}
 
+	public static function at_admin_setup_app_url(): bool {
+		$current_url = static::get_current_url();
+		$redirect_uri = static::get_admin_setup_app_uri();
+
+		return ( strpos( $current_url, $redirect_uri ) !== false );
+	}
+
 	public static function at_wp_login_url(): bool {
 		$current_url = static::get_current_url();
 		$login_url = wp_login_url();
@@ -63,7 +77,7 @@ class Enpii_Base_Helper {
 
 	public static function redirect_to_setup_url(): void {
 		$redirect_uri = static::get_setup_app_uri();
-		if ( ! static::at_setup_app_url() && ! static::at_wp_login_url() ) {
+		if ( ! static::at_setup_app_url() && ! static::at_admin_setup_app_url() ) {
 			$redirect_url = add_query_arg(
 				[
 					'return_url' => urlencode( static::get_current_url() ),
@@ -73,5 +87,11 @@ class Enpii_Base_Helper {
 			header( 'Location: ' . $redirect_url );
 			exit( 0 );
 		}
+	}
+
+	public static function get_base_url_path(): string {
+		$site_url_parts = wp_parse_url( site_url() );
+
+		return empty( $site_url_parts['path'] ) ? '' : $site_url_parts['path'];
 	}
 }

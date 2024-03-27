@@ -5,19 +5,20 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateJobsTable extends Migration {
-
 	/**
 	 * Run the migrations.
 	 *
 	 * @return void
 	 */
 	public function up() {
-		if ( ! Schema::hasTable('wp_app_jobs')) {
+		if ( ! Schema::hasTable( 'wp_app_jobs' ) ) {
 			Schema::create(
 				'wp_app_jobs',
 				function ( Blueprint $table ) {
+					$table->charset = defined( 'DB_CHARSET' ) && DB_CHARSET ? DB_CHARSET : 'utf8mb4';
+
 					$table->bigIncrements( 'id' );
-					$table->uuid('uuid')->nullable();
+					$table->uuid( 'uuid' )->nullable();
 					$table->string( 'queue' )->index();
 					$table->longText( 'payload' );
 					$table->unsignedTinyInteger( 'attempts' );

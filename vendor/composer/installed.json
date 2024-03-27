@@ -7,18 +7,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "a3b07e11e8d9f987025d2b65b661b1a6101fca2c"
+                "reference": "f63041b73181f0a93c22588854775bc98648b205"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/a3b07e11e8d9f987025d2b65b661b1a6101fca2c",
-                "reference": "a3b07e11e8d9f987025d2b65b661b1a6101fca2c",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/f63041b73181f0a93c22588854775bc98648b205",
+                "reference": "f63041b73181f0a93c22588854775bc98648b205",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.3|^8.0.0"
             },
-            "time": "2024-01-09T09:25:04+00:00",
+            "time": "2024-03-27T12:14:04+00:00",
             "type": "wordpress-muplugin",
             "extra": {
                 "exclude-from-files": [

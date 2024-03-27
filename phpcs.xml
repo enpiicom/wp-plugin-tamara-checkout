@@ -4,6 +4,8 @@
 
 	<file>src/</file>
 	<file>resources/views/</file>
+	<file>tamara-checkout.php</file>
+	<file>tamara-checkout-bootstrap.php</file>
 
 	<!-- Exclude Composer vendor directory. -->
 	<exclude-pattern>*/.git/*</exclude-pattern>
@@ -48,6 +50,14 @@
 
 	<!-- Disallow Yoda conditions. -->
 	<rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
+
+	<!-- Suppress no code rule. -->
+	<rule ref="Internal.NoCodeFound">
+		<severity>0</severity>
+	</rule>
+	<rule ref="Squiz.PHP.CommentedOutCode.Found">
+		<severity>0</severity>
+	</rule>
 
 	<!-- Check code for cross-version PHP compatibility. -->
 	<config name="testVersion" value="7.3-"/>
