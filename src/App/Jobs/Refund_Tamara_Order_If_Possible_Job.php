@@ -155,7 +155,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 			return false;
 		}
 
-		if ( $tamara_wc_order_refund->get_total_refund_amount() <= 0 ) {
+		if ( abs( $tamara_wc_order_refund->get_total_refund_amount() ) <= 0 ) {
 			return false;
 		}
 
