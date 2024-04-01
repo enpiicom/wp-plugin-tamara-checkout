@@ -90,6 +90,6 @@ class Tamara_WC_Order_Refund extends Tamara_WC_Order {
 	 * @return float
 	 */
 	public function get_total_refund_amount() {
-		return $this->wc_order_refund->get_total();
+		return (float) $this->wc_order_refund->get_total();
 	}
 }
