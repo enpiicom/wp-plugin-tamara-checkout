@@ -70,6 +70,19 @@ if ( ! function_exists( 'enpii_base_wp_app_get_base_path' ) ) {
 	}
 }
 
+if ( ! function_exists( 'enpii_base_wp_app_get_asset_url' ) ) {
+	function enpii_base_wp_app_get_asset_url( $full_url = false ) {
+		if ( defined( 'ENPII_BASE_WP_APP_ASSET_URL' ) && ENPII_BASE_WP_APP_ASSET_URL ) {
+			return ENPII_BASE_WP_APP_ASSET_URL;
+		}
+
+		$slug_to_wp_app = str_replace( ABSPATH, '', enpii_base_wp_app_get_base_path() );
+		$slug_to_public_asset = '/' . $slug_to_wp_app . '/public';
+
+		return $full_url ? trim( get_site_url(), '/' ) . $slug_to_public_asset : $slug_to_public_asset;
+	}
+}
+
 if ( ! function_exists( 'enpii_base_wp_app_web_page_title' ) ) {
 	function enpii_base_wp_app_web_page_title() {
 		$title = empty( wp_title( '', false ) ) ? get_bloginfo( 'name' ) . ' | ' . ( get_bloginfo( 'description' ) ? get_bloginfo( 'description' ) : 'WP App' ) : wp_title( '', false );
@@ -173,5 +186,39 @@ if ( ! function_exists( 'enpii_base_wp_app_setup_failed' ) ) {
 	 */
 	function enpii_base_wp_app_setup_failed(): bool {
 		return (string) get_option( App_Const::OPTION_SETUP_INFO ) === 'failed';
+	}
+}
+
+if ( ! function_exists( 'enpii_base_wp_app_get_timezone' ) ) {
+	/**
+	 * Get the correct timezone value for WP App (from WordPress and map to the date_default_timezone_set ids)
+	 * @return string
+	 */
+	function enpii_base_wp_app_get_timezone(): string {
+		$current_offset = (int) get_option( 'gmt_offset' );
+		$timezone_string = get_option( 'timezone_string' );
+
+		// Remove old Etc mappings. Fallback to gmt_offset.
+		if ( false !== strpos( $timezone_string, 'Etc/GMT' ) ) {
+			$timezone_string = '';
+		}
+
+		// Create Etc/GMT time zone id that match date_default_timezone_set function
+		//	https://www.php.net/manual/en/timezones.others.php
+		if ( empty( $timezone_string ) ) {
+			if ( 0 == $current_offset ) {
+				$timezone_string = 'Etc/GMT';
+			} elseif ( $current_offset < 0 ) {
+				$timezone_string = 'Etc/GMT+' . abs( $current_offset );
+			} else {
+				$timezone_string = 'Etc/GMT-' . abs( $current_offset );
+			}
+		}
+
+		if ( function_exists('wp_timezone') ) {
+			return false !== strpos( wp_timezone()->getName(), '/' ) ? wp_timezone()->getName() : $timezone_string;
+		}
+
+		return defined( 'WP_APP_TIMEZONE' ) ? WP_APP_TIMEZONE : $timezone_string;
 	}
 }

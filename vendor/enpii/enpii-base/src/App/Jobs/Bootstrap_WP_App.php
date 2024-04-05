@@ -16,6 +16,7 @@ class Bootstrap_WP_App {
 		/** @var \Enpii_Base\App\WP\WP_Application $wp_app  */
 		$wp_app = wp_app();
 		$wp_app['env'] = wp_app_config( 'app.env' );
+		$config = wp_app_config();
 
 		// As we may not use Contracts\Kernel::handle(), we need to call bootstrap method
 		//  to iinitialize all boostrappers
@@ -24,8 +25,16 @@ class Bootstrap_WP_App {
 		$http_kernel->capture_request();
 		$http_kernel->bootstrap();
 
-		/** @var \Enpii_Base\App\Console\Kernel $http_kernel */
+		/** @var \Enpii_Base\App\Console\Kernel $console_kernel */
 		$console_kernel = $wp_app->make( \Illuminate\Contracts\Console\Kernel::class );
 		$console_kernel->bootstrap();
+
+		// As we don't use the LoadConfiguration boostrapper, we need the below snippets
+		//	taken from Illuminate\Foundation\Bootstrap\LoadConfiguration
+        $wp_app->detectEnvironment( function () use ( $config ) {
+            return $config->get( 'app.env', 'production' );
+        } );
+        date_default_timezone_set( $config->get( 'app.timezone', 'UTC' ) );
+        mb_internal_encoding( 'UTF-8' );
 	}
 }
