@@ -114,8 +114,8 @@ JS_SCRIPT;
 
 	public function fetch_tamara_cart_widget( $data = [] ) {
 		extract( (array) $data );
-		$cart_contents_total = ! empty( WC()->cart ) ? WC()->cart->get_cart_contents_total() : 0;
-		$widget_amount = ! empty( $price ) ? $price : $cart_contents_total;
+		$cart_total = ! empty( WC()->cart ) ? WC()->cart->get_total( null ) : 0;
+		$widget_amount = ! empty( $price ) ? $price : $cart_total;
 		$widget_inline_type = 3;
 
 		if ( ! $widget_amount ) {
