@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'enpii/enpii-base',
-        'pretty_version' => 'dev-develop',
-        'version' => 'dev-develop',
-        'reference' => 'a3b07e11e8d9f987025d2b65b661b1a6101fca2c',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'f63041b73181f0a93c22588854775bc98648b205',
         'type' => 'wordpress-muplugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -101,9 +101,9 @@
             'dev_requirement' => false,
         ),
         'enpii/enpii-base' => array(
-            'pretty_version' => 'dev-develop',
-            'version' => 'dev-develop',
-            'reference' => 'a3b07e11e8d9f987025d2b65b661b1a6101fca2c',
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'f63041b73181f0a93c22588854775bc98648b205',
             'type' => 'wordpress-muplugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -638,7 +638,7 @@
         'symfony/cache-contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v2.5.2',
+                0 => 'v2.5.3',
             ),
         ),
         'symfony/console' => array(
@@ -651,9 +651,9 @@
             'dev_requirement' => false,
         ),
         'symfony/contracts' => array(
-            'pretty_version' => 'v2.5.2',
-            'version' => '2.5.2.0',
-            'reference' => 'd3da2932c17d3cc0d6cd167518cc63ab7b909f38',
+            'pretty_version' => 'v2.5.3',
+            'version' => '2.5.3.0',
+            'reference' => 'f1f0736d931758280fcebc91b0bfa1e69b5483db',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/contracts',
             'aliases' => array(),
@@ -671,13 +671,13 @@
         'symfony/deprecation-contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v2.5.2',
+                0 => 'v2.5.3',
             ),
         ),
         'symfony/error-handler' => array(
-            'pretty_version' => 'v5.4.36',
-            'version' => '5.4.36.0',
-            'reference' => '90b1d7799bfc1b3ed5f902e8b334eeb7dba537a1',
+            'pretty_version' => 'v5.4.38',
+            'version' => '5.4.38.0',
+            'reference' => '3c1fed45a12718e7e2758eef072677d01a0c91a4',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/error-handler',
             'aliases' => array(),
@@ -695,7 +695,7 @@
         'symfony/event-dispatcher-contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v2.5.2',
+                0 => 'v2.5.3',
             ),
         ),
         'symfony/event-dispatcher-implementation' => array(
@@ -716,31 +716,31 @@
         'symfony/http-client-contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v2.5.2',
+                0 => 'v2.5.3',
             ),
         ),
         'symfony/http-foundation' => array(
-            'pretty_version' => 'v5.4.35',
-            'version' => '5.4.35.0',
-            'reference' => 'f2ab692a22aef1cd54beb893aa0068bdfb093928',
+            'pretty_version' => 'v5.4.38',
+            'version' => '5.4.38.0',
+            'reference' => 'd8c13d35f68c69e15595fe37fa2c225d11c10f7e',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/http-foundation',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
         'symfony/http-kernel' => array(
-            'pretty_version' => 'v5.4.37',
-            'version' => '5.4.37.0',
-            'reference' => '4ef7ed872564852b3c6c15fecf492975a52cbff3',
+            'pretty_version' => 'v5.4.38',
+            'version' => '5.4.38.0',
+            'reference' => '21c32c7c6c32ea8d0f4b8e88a2607a2dc72799e5',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/http-kernel',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
         'symfony/mime' => array(
-            'pretty_version' => 'v5.4.35',
-            'version' => '5.4.35.0',
-            'reference' => 'ee94d9b538f93abbbc1ee4ccff374593117b04a9',
+            'pretty_version' => 'v5.4.38',
+            'version' => '5.4.38.0',
+            'reference' => '82fa6be8a0295a3932df871e88fc8c8d77aa71d4',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/mime',
             'aliases' => array(),
@@ -855,9 +855,9 @@
             'dev_requirement' => false,
         ),
         'symfony/routing' => array(
-            'pretty_version' => 'v5.4.37',
-            'version' => '5.4.37.0',
-            'reference' => '48ae43e443693ddb4e574f7c12f0d17ce287694e',
+            'pretty_version' => 'v5.4.38',
+            'version' => '5.4.38.0',
+            'reference' => 'f455f06d4ee7d354d9dcaf7d436532c1f388ee01',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/routing',
             'aliases' => array(),
@@ -866,7 +866,7 @@
         'symfony/service-contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v2.5.2',
+                0 => 'v2.5.3',
             ),
         ),
         'symfony/string' => array(
@@ -890,7 +890,7 @@
         'symfony/translation-contracts' => array(
             'dev_requirement' => false,
             'replaced' => array(
-                0 => 'v2.5.2',
+                0 => 'v2.5.3',
             ),
         ),
         'symfony/translation-implementation' => array(
@@ -900,9 +900,9 @@
             ),
         ),
         'symfony/var-dumper' => array(
-            'pretty_version' => 'v5.4.36',
-            'version' => '5.4.36.0',
-            'reference' => '2e9c2b11267119d9c90d6b3fdce5e4e9f15e2e90',
+            'pretty_version' => 'v5.4.38',
+            'version' => '5.4.38.0',
+            'reference' => 'ae1d949ccc57d3f6662e4256b47ac9fbfa9651ae',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/var-dumper',
             'aliases' => array(),

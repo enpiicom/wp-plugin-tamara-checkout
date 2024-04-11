@@ -5,7 +5,7 @@ $enpii_base_existed = defined( 'ENPII_BASE_PLUGIN_VERSION' );
 defined( 'DIR_SEP' ) || define( 'DIR_SEP', DIRECTORY_SEPARATOR );
 
 // Update these constants whenever you bump the version
-defined( 'ENPII_BASE_PLUGIN_VERSION' ) || define( 'ENPII_BASE_PLUGIN_VERSION', '0.5.0' );
+defined( 'ENPII_BASE_PLUGIN_VERSION' ) || define( 'ENPII_BASE_PLUGIN_VERSION', '0.6.0' );
 
 // We set the slug for the plugin here.
 // This slug will be used to identify the plugin instance from the WP_Applucation container

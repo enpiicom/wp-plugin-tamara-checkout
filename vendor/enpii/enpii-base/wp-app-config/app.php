@@ -12,7 +12,7 @@ return [
 	|
 	*/
 
-	'name' => defined( 'WP_APP_NAME' ) ? WP_APP_NAME : 'Enpii Base Web App',
+	'name' => defined( 'WP_APP_NAME' ) ? WP_APP_NAME : 'EnpiiBase Web App',
 
 	/**
 	|--------------------------------------------------------------------------

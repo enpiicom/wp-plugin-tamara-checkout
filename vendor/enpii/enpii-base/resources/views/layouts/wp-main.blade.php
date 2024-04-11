@@ -1,4 +1,6 @@
-<!doctype html>
+<?php
+do_action( 'get_header' );
+?><!doctype html>
 <html <?php language_attributes(); ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
@@ -6,6 +8,7 @@
 			content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 
 	<title>{{ enpii_base_wp_app_web_page_title() }}</title>
+	<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
@@ -29,6 +32,10 @@
 		.message-content { line-height: 1.5em; }
 		.message-content br { display: block; height: 0.8rem; content: ''; }
 	</style>
+	<?php wp_head(); ?>
+	<style type="text/css">
+		body { font-family: "Plus Jakarta Sans", sans-serif; }
+	</style>
 </head>
 
 <body>
@@ -38,8 +45,12 @@
 			<a href="https//enpii.com/wp-plugins/enpii-base/docs" target="_blank">Guides - Docs</a>
 		</div>
 	</div>
-	<main class="site-body">
+	<main class="site-body wp-block-group">
 		@yield('content')
 	</main>
+<?php
+do_action( 'get_footer' );
+wp_footer();
+?>
 </body>
 </html>

@@ -42,7 +42,7 @@ class View_Service_Provider extends ViewServiceProvider {
 	 */
 	protected function generate_view_storage_paths(): array {
 		// We want to use the child theme and the template as the main views paths
-		// then the fallback is the Enpii Base plugin views
+		// then the fallback is the EnpiiBase plugin views
 		return get_stylesheet_directory() === get_template_directory() ?
 			[
 				get_stylesheet_directory(),

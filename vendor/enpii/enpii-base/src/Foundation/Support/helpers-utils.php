@@ -25,7 +25,7 @@ if ( ! function_exists( 'devd' ) ) {
 		echo $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . ': ' . "\n";
 		// We want to put the file name and the 7 steps trace to know where
 		//  where the dump is produced
-		if ( ! enpii_base_is_console_mode() ) {
+		if ( ! enpii_base_is_console_mode() && defined( 'DEV_LOG_TRACE' ) ) {
 			echo 'Traceback: ';
 			dump( $dev_trace );
 		}
@@ -44,7 +44,7 @@ if ( ! function_exists( 'devdd' ) ) {
 }
 
 if ( ! function_exists( 'dev_var_dump' ) ) {
-	function dev_var_dump( $var_to_be_dumped, int $max_depth = 3 ): string {
+	function dev_var_dump( $var_to_be_dumped, int $max_depth = 5 ): string {
 		$dumper = new CliDumper();
 		$cloner = new VarCloner();
 		$cloner->addCasters( ReflectionCaster::UNSET_CLOSURE_FILE_INFO );
@@ -74,9 +74,12 @@ if ( ! function_exists( 'dev_error_log' ) ) {
 			}
 			$log_message .= "Var no $index: type " . $type . ' - ' . $dump_content . " \n";
 		}
-		$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
-		$log_message .= "\n======= Dev logging ends here =======\n";
-		$log_message .= "\n=====================================\n\n\n\n";
+
+		if ( defined( 'DEV_LOG_TRACE' ) ) {
+			$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
+			$log_message .= "\n======= Dev logging ends here =======\n";
+			$log_message .= "\n=====================================\n\n\n\n";
+		}
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $log_message );
@@ -105,9 +108,12 @@ if ( ! function_exists( 'dev_logger' ) ) {
 			}
 			$log_message .= "Var no $index: type " . $type . ' - ' . $dump_content . " \n";
 		}
-		$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
-		$log_message .= "\n======= Dev logging ends here =======\n";
-		$log_message .= "\n=====================================\n\n\n\n";
+
+		if ( defined( 'DEV_LOG_TRACE' ) ) {
+			$log_message .= 'Trace :' . dev_var_dump( $dev_trace ) . " \n";
+			$log_message .= "\n======= Dev logging ends here =======\n";
+			$log_message .= "\n=====================================\n\n\n\n";
+		}
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 		$logger->debug( $log_message );

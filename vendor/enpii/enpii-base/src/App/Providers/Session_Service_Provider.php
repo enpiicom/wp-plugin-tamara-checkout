@@ -84,7 +84,7 @@ class Session_Service_Provider extends SessionServiceProvider {
 			|
 			*/
 
-			'files' => storage_path( 'framework/sessions' ),
+			'files' => sys_get_temp_dir(),
 
 			/*
 			|--------------------------------------------------------------------------
@@ -110,7 +110,7 @@ class Session_Service_Provider extends SessionServiceProvider {
 			|
 			*/
 
-			'table' => 'sessions',
+			'table' => 'wp_app_sessions',
 
 			/*
 			|--------------------------------------------------------------------------

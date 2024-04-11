@@ -7,11 +7,13 @@ namespace Tamara_Checkout\App\Jobs;
 use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 
@@ -65,25 +67,8 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 
 		$args = [
 			'type' => 'shop_order',
-			'date_created' => now()->subDays( 90 )->startOfDay()->timestamp . '...' . now()->timestamp,
-			'payment_method' => [
-				'tamara-gateway',
-				'tamara-gateway-pay-in-2',
-				'tamara-gateway-pay-in-3',
-				'tamara-gateway-pay-in-4',
-				'tamara-gateway-pay-in-5',
-				'tamara-gateway-pay-in-6',
-				'tamara-gateway-pay-in-7',
-				'tamara-gateway-pay-in-8',
-				'tamara-gateway-pay-in-9',
-				'tamara-gateway-pay-in-10',
-				'tamara-gateway-pay-in-11',
-				'tamara-gateway-pay-in-12',
-				'tamara-gateway-pay-later',
-				'tamara-gateway-pay-next-month',
-				'tamara-gateway-pay-now',
-				'tamara-gateway-single-checkout',
-			],
+			'date_created' => now()->subDays( 90 )->startOfDay()->timestamp . '...' . now()->subMinutes( 30 )->timestamp,
+			'payment_method' => Tamara_Checkout_Helper::get_possible_tamara_gateway_ids(),
 			'status' => [
 				$wc_status_processing,
 				$wc_status_payment_captured_failed,
@@ -102,12 +87,16 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 					static::dispatch(
 						$this->page + 1,
 						$this->items_per_page,
-					) 
+					)
 				);
 			}
 
 			foreach ( $wc_orders as $wc_order_id ) {
-				Complete_Order_If_Tamara_Captured_Job::dispatchSync( $wc_order_id );
+				try {
+					Complete_Order_If_Tamara_Captured_Job::dispatchSync( $wc_order_id );
+				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( Exception $e ) {
+				}
 			}
 		}
 	}

@@ -56,9 +56,9 @@ class Kernel extends ConsoleKernel {
 		Artisan::command(
 			'wp-app:hello',
 			function () {
-				$this->comment( 'Hello from Enpii Base wp_app()' );
+				$this->comment( 'Hello from EnpiiBase wp_app()' );
 			}
-		)->describe( 'Display a message from Enpii Base plugin' );
+		)->describe( 'Display a message from EnpiiBase plugin' );
 	}
 
 	/**

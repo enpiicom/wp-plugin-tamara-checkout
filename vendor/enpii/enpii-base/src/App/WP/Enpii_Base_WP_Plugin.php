@@ -64,7 +64,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	public function get_name(): string {
-		return 'Enpii Base';
+		return 'EnpiiBase';
 	}
 
 	public function get_version(): string {
@@ -131,8 +131,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 		add_action( 'wp_logout', [ $this, 'logout_wp_app_user' ] );
 
 		add_action( 'admin_print_footer_scripts', [ $this, 'write_setup_wp_app_client_script' ] );
-		add_action( 'admin_print_footer_scripts', [ $this, 'write_web_worker_client_script' ] );
-		add_action( 'wp_footer', [ $this, 'write_web_worker_client_script' ] );
+		add_action( 'admin_print_footer_scripts', [ $this, 'write_web_worker_client_script' ], 10000 );
 
 		add_action( 'admin_head', [ $this, 'handle_admin_head' ] );
 

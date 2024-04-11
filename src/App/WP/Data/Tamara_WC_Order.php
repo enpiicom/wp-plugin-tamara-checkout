@@ -563,6 +563,10 @@ class Tamara_WC_Order {
 		return $tamara_address;
 	}
 
+	public function set_authorise_checked() {
+		update_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, 1 );
+	}
+
 	protected function build_tamara_order_item_from_object( WC_Order_Item_Product $wc_order_item, $currency, $item_id ): OrderItem {
 		$order_item = new OrderItem();
 		$wc_order_item_product = $wc_order_item->get_product();
