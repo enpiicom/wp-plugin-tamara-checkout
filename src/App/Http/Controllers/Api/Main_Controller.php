@@ -139,6 +139,8 @@ class Main_Controller extends Base_Controller {
 	}
 
 	public function solve_stuck_orders(): JsonResponse {
+		Authorise_Tamara_Stuck_Approved_Orders_Job::dispatchSync();
+		Capture_Tamara_Stuck_Authorised_Orders_Job::dispatchSync();
 		$this->enqueue_job( Authorise_Tamara_Stuck_Approved_Orders_Job::dispatch() );
 		$this->enqueue_job( Capture_Tamara_Stuck_Authorised_Orders_Job::dispatch() );
 

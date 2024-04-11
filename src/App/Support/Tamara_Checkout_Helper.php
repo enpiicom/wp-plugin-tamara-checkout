@@ -31,6 +31,8 @@ class Tamara_Checkout_Helper {
 	public const TAMARA_EVENT_TYPE_ORDER_CAPTURED = 'order_captured';
 	public const TAMARA_EVENT_TYPE_ORDER_REFUNDED = 'order_refunded';
 
+	public const POST_META_AUTHORISE_CHECKED = '_tamara_authorise_checked';
+
 	public static function check_mandatory_prerequisites(): bool {
 		return static::check_enpii_base_plugin() && static::check_woocommerce_plugin();
 	}
@@ -294,5 +296,30 @@ class Tamara_Checkout_Helper {
 	public static function is_tamara_checkout_settings_page() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && $_GET['page'] === 'wc-settings' && $_GET['tab'] === 'checkout' && $_GET['section'] === static::DEFAULT_TAMARA_GATEWAY_ID;
+	}
+
+	/**
+	 *
+	 * @return string[]
+	 */
+	public static function get_possible_tamara_gateway_ids() {
+		return [
+			'tamara-gateway',
+			'tamara-gateway-pay-in-2',
+			'tamara-gateway-pay-in-3',
+			'tamara-gateway-pay-in-4',
+			'tamara-gateway-pay-in-5',
+			'tamara-gateway-pay-in-6',
+			'tamara-gateway-pay-in-7',
+			'tamara-gateway-pay-in-8',
+			'tamara-gateway-pay-in-9',
+			'tamara-gateway-pay-in-10',
+			'tamara-gateway-pay-in-11',
+			'tamara-gateway-pay-in-12',
+			'tamara-gateway-pay-later',
+			'tamara-gateway-pay-next-month',
+			'tamara-gateway-pay-now',
+			'tamara-gateway-single-checkout',
+		];
 	}
 }

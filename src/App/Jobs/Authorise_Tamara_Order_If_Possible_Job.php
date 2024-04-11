@@ -23,6 +23,7 @@ use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
+use Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse;
 
 class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable;
@@ -94,13 +95,15 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$tamara_client_response = $this->tamara_client()->authorise_order( new AuthoriseOrderRequest( $this->tamara_order_id ) );
 
+		$this->tamara_wc_order->set_authorise_checked();
+
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO && $tamara_client_response->status_code !== 409 ) {
 			$this->process_failed_action();
 
 			return;
 		}
 
-		$this->process_successful_action();
+		$this->process_successful_action( $tamara_client_response );
 	}
 
 	/**
@@ -121,7 +124,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	/**
 	 * @throws \WC_Data_Exception
 	 */
-	protected function process_successful_action(): void {
+	protected function process_successful_action( AuthoriseOrderResponse $tamara_client_response ): void {
 		// We want to re-build a new Tamara_WC_Order here
 		//  to have refreshed meta data
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
@@ -171,7 +174,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			( $tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
 			$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED )
 		) {
-			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Error! Incorrect Order.' ) ) );
+			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Error! Incorrect Order. WC Order ID: ' . $this->wc_order_id . ', Tamara order Status: ' . $tamara_client_response->getStatus() ) ) );
 		}
 
 		$tamara_meta_dto = new WC_Order_Tamara_Meta_DTO();
