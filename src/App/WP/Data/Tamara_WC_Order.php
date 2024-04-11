@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use Exception;
 use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
-use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment_Query;
+use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
@@ -99,9 +99,8 @@ class Tamara_WC_Order {
 	public function get_tamara_order_id(): string {
 		$tamara_order_id = (string) $this->get_tamara_meta( 'tamara_order_id' );
 		if ( empty( $tamara_order_id ) ) {
-			$tamara_order = $this->get_tamara_order_by_reference_id();
-			$tamara_order_id = $tamara_order->getOrderId();
-			$this->update_tamara_meta( 'tamara_order_id', $tamara_order_id );
+			$this->reupdate_tamara_meta_from_remote();
+			$tamara_order_id = (string) $this->get_tamara_meta( 'tamara_order_id' );
 		}
 
 		return $tamara_order_id;
@@ -134,16 +133,15 @@ class Tamara_WC_Order {
 		$tamara_capture_id = $this->get_tamara_meta( 'tamara_capture_id' );
 
 		if ( empty( $tamara_capture_id ) ) {
-			$tamara_client_response = $this->get_tamara_order_by_reference_id();
-			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
-			$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
-			if ( ! empty( $capture_item ) ) {
-				$tamara_capture_id = $capture_item->getCaptureId();
-				$this->update_tamara_meta( 'tamara_capture_id', $tamara_capture_id );
-			}
+			$this->reupdate_tamara_meta_from_remote();
+			$tamara_capture_id = $this->get_tamara_meta( 'tamara_capture_id' );
 		}
 
 		return (string) $tamara_capture_id;
+	}
+
+	public function get_tamara_capture_amount(): string {
+		return (string) $this->get_tamara_meta( 'tamara_capture_amount' );
 	}
 
 	public function get_tamara_meta( $meta_key ) {
@@ -212,12 +210,36 @@ class Tamara_WC_Order {
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	public function reupdate_meta_for_tamara_order_id(): void {
-		$wc_order_id = $this->wc_order_id;
+	public function reupdate_tamara_meta_from_remote(): void {
 		$tamara_client_response = $this->get_tamara_order_by_reference_id();
-		if ( ! empty( $tamara_client_response ) ) {
-			update_post_meta( $wc_order_id, 'tamara_order_id', $tamara_client_response->getOrderId() );
-			update_post_meta( $wc_order_id, '_tamara_order_id', $tamara_client_response->getOrderId() );
+		if ( $tamara_client_response->isSuccess() ) {
+			$this->update_tamara_meta( 'tamara_order_id', $tamara_client_response->getOrderId() );
+			$this->update_tamara_meta( 'tamara_order_number', $tamara_client_response->getOrderNumber() );
+			$this->update_tamara_meta( 'tamara_payment_type', $tamara_client_response->getPaymentType() );
+			$this->update_tamara_meta( 'tamara_instalments', $tamara_client_response->getInstalments() );
+			$this->update_tamara_meta( 'tamara_payment_status', $tamara_client_response->getStatus() );
+
+			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CaptureItem $capture_item */
+			$capture_item = $tamara_client_response->getTransactions()->getCaptures()->getIterator()[0] ?? [];
+			if ( ! empty( $capture_item ) ) {
+				$this->update_tamara_meta( 'tamara_capture_id', $capture_item->getCaptureId() );
+				$this->update_tamara_meta( 'tamara_capture_amount', $capture_item->getTotalAmount()->getAmount() );
+			}
+
+			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\CancelItem $cancel_item */
+			$cancel_item = $tamara_client_response->getTransactions()->getCancels()->getIterator()[0] ?? [];
+			if ( ! empty( $cancel_item ) ) {
+				$this->update_tamara_meta( 'tamara_cancel_id', $cancel_item->getCancelId() );
+				$this->update_tamara_meta( 'tamara_cancel_amount', $cancel_item->getTotalAmount()->getAmount() );
+			}
+
+			/** @var \Tamara_Checkout\Deps\Tamara\Model\Order\RefundItem[] $refund_items */
+			$refund_items = $tamara_client_response->getTransactions()->getRefunds();
+			if ( ! empty( $refund_items ) ) {
+				foreach ( $refund_items as $refund_item ) {
+					$this->add_tamara_refund_meta( $refund_item->getRefundId(), $refund_item->getCaptureId() );
+				}
+			}
 		}
 	}
 
@@ -396,9 +418,7 @@ class Tamara_WC_Order {
 		$order->setShippingAddress( $this->build_tamara_shipping_address() );
 		$order->setConsumer( $this->build_tamara_consumer() );
 		$order->setRiskAssessment(
-			Build_Tamara_Order_Risk_Assessment_Query::execute_now(
-				$wc_order
-			)
+			Build_Tamara_Order_Risk_Assessment::execute_now( $wc_order )
 		);
 
 		$order->setItems( $this->build_tamara_order_items() );
@@ -541,6 +561,10 @@ class Tamara_WC_Order {
 		$tamara_address->setCountryCode( (string) $country );
 
 		return $tamara_address;
+	}
+
+	public function set_authorise_checked() {
+		update_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, 1 );
 	}
 
 	protected function build_tamara_order_item_from_object( WC_Order_Item_Product $wc_order_item, $currency, $item_id ): OrderItem {

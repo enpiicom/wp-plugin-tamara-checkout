@@ -1,0 +1,136 @@
+{
+  "name": "tamara/tamara-checkout",
+  "type": "wordpress-plugin",
+  "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "tamara",
+    "payment gateway",
+    "bnpl",
+    "mena",
+    "enpii",
+    "enpii-base",
+    "laravel",
+    "wordpress laravel"
+  ],
+  "authors": [
+    {
+      "name": "Tamara Team",
+      "email": "dev@tamara.co",
+      "homepage": "https://tamara.co"
+    },
+    {
+      "name": "Trac Nguyen",
+      "email": "npbtrac@yahoo.com",
+      "homepage": "https://github.com/npbtrac"
+    }
+  ],
+  "require": {
+    "enpii/enpii-base": "dev-wp-release",
+    "php": "^7.3|^8.0"
+  },
+  "require-dev": {
+    "johnpbloch/wordpress-core": "^6.1.0",
+    "wpackagist-plugin/query-monitor": "^3.15",
+    "wpackagist-plugin/woocommerce-product-price-based-on-countries": "^3.0.0",
+    "wpackagist-theme/storefront": "^4.0",
+    "wp-plugins/woocommerce": "*",
+    "codeception/codeception": "^5.0.0",
+    "codeception/module-asserts": "^3.0",
+    "codeception/module-phpbrowser": "^3.0",
+    "automattic/vipwpcs": "^3.0.0",
+    "phpcompatibility/php-compatibility": "^9.3.5"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "wp-plugins/woocommerce",
+        "version": "8.5.2",
+        "type": "wordpress-plugin",
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/woocommerce.8.5.2.zip"
+        }
+      }
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Tamara_Checkout\\": "src",
+      "Tamara_Checkout\\Deps\\": "src-deps",
+      "Tamara_Checkout\\Tests\\": "tests",
+      "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
+    }
+  },
+  "config": {
+    "platform-check": false,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
+    }
+  },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "Tamara_Checkout\\Deps\\",
+      "dep_directory": "/src-deps/",
+      "classmap_directory": "/src-classes/deps/",
+      "classmap_prefix": "TCO_",
+      "packages": [
+        "guzzlehttp/guzzle",
+        "firebase/php-jwt",
+        "tamara-solution/php-sdk"
+      ],
+      "delete_vendor_directories": true
+    },
+    "installer-paths": {
+      "vendor/enpii/enpii-base": [
+        "enpii/enpii-base"
+      ],
+      "dev-docker/wordpress/wp-content/mu-plugins/{$name}/": [
+        "type:wordpress-muplugin"
+      ],
+      "dev-docker/wordpress/wp-content/themes/{$name}/": [
+        "type:wordpress-theme"
+      ],
+      "dev-docker/wordpress/wp-content/plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ]
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "cp -r `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -vE 'wp-content$|composer.json$|wp-cli.yml$|README.md$|LICENSE.md$'` ./dev-docker/wordpress",
+      "rm -rf `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -vE 'license.txt|readme.html'`"
+    ],
+    "post-update-cmd": [
+      "cp -r `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -vE 'wp-content$|composer.json$|wp-cli.yml$|README.md$|LICENSE.md$'` ./dev-docker/wordpress",
+      "rm -rf `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -vE 'license.txt|readme.html'`"
+    ],
+    "dev-update": [
+      "cp -r `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -vE 'wp-content$|composer.json$|wp-cli.yml$|README.md$|LICENSE.md$'` ./dev-docker/wordpress",
+      "rm -rf `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -vE 'license.txt|readme.html'`"
+    ],
+    "phpcs": [
+      "./vendor/bin/phpcs"
+    ],
+    "phpunit": [
+      "./vendor/bin/phpunit"
+    ],
+    "test": [
+      "@phpcs",
+      "@codecept-run unit"
+    ]
+  }
+}

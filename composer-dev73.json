@@ -1,0 +1,133 @@
+{
+  "name": "tamara/tamara-checkout",
+  "type": "wordpress-plugin",
+  "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "tamara",
+    "payment gateway",
+    "bnpl",
+    "mena",
+    "enpii",
+    "enpii-base",
+    "laravel",
+    "wordpress laravel"
+  ],
+  "authors": [
+    {
+      "name": "Tamara Team",
+      "email": "dev@tamara.co",
+      "homepage": "https://tamara.co"
+    },
+    {
+      "name": "Trac Nguyen",
+      "email": "npbtrac@yahoo.com",
+      "homepage": "https://github.com/npbtrac"
+    }
+  ],
+  "require": {
+    "enpii/enpii-base": "dev-wp-release",
+    "php": "^7.3|^8.0"
+  },
+  "require-dev": {
+    "composer/installers": "~1.0",
+    "johnpbloch/wordpress-core": "~5.2.0",
+    "wpackagist-plugin/woocommerce-product-price-based-on-countries": "^3.0.0",
+    "wpackagist-plugin/query-monitor": "^2.15",
+    "wpackagist-theme/storefront": "^4.0",
+    "wp-plugins/woocommerce": "4.1.0"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "wp-plugins/woocommerce",
+        "version": "4.1.0",
+        "type": "wordpress-plugin",
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/woocommerce.4.1.0.zip"
+        }
+      }
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Tamara_Checkout\\": "src",
+      "Tamara_Checkout\\Deps\\": "src-deps",
+      "Tamara_Checkout\\Tests\\": "tests",
+      "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
+    }
+  },
+  "config": {
+    "platform-check": false,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
+    }
+  },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "Tamara_Checkout\\Deps\\",
+      "dep_directory": "/src-deps/",
+      "classmap_directory": "/src-classes/deps/",
+      "classmap_prefix": "TCO_",
+      "packages": [
+        "guzzlehttp/guzzle",
+        "firebase/php-jwt",
+        "tamara-solution/php-sdk"
+      ],
+      "delete_vendor_directories": true
+    },
+    "installer-paths": {
+      "vendor/enpii/enpii-base": [
+        "enpii/enpii-base"
+      ],
+      "dev-docker/wordpress/wp-content/mu-plugins/{$name}/": [
+        "type:wordpress-muplugin"
+      ],
+      "dev-docker/wordpress/wp-content/themes/{$name}/": [
+        "type:wordpress-theme"
+      ],
+      "dev-docker/wordpress/wp-content/plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ]
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "cp -r `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -v 'wp-content'` dev-docker/wordpress",
+      "rm -rf `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -v 'composer.json'`"
+    ],
+    "post-update-cmd": [
+      "cp -r `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -v 'wp-content'` dev-docker/wordpress",
+      "rm -rf `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -v 'composer.json'`"
+    ],
+    "dev-update": [
+      "@composer update --dev",
+      "cp -r `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -v 'wp-content'` dev-docker/wordpress",
+      "rm -rf `find ./vendor/johnpbloch/wordpress-core -maxdepth 1 -mindepth 1 | cut -c3- | grep -v 'composer.json'`"
+    ],
+    "phpcs": [
+      "./vendor/bin/phpcs"
+    ],
+    "phpunit": [
+      "./vendor/bin/phpunit"
+    ],
+    "test": [
+      "@phpcs",
+      "@codecept-run unit"
+    ]
+  }
+}

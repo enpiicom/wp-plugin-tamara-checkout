@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tamara_Checkout\App\Services;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
+use Tamara_Checkout\App\Queries\Get_Cart_Products;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
@@ -77,6 +78,34 @@ JS_SCRIPT;
 			return '';
 		}
 
+		// Todo: we need to find a way to refactor this and the snippet in
+		//  Tamara_Checkout_WP_Plugin::adjust_tamara_payment_types_on_checkout
+		$product_id = wc_get_product()->get_id();
+		$product_ids = [];
+		$product_category_ids = [];
+
+		if ( $product_id ) {
+			$product_ids[] = $product_id;
+			$product_category_ids = array_merge( $product_category_ids, wc_get_product_cat_ids( $product_id ) );
+		}
+
+		$product_valid = ( count(
+			array_intersect(
+				$product_ids,
+				$this->tamara_settings()->excluded_products
+			)
+		) < 1 );
+		$product_category_valid = ( count(
+			array_intersect(
+				$product_category_ids,
+				$this->tamara_settings()->excluded_product_categories
+			)
+		) < 1 );
+
+		if ( ! $product_valid || ! $product_category_valid ) {
+			return '';
+		}
+
 		return Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 			'blocks/tamara-widget',
 			compact( 'widget_inline_type', 'widget_amount' )
@@ -85,11 +114,32 @@ JS_SCRIPT;
 
 	public function fetch_tamara_cart_widget( $data = [] ) {
 		extract( (array) $data );
-		$cart_contents_total = ! empty( WC()->cart ) ? WC()->cart->get_cart_contents_total() : 0;
-		$widget_amount = ! empty( $price ) ? $price : $cart_contents_total;
+		$cart_total = ! empty( WC()->cart ) ? WC()->cart->get_total( null ) : 0;
+		$widget_amount = ! empty( $price ) ? $price : $cart_total;
 		$widget_inline_type = 3;
 
 		if ( ! $widget_amount ) {
+			return '';
+		}
+
+		// Todo: we need to find a way to refactor this and the snippet in
+		//  Tamara_Checkout_WP_Plugin::adjust_tamara_payment_types_on_checkout
+		list($cart_product_ids, $cart_product_category_ids) = Get_Cart_Products::execute_now();
+
+		$product_valid = ( count(
+			array_intersect(
+				$cart_product_ids,
+				$this->tamara_settings()->excluded_products
+			)
+		) < 1 );
+		$product_category_valid = ( count(
+			array_intersect(
+				$cart_product_category_ids,
+				$this->tamara_settings()->excluded_product_categories
+			)
+		) < 1 );
+
+		if ( ! $product_valid || ! $product_category_valid ) {
 			return '';
 		}
 
@@ -153,7 +203,7 @@ JS_SCRIPT;
 	 * @return string
 	 */
 	protected function get_view_and_pay_url(): string {
-		$base_url = $this->tamara_gateway()->get_settings()->is_live_mode ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
+		$base_url = $this->tamara_gateway()->get_settings_vo()->is_live_mode ? 'https://app.tamara.co/payments' : 'https://app-sandbox.tamara.co/payments';
 		$locale_suffix = Tamara_Checkout_Helper::get_current_language_code() === 'ar' ? '?locale=ar_SA' : '?locale=en_US';
 
 		return $base_url . $locale_suffix;
@@ -167,7 +217,7 @@ JS_SCRIPT;
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
 		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
-		if ( ! $this->tamara_gateway()->get_settings()->is_live_mode ) {
+		if ( ! $this->tamara_gateway()->get_settings_vo()->is_live_mode ) {
 			$description .= '<br/>' . $this->_t(
 				'SANDBOX ENABLED.
 							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide

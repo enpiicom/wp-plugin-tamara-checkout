@@ -31,16 +31,18 @@ class Tamara_Checkout_Helper {
 	public const TAMARA_EVENT_TYPE_ORDER_CAPTURED = 'order_captured';
 	public const TAMARA_EVENT_TYPE_ORDER_REFUNDED = 'order_refunded';
 
+	public const POST_META_AUTHORISE_CHECKED = '_tamara_authorise_checked';
+
 	public static function check_mandatory_prerequisites(): bool {
 		return static::check_enpii_base_plugin() && static::check_woocommerce_plugin();
 	}
 
 	public static function check_enpii_base_plugin(): bool {
-		return ! ! class_exists( \Enpii_Base\App\WP\WP_Application::class );
+		return (bool) class_exists( \Enpii_Base\App\WP\WP_Application::class );
 	}
 
 	public static function check_woocommerce_plugin(): bool {
-		return ! ! class_exists( \WooCommerce::class );
+		return (bool) class_exists( \WooCommerce::class );
 	}
 
 	/**
@@ -181,7 +183,7 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function is_tamara_admin_settings_screen(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return ! ! ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
+		return (bool) ( is_admin() && isset( $_GET['page'], $_GET['tab'], $_GET['section'] )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&& ( $_GET['page'] === 'wc-settings' )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -197,7 +199,7 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function is_shop_order_screen(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return ! ! ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
+		return (bool) ( is_admin() && isset( $_GET['post_type'] ) && ( $_GET['post_type'] === 'shop_order' ) );
 	}
 
 	/**
@@ -264,12 +266,16 @@ class Tamara_Checkout_Helper {
 	 * @return array
 	 */
 	public static function get_current_cart_info(): array {
+		if ( empty( WC()->customer ) ) {
+			return [];
+		}
+
 		$current_cart_total = ! empty( WC()->cart->total ) ? WC()->cart->total : 0;
 		$runtime_checkout_data = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_checkout_data_on_runtime();
 
 		$billing_customer_phone = ! empty( WC()->customer->get_billing_phone() ) ? WC()->customer->get_billing_phone() : '';
 		$cart_total = static::define_total_amount_to_calculate( $current_cart_total );
-		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ];
+		$country_mapping = static::get_currency_country_mappings()[ get_woocommerce_currency() ] ?? static::get_store_base_country_code();
 		$country_code = WC()->customer->get_shipping_country() ? WC()->customer->get_shipping_country() : $country_mapping;
 		$customer_phone = ! empty( $runtime_checkout_data['billing_phone'] ) ?
 			$runtime_checkout_data['billing_phone'] :
@@ -279,6 +285,41 @@ class Tamara_Checkout_Helper {
 			'cart_total' => $cart_total,
 			'customer_phone' => $customer_phone,
 			'country_code' => $country_code,
+		];
+	}
+
+	/**
+	 * Check if is Tamara Checkout settings page.
+	 *
+	 * @return bool
+	 */
+	public static function is_tamara_checkout_settings_page() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && $_GET['page'] === 'wc-settings' && $_GET['tab'] === 'checkout' && $_GET['section'] === static::DEFAULT_TAMARA_GATEWAY_ID;
+	}
+
+	/**
+	 *
+	 * @return string[]
+	 */
+	public static function get_possible_tamara_gateway_ids() {
+		return [
+			'tamara-gateway',
+			'tamara-gateway-pay-in-2',
+			'tamara-gateway-pay-in-3',
+			'tamara-gateway-pay-in-4',
+			'tamara-gateway-pay-in-5',
+			'tamara-gateway-pay-in-6',
+			'tamara-gateway-pay-in-7',
+			'tamara-gateway-pay-in-8',
+			'tamara-gateway-pay-in-9',
+			'tamara-gateway-pay-in-10',
+			'tamara-gateway-pay-in-11',
+			'tamara-gateway-pay-in-12',
+			'tamara-gateway-pay-later',
+			'tamara-gateway-pay-next-month',
+			'tamara-gateway-pay-now',
+			'tamara-gateway-single-checkout',
 		];
 	}
 }

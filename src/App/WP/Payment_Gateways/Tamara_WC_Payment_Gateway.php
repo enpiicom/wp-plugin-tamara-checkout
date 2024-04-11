@@ -6,7 +6,7 @@ namespace Tamara_Checkout\App\WP\Payment_Gateways;
 
 use Enpii_Base\Foundation\Shared\Traits\Static_Instance_Trait;
 use Tamara_Checkout\App\Jobs\Validate_Admin_Settings_Job;
-use Tamara_Checkout\App\Queries\Build_Payment_Gateway_Admin_Form_Fields_Query;
+use Tamara_Checkout\App\Queries\Build_Payment_Gateway_Admin_Form_Fields;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_WC_Payment_Gateway_Settings_VO;
@@ -33,10 +33,11 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	public const LIVE_API_URL = 'https://api.tamara.co';
 	public const SANDBOX_API_URL = 'https://api-sandbox.tamara.co';
 
-	public const PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS',
-				PAYMENT_TYPE_PAY_LATER = 'PAY_BY_LATER',
-				PAYMENT_TYPE_PAY_NOW = 'PAY_NOW',
-				PAYMENT_TYPE_PAY_NEXT_MONTH = 'PAY_NEXT_MONTH';
+	public const
+		PAYMENT_TYPE_PAY_BY_INSTALMENTS = 'PAY_BY_INSTALMENTS',
+		PAYMENT_TYPE_PAY_LATER = 'PAY_BY_LATER',
+		PAYMENT_TYPE_PAY_NOW = 'PAY_NOW',
+		PAYMENT_TYPE_PAY_NEXT_MONTH = 'PAY_NEXT_MONTH';
 
 	public $id = 'tamara-gateway';
 
@@ -58,8 +59,11 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		$this->method_title = $this->_t( 'Tamara Payment Method' );
 		$this->method_description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
 
-		$this->init_settings();
-		$this->init_form_fields();
+		if ( Tamara_Checkout_Helper::is_tamara_checkout_settings_page() ) {
+			// TODO: we need to find a good hook to init settings form fields
+			//  rather than init in the constructor like this
+			$this->init_form_fields();
+		}
 	}
 
 	/**
@@ -71,7 +75,7 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		return static::PAYMENT_TYPE_PAY_BY_INSTALMENTS;
 	}
 
-	public function get_settings( $refresh = false ): Tamara_WC_Payment_Gateway_Settings_VO {
+	public function get_settings_vo( $refresh = false ): Tamara_WC_Payment_Gateway_Settings_VO {
 		// We need to re-pull settings from db if $refesh enabled
 		if ( $refresh || empty( $this->settings ) ) {
 			$this->init_settings();
@@ -81,18 +85,15 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 		}
 
 		// We want to init the Settings Value Object if value not set
-		$this->settings_vo = empty( $this->settings_vo ) ? new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings ) : $this->settings_vo;
-
-		return $this->settings_vo;
+		return empty( $this->settings_vo ) ? new Tamara_WC_Payment_Gateway_Settings_VO( $this->settings ) : $this->settings_vo;
 	}
 
 	/**
 	 * Init admin form fields
 	 */
-	public function init_form_fields(): void {
-		$form_fields = Build_Payment_Gateway_Admin_Form_Fields_Query::execute_now( $this->settings );
-
-		$this->form_fields = $form_fields;
+	public function init_form_fields() {
+		$this->init_settings();
+		$this->form_fields = Build_Payment_Gateway_Admin_Form_Fields::execute_now( $this->settings );
 	}
 
 	/**
@@ -106,16 +107,20 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 *
 	 * @return void
 	 */
-	public function process_admin_options(): void {
+	public function process_admin_options() {
 		Validate_Admin_Settings_Job::dispatchSync();
-		$saved = parent::process_admin_options();
-		if ( $saved ) {
-			if ( $this->get_option( 'custom_log_message_enabled' ) && empty( $this->update_option( 'custom_log_message' ) ) ) {
+		parent::process_admin_options();
+		if ( $this->get_option( 'custom_log_message_enabled' ) === 'yes' ) {
+			if ( empty( $this->get_option( 'custom_log_message' ) ) ) {
 				$this->update_option( 'custom_log_message', wp_app_storage_path( 'logs/tamara-custom' . uniqid() . '.log' ) );
-			} else {
-				$this->update_option( 'custom_log_message', '' );
 			}
+		} elseif ( ! empty( $this->get_option( 'custom_log_message' ) ) ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_unlink
+			@unlink( $this->get_option( 'custom_log_message' ) );
+			$this->update_option( 'custom_log_message', '' );
 		}
+
+		$this->init_form_fields();
 	}
 
 	/**

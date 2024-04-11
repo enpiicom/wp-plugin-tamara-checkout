@@ -1,8 +1,66 @@
-### Update `wp-release` branch
+# Development Guides
+
+## Basic guides
+- Generate Block theme blocks (e.g. Payment options block...)
+```
+yarn build-blocks
+```
+
+## Use the docker to deploy the project locally
+
+### Using PHP 7.3 docker
+- Copy the environments and adjust the values to match your local
+```
+cp .env.example .env
+```
+- Install need dev stuff for PHP 7.3
+```
+XDEBUG_MODE=off COMPOSER=composer-dev73.json composer73 install
+```
+or if you don't have PHP 7.3 locally
+```
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev73.json -v $PWD:/app npbtrac/php73_cli composer install
+```
+- Start the docker
+```
+docker-compose up -d wordpress73
+```
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}73
+
+### Using PHP 8.1 docker
+- Copy the environments and adjust the values to match your local
+```
+cp .env.example .env
+```
+- Install need dev stuff for PHP 8.1
+```
+XDEBUG_MODE=off COMPOSER=composer-dev81.json composer81 install
+```
+or if you don't have PHP 8.0 locally
+```
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev81.json -v $PWD:/app npbtrac/php81_cli composer install
+```
+- Start the docker
+```
+docker-compose up -d wordpress81
+```
+- Check the website at http://127.0.0.1:${HTTP_EXPOSING_PORT_PREFIX}81
+
+### Troubleshooting
+- If you see the errors, try to do:
+```
+docker compose exec wordpress81 wp --allow-root enpii-base prepare
+```
+or without the root
+```
+docker compose exec wordpress81 --user=webuser wp enpii-base artisan wp-app:setup
+```
+
+## Update `wp-release` branch
 - Use the following commands
   - Remove vendors
   ```
-  rm -rf vendor
+  rm -rf vendor public-assets resources src src-deps
   ```
   - Update needed files from the main branches
   ```
@@ -28,18 +86,23 @@
   - Remove require stuff in composer.json
   - The add and commit everything
 
-### Codestyling (PHPCS)
+## Codestyling (PHPCS)
+Install/update dependencies (you should use PHP 8.0+)
+```
+composer install
+```
+
 - Fix all possible phpcs issues
 ```
-php74 ./vendor/bin/phpcbf
+php ./vendor/bin/phpcbf
 ```
 - Fix possible phpcs issues on a specified folder
 ```
-php74 ./vendor/bin/phpcbf <path/to/the/folder>
+php ./vendor/bin/phpcbf <path/to/the/folder>
 ```
 - Find all the phpcs issues
 ```
-php74 ./vendor/bin/phpcs
+php ./vendor/bin/phpcs
 ```
 - Suppress one or multible phpcs rules for the next below line
 ```
@@ -58,8 +121,13 @@ $foo = 'bar';
 // phpcs:enable
 ```
 
-### Running Unit Test
-We must run the composer and codecept run test using PHP 8.0 (considering `php80` is the alias to your PHP 8.0 executable file)
+## Running Unit Test
+Install/update dependencies (you should use PHP 8.0+)
+```
+composer install
+```
+
+We must run the composer and codecept run test using PHP 8.0+ (considering `php80` is the alias to your PHP 8.0 executable file)
 
 If you don't have PHP 8.0 locally, you can use the docker:
 ```
@@ -86,7 +154,7 @@ php80 ./vendor/bin/phpunit --verbose tests/unit/App/Support/Tamara_Checkout_Help
 php80 ./vendor/bin/codecept run unit
 ```
 
-#### Using Coverage report
+### Using Coverage report
 - Run Unit Test with Codeception (with coverage report)
 ```
 XDEBUG_MODE=coverage php80 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html unit

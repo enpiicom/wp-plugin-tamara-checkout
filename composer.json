@@ -1,71 +1,62 @@
 {
-    "name": "tamara/tamara-checkout",
-    "type": "wordpress-plugin",
-    "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
-    "license": "MIT",
-    "keywords": [
-      "wordpress",
-      "tamara",
-      "payment gateway",
-      "bnpl",
-      "mena",
-      "enpii",
-      "enpii-base",
-      "laravel",
-      "wordpress laravel"
-    ],
-    "authors": [
-      {
-        "name": "Tamara Team",
-        "email": "dev@tamara.co",
-        "homepage": "https://tamara.co"
-      },
-      {
-        "name": "Trac Nguyen",
-        "email": "npbtrac@yahoo.com",
-        "homepage": "https://github.com/npbtrac"
-      }
-    ],
-    "require": {
-      "enpii/enpii-base": "dev-wp-release",
-      "php": "^7.3|^8.0"
+  "name": "tamara/tamara-checkout",
+  "type": "wordpress-plugin",
+  "description": "The WordPress plugin for Tamara payment gateway http://tamara.co. Based on Enpii Base plugin",
+  "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "tamara",
+    "payment gateway",
+    "bnpl",
+    "mena",
+    "enpii",
+    "enpii-base",
+    "laravel",
+    "wordpress laravel"
+  ],
+  "authors": [
+    {
+      "name": "Tamara Team",
+      "email": "dev@tamara.co",
+      "homepage": "https://tamara.co"
     },
-    "replace": {
-      "symfony/http-foundation": "^5.0.0",
-      "symfony/deprecation-contracts": "^2.5.0",
-      "symfony/contracts": "^2.5.0",
-      "symfony/options-resolver": "^5.4.0",
-      "symfony/error-handler": "^4.4.0",
-      "psr/log": "^1.1.4",
-      "psr/cache": "^1.0.1",
-      "psr/container": "1.1.0",
-      "symfony/string": "^5.4"
-    },
-    "require-dev": {
-      "10up/wp_mock": "~0.5.0|^1.0.0",
-      "automattic/vipwpcs": "^3.0.0",
-      "symfony/console": "^5.4.0",
-      "codeception/codeception": "^5.0.0",
-      "codeception/module-asserts": "^3.0",
-      "phpcompatibility/php-compatibility": "^9.3.5",
-        "codeception/module-phpbrowser": "^3.0"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "autoload": {
-      "psr-4": {
-        "Tamara_Checkout\\": "src",
-        "Tamara_Checkout\\Deps\\": "src-deps",
-        "Tamara_Checkout\\Tests\\": "tests",
-        "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
-      }
-    },
-    "config": {
-      "platform-check": false,
-      "allow-plugins": {
-        "dealerdirect/phpcodesniffer-composer-installer": true
-      }
-    },
+    {
+      "name": "Trac Nguyen",
+      "email": "npbtrac@yahoo.com",
+      "homepage": "https://github.com/npbtrac"
+    }
+  ],
+  "require": {
+    "php": "^7.3|^8.0"
+  },
+  "require-dev": {
+    "10up/wp_mock": "^1.0.0",
+    "automattic/vipwpcs": "^3.0.0",
+    "symfony/console": "^5.4.0|^6.0.0",
+    "codeception/codeception": "^5.0.0",
+    "codeception/module-asserts": "^3.0",
+    "codeception/module-phpbrowser": "^3.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+    "phpcompatibility/php-compatibility": "^9.3.5"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Tamara_Checkout\\": "src",
+      "Tamara_Checkout\\Deps\\": "src-deps",
+      "Tamara_Checkout\\Tests\\": "tests",
+      "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
+    }
+  },
+  "config": {
+    "platform-check": false,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true,
+      "mcaskill/composer-exclude-files": true
+    }
+  },
   "extra": {
     "mozart": {
       "dep_namespace": "Tamara_Checkout\\Deps\\",
