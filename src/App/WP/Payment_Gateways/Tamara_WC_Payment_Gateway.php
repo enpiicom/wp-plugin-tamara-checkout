@@ -54,10 +54,10 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * @throws \Illuminate\Contracts\Container\BindingResolutionException
 	 */
 	public function __construct() {
-		$this->title = $this->_t( 'Tamara - Buy Now Pay Later' );
-		$this->description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
-		$this->method_title = $this->_t( 'Tamara Payment Method' );
-		$this->method_description = $this->_t( 'Buy Now Pay Later, no hidden fees, with Tamara' );
+		$this->title = $this->__( 'Tamara - Buy Now Pay Later' );
+		$this->description = $this->__( 'Buy Now Pay Later, no hidden fees, with Tamara' );
+		$this->method_title = $this->__( 'Tamara Payment Method' );
+		$this->method_description = $this->__( 'Buy Now Pay Later, no hidden fees, with Tamara' );
 
 		if ( Tamara_Checkout_Helper::is_tamara_checkout_settings_page() ) {
 			// TODO: we need to find a good hook to init settings form fields

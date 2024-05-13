@@ -58,7 +58,7 @@ class Tamara_WC_Order {
 	 */
 	public function __construct( WC_Order $wc_order ) {
 		if ( empty( $wc_order->get_id() ) ) {
-			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Invalid WC_Order' ) ) );
+			throw new Tamara_Exception( wp_kses_post( $this->__( 'Invalid WC_Order' ) ) );
 		}
 
 		$this->wc_order = $wc_order;
@@ -457,7 +457,7 @@ class Tamara_WC_Order {
 		$wc_billing_address = $wc_order->get_address( 'billing' );
 
 		if ( empty( $wc_billing_address['email'] ) || empty( $wc_billing_address['phone'] ) ) {
-			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Phone and Email are mandatory when checking out with Tamara' ) ) );
+			throw new Tamara_Exception( wp_kses_post( $this->__( 'Phone and Email are mandatory when checking out with Tamara' ) ) );
 		}
 
 		$first_name = ! empty( $wc_billing_address['first_name'] ) ? $wc_billing_address['first_name'] : 'N/A';

@@ -224,10 +224,10 @@ class Tamara_Client {
 			$api_response = $this->api_client->$remote_action( $client_request );
 			$this->log_message( sprintf( 'Tamara API response: %s', dev_var_dump( $api_response ) ) );
 		} catch ( RequestDispatcherException $tamara_request_dispatcher_exception ) {
-			$error_message = $this->_t( $tamara_request_dispatcher_exception->getMessage() );
+			$error_message = $this->__( $tamara_request_dispatcher_exception->getMessage() );
 			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump( $tamara_request_dispatcher_exception ) ), 'error' );
 		} catch ( Exception $tamara_checkout_exception ) {
-			$error_message = $this->_t( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->_t( $tamara_checkout_exception->getMessage() );
+			$error_message = $this->__( 'Tamara Service unavailable! Please try again later.' ) . "<br />\n" . $this->__( $tamara_checkout_exception->getMessage() );
 			$this->log_message( sprintf( 'Tamara API error: %s', dev_var_dump( $tamara_checkout_exception ) ), 'error' );
 		}
 

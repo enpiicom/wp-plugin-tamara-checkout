@@ -105,7 +105,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 		$tamara_wc_order->add_tamara_order_note(
 			sprintf(
-				$this->_t( 'Order fully captured successfully. Capture Id: %s, Captured Amount %s.' ),
+				$this->__( 'Order fully captured successfully. Capture Id: %s, Captured Amount %s.' ),
 				$capture_id,
 				$this->tamara_capture_request->getCapture()->getTotalAmount()->getAmount()
 			)
@@ -135,10 +135,10 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 		$tamara_wc_order = $this->tamara_wc_order;
 
-		$error_message = $this->_t( 'Error when trying to capture order with Tamara.' );
+		$error_message = $this->__( 'Error when trying to capture order with Tamara.' );
 		$error_message .= "\n";
 		$error_message .= sprintf(
-			$this->_t( 'Error with Tamara API: %s' ),
+			$this->__( 'Error with Tamara API: %s' ),
 			$tamara_api_error->error_message
 		);
 		$tamara_wc_order->get_wc_order()->add_order_note( $error_message );

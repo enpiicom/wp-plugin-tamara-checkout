@@ -97,7 +97,7 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		$cancel_id = $tamara_client_response->getCancelId();
 		if ( $cancel_id ) {
 			$tamara_wc_order->update_tamara_meta( 'tamara_cancel_id', $cancel_id );
-			$order_note = sprintf( $this->_t( 'Order cancelled successfully. Cancel Id: %s.' ), $cancel_id );
+			$order_note = sprintf( $this->__( 'Order cancelled successfully. Cancel Id: %s.' ), $cancel_id );
 			$tamara_wc_order->add_tamara_order_note( $order_note );
 		}
 	}
@@ -111,10 +111,10 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
 		$tamara_wc_order = $this->tamara_wc_order;
 
-		$error_message = $this->_t( 'Error when trying to cancel order with Tamara.' );
+		$error_message = $this->__( 'Error when trying to cancel order with Tamara.' );
 		$error_message .= "\n";
 		$error_message .= sprintf(
-			$this->_t( 'Error with Tamara API: %s' ),
+			$this->__( 'Error with Tamara API: %s' ),
 			$tamara_api_error->error_message
 		);
 		$tamara_wc_order->add_tamara_order_note( $error_message );

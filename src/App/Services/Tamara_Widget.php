@@ -216,9 +216,9 @@ JS_SCRIPT;
 	 * @throws \Exception
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
-		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
+		$description = $this->__( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
 		if ( ! $this->tamara_gateway()->get_settings_vo()->is_live_mode ) {
-			$description .= '<br/>' . $this->_t(
+			$description .= '<br/>' . $this->__(
 				'SANDBOX ENABLED.
 							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide
 							</a> for more details.'

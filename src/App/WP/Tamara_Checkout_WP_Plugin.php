@@ -27,6 +27,7 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
@@ -38,6 +39,7 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Queue_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $checkout_data_on_runtime = [];
 
@@ -415,7 +417,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws Exception
 	 */
 	public function add_plugin_settings_link( $plugin_links ) {
-		$settings_link = '<a href="' . Tamara_Checkout_Helper::get_admin_settings_section_url() . '">' . $this->_t( 'Settings' ) . '</a>';
+		$settings_link = '<a href="' . Tamara_Checkout_Helper::get_admin_settings_section_url() . '">' . $this->__( 'Settings' ) . '</a>';
 		array_unshift( $plugin_links, $settings_link );
 
 		return $plugin_links;

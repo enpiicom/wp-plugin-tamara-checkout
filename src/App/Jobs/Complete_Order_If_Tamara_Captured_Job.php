@@ -63,7 +63,7 @@ class Complete_Order_If_Tamara_Captured_Job extends Base_Job implements ShouldQu
 
 		$tamara_wc_order->add_tamara_order_note(
 			sprintf(
-				$this->_t( 'Update order status because the order is captured on Tamara. Capture Id: %s, Captured Amount %s.' ),
+				$this->__( 'Update order status because the order is captured on Tamara. Capture Id: %s, Captured Amount %s.' ),
 				$tamara_capture_id,
 				$tamara_capture_amount
 			)
