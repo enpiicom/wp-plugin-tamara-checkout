@@ -148,12 +148,10 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 	 * Enqueue tamara general scripts in admin
 	 */
 	public function enqueue_admin_scripts(): void {
-		$js_url_handle_id = 'tamara-checkout-admin';
-
 		// Only enqueue the setting scripts on the Tamara Checkout settings screen and shop order screen.
 		if ( Tamara_Checkout_Helper::is_tamara_admin_settings_screen() ) {
 			wp_enqueue_script(
-				$js_url_handle_id,
+				'tamara-checkout-admin',
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/dist/js/admin.js',
 				[ 'jquery' ],
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version(),
@@ -161,7 +159,14 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 			);
 
 			wp_enqueue_style(
-				$js_url_handle_id,
+				'tamara-checkout-fontawesome-free',
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/fonts/fontawesome-free/css/all.min.css',
+				[],
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()
+			);
+
+			wp_enqueue_style(
+				'tamara-checkout-admin',
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/dist/css/admin.css',
 				[],
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()
@@ -169,7 +174,14 @@ class Tamara_WC_Payment_Gateway extends WC_Payment_Gateway implements Tamara_Pay
 
 		} elseif ( Tamara_Checkout_Helper::is_shop_order_screen() ) {
 			wp_enqueue_style(
-				$js_url_handle_id,
+				'tamara-checkout-fontawesome-free',
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/fonts/fontawesome-free/css/all.min.css',
+				[],
+				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()
+			);
+
+			wp_enqueue_style(
+				'tamara-checkout-admin',
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_base_url() . 'public-assets/dist/css/admin.css',
 				[],
 				Tamara_Checkout_WP_Plugin::wp_app_instance()->get_version()

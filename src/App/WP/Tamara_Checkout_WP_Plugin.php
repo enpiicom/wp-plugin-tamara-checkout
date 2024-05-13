@@ -45,6 +45,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function manipulate_hooks(): void {
 		add_action( 'init', [ $this, 'register_tamara_custom_order_statuses' ] );
+		add_action( 'init', [ $this, 'load_text_domain' ] );
 
 		/** For WooCommerce */
 		// Add more payment gateways
@@ -622,6 +623,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			);
 		}
 	}
+
+	/**
+     * Localize the plugin
+     */
+    public function load_text_domain()
+    {
+        $locale = determine_locale();
+        $mofile = $locale.'.mo';
+		$text_domain = 'tamara';
+        load_textdomain( $text_domain, $this->get_base_path() . '/languages/' . $text_domain . '-' . $mofile);
+    }
 
 	/**
 	 * We want to register all services with this plugin here
