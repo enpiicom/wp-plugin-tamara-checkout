@@ -362,35 +362,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * Translate a text with gettext context using the plugin's text domain
-	 *
-	 * @param mixed $untranslated_text Text to be translated
-	 *
-	 * @return string Translated tet
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _x( $untranslated_text, $context ): string {
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralContext, WordPress.WP.I18n.NonSingularStringLiteralDomain
-		return _x( $untranslated_text, $context, $this->get_text_domain() );
-	}
-
-	/**
-	 *
-	 * Registers plural strings in POT file using the plugin's text domain, but does not translate them
-	 *
-	 * @param  string  $singular
-	 * @param  string  $plural
-	 *
-	 * @return array
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _n_noop( string $singular, string $plural ): array {
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralSingular, WordPress.WP.I18n.NonSingularStringLiteralPlural, WordPress.WP.I18n.NonSingularStringLiteralDomain
-		return _n_noop( $singular, $plural, $this->get_text_domain() );
-	}
-
-	/**
 	 * Register Tamara new statuses
 	 *
 	 * @throws \Exception

@@ -1,8 +1,8 @@
 === Tamara Checkout ===
 Contributors: tamarasolution, npbtrac, kimloile
 Tags: tamara, tamara-checkout, tamara-payment, e-commerce, store, sales, sell, woo, shop, cart, checkout, payments, woocommerce
-Requires at least: 5.0
-Tested up to: 6.4.1
+Requires at least: 5.4
+Tested up to: 6.5.5
 Requires PHP: 7.3+
 Stable tag: 2.0.0
 License: GPLv2 or later
