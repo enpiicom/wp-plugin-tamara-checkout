@@ -16,8 +16,6 @@ tests
 /dev-*
 
 # package management
-/vendor
-/vendor-*
 /node_modules
 
 # zip files
@@ -71,6 +69,3 @@ config.codekit
 
 #robot file
 /robots.txt
-
-# public assets bundled
-/public-assets/dist/*
