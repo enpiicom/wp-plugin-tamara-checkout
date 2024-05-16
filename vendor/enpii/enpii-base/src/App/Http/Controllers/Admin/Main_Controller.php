@@ -14,8 +14,12 @@ use Illuminate\Support\Facades\Auth;
 
 class Main_Controller extends Base_Controller {
 	public function home() {
-		$user = Auth::user();
-		return sprintf( 'Logged in use is here, username %s, user ID %s', $user->ID, $user->user_login );
+		return Enpii_Base_WP_Plugin::wp_app_instance()->view(
+			'main/index',
+			[
+				'message' => sprintf( 'Logged-in user is here, username %s, user ID %s', Auth::user()->ID, Auth::user()->user_login ),
+			]
+		);
 	}
 
 	/**

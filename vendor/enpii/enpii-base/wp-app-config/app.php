@@ -12,7 +12,7 @@ return [
 	|
 	*/
 
-	'name' => defined( 'WP_APP_NAME' ) ? WP_APP_NAME : 'EnpiiBase Web App',
+	'name' => defined( 'WP_APP_NAME' ) ? WP_APP_NAME : 'Enpii Base Web App',
 
 	/**
 	|--------------------------------------------------------------------------
@@ -38,7 +38,7 @@ return [
 	|
 	*/
 
-	'debug' => defined( 'WP_DEBUG' ) ? WP_DEBUG : false,
+	'debug' => defined( 'WP_DEBUG' ) ? (bool) WP_DEBUG : false,
 
 	/**
 	|--------------------------------------------------------------------------

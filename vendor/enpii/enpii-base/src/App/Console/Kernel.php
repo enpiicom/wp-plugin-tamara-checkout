@@ -6,11 +6,14 @@ namespace Enpii_Base\App\Console;
 
 use Enpii_Base\App\Console\Commands\WP_App_Setup_Command;
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Traits\Enpii_Base_Trans_Trait;
+use Enpii_Base\App\WP\Enpii_Base_WP_Plugin;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Artisan;
 
 class Kernel extends ConsoleKernel {
+	use Enpii_Base_Trans_Trait;
 
 	/**
 	 * The bootstrap classes for the application.
@@ -53,12 +56,21 @@ class Kernel extends ConsoleKernel {
 	 * @return void
 	 */
 	protected function commands() {
+		$enpii_base_plugin = Enpii_Base_WP_Plugin::wp_app_instance();
 		Artisan::command(
 			'wp-app:hello',
-			function () {
-				$this->comment( 'Hello from EnpiiBase wp_app()' );
+			function () use ( $enpii_base_plugin ) {
+				/** @var \Illuminate\Foundation\Console\ClosureCommand $this */
+				$start_time = microtime( true );
+				for ( $i = 0; $i < 500000; $i++ ) {
+					$message = $enpii_base_plugin->__( 'Hello from Enpii Base wp_app()' );
+					// $message = __( 'Hello from Enpii Base wp_app()' );
+				}
+				$end_time = microtime( true );
+				$this->comment( $message );
+				$this->info( $end_time - $start_time );
 			}
-		)->describe( 'Display a message from EnpiiBase plugin' );
+		)->describe( 'Display a message from Enpii Base plugin' );
 	}
 
 	/**

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\Http\Controllers\Api;
 
-use Enpii_Base\App\Models\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Enpii_Base\Foundation\Http\Base_Controller;
 use Illuminate\Http\Request;

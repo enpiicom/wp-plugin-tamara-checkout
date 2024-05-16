@@ -7,18 +7,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "0930db89396d05764f72fe33182aff26a333243f"
+                "reference": "21e75b02e76d0b182dadd81eb0c63638f0685236"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/0930db89396d05764f72fe33182aff26a333243f",
-                "reference": "0930db89396d05764f72fe33182aff26a333243f",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/21e75b02e76d0b182dadd81eb0c63638f0685236",
+                "reference": "21e75b02e76d0b182dadd81eb0c63638f0685236",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.3|^8.0.0"
             },
-            "time": "2024-04-11T15:14:04+00:00",
+            "time": "2024-05-16T15:14:04+00:00",
             "type": "wordpress-muplugin",
             "extra": {
                 "exclude-from-files": [
@@ -65,6 +65,6 @@
             "install-path": "../enpii/enpii-base"
         }
     ],
-    "dev": false,
+    "dev": true,
     "dev-package-names": []
 }

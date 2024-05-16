@@ -3,80 +3,26 @@
         'name' => 'tamara/tamara-checkout',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '07526d70ab549b4def560d13b8c03cb5bd725031',
+        'reference' => '766e674913c2f6a8795b5201549b3d88500f3fd2',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => false,
+        'dev' => true,
     ),
     'versions' => array(
         'enpii/enpii-base' => array(
             'pretty_version' => 'dev-wp-release',
             'version' => 'dev-wp-release',
-            'reference' => '0930db89396d05764f72fe33182aff26a333243f',
+            'reference' => '21e75b02e76d0b182dadd81eb0c63638f0685236',
             'type' => 'wordpress-muplugin',
             'install_path' => __DIR__ . '/../enpii/enpii-base',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'psr/cache' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^1.0.1',
-            ),
-        ),
-        'psr/container' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '1.1.0',
-            ),
-        ),
-        'psr/log' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^1.1.4',
-            ),
-        ),
-        'symfony/contracts' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^2.5.0',
-            ),
-        ),
-        'symfony/deprecation-contracts' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^2.5.0',
-            ),
-        ),
-        'symfony/error-handler' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^4.4.0',
-            ),
-        ),
-        'symfony/http-foundation' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^5.0.0',
-            ),
-        ),
-        'symfony/options-resolver' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^5.4.0',
-            ),
-        ),
-        'symfony/string' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '^5.4',
-            ),
-        ),
         'tamara/tamara-checkout' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '07526d70ab549b4def560d13b8c03cb5bd725031',
+            'reference' => '766e674913c2f6a8795b5201549b3d88500f3fd2',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

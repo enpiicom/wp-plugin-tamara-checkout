@@ -35,10 +35,4 @@ interface WP_Theme_Interface {
 	 * @return string
 	 */
 	public function get_version(): string;
-
-	/**
-	 * The plugin should have a text domain
-	 * @return string
-	 */
-	public function get_text_domain(): string;
 }

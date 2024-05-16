@@ -102,35 +102,6 @@ abstract class WP_Theme extends ServiceProvider implements WP_Theme_Interface {
 	}
 
 	/**
-	 * Translate a text using the plugin's text domain
-	 *
-	 * @param string $untranslated_text Text to be translated
-	 *
-	 * @return string Translated text
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t( $untranslated_text ): string {
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
-		return __( $untranslated_text, $this->get_text_domain() );
-	}
-
-	/**
-	 * Translate a text using the plugin's text domain
-	 *
-	 * @param string $untranslated_text Text to be translated
-	 * @param string $context for the translation
-	 *
-	 * @return string Translated text
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _x( $untranslated_text, $context ): string {
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralContext, WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
-		return _x( $untranslated_text, $context, $this->get_text_domain() );
-	}
-
-	/**
 	 * @throws \Exception
 	 */
 	protected function validate_needed_properties(): void {
@@ -217,7 +188,8 @@ abstract class WP_Theme extends ServiceProvider implements WP_Theme_Interface {
 		Session::push(
 			'info',
 			sprintf(
-				$this->_t( 'Theme <strong>%s</strong> activated' ),
+				// translators: %s is replace by a string, plugin name.
+				__( 'Theme <strong>%s</strong> activated', 'enpii' ),
 				$this->get_name()
 			)
 		);
@@ -234,7 +206,8 @@ abstract class WP_Theme extends ServiceProvider implements WP_Theme_Interface {
 			Session::push(
 				'caution',
 				sprintf(
-					$this->_t( 'This theme needs <strong>%s</strong> to work properly.' ),
+					// translators: %s is replace by a string, plugin, theme or package name(s)
+					__( 'This theme needs <strong>%s</strong> to work properly.', 'enpii' ),
 					'Plugin ACF Pro'
 				)
 			);
@@ -252,7 +225,8 @@ abstract class WP_Theme extends ServiceProvider implements WP_Theme_Interface {
 			Session::push(
 				'caution',
 				sprintf(
-					$this->_t( 'This theme needs <strong>%s</strong> to work properly.' ),
+					// translators: %s is replace by a string, plugin, theme or package name(s)
+					__( 'This theme needs <strong>%s</strong> to work properly.', 'enpii' ),
 					'Plugin Enpii Html Components'
 				)
 			);

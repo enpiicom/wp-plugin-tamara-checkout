@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\WP;
 
+use Enpii_Base\App\Console\Commands\WP_App_Make_PHPUnit_Command;
 use Enpii_Base\App\Http\Response;
 use Enpii_Base\App\Jobs\Bootstrap_WP_App;
 use Enpii_Base\App\Jobs\Login_WP_App_User;
@@ -20,6 +21,7 @@ use Enpii_Base\App\Jobs\Write_Setup_Client_Script;
 use Enpii_Base\App\Jobs\Write_Web_Worker_Script;
 use Enpii_Base\App\Queries\Add_More_Providers;
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Traits\Enpii_Base_Trans_Trait;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
@@ -35,9 +37,11 @@ use WP_User;
  * @package Enpii_Base\App\WP
  */
 final class Enpii_Base_WP_Plugin extends WP_Plugin {
+	use Enpii_Base_Trans_Trait;
+
 	public function boot() {
 		if ( $this->app->runningInConsole() ) {
-			// Register migrations rules
+			// Publish migrations rules
 			$this->publishes(
 				[
 					$this->get_base_path() . '/database/migrations' => database_path( 'migrations' ),
@@ -45,7 +49,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 				[ 'enpii-base-migrations', 'laravel-migrations' ]
 			);
 
-			// Register assets
+			// Publish assets
 			$this->publishes(
 				[
 					$this->get_base_path() . '/public-assets/dist' => wp_app_public_path( 'plugins/' . $this->get_plugin_slug() ),
@@ -58,21 +62,32 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 				],
 				[ 'enpii-base-assets', 'laravel-assets' ]
 			);
+
+			// Publish stubs
+			$this->publishes(
+				[
+					$this->get_base_path() . '/resources' => wp_app_resource_path( 'plugins/' . $this->get_plugin_slug() ),
+				],
+				[ 'enpii-base-assets', 'laravel-assets' ]
+			);
+
+			// Register Commands
+			$this->commands(
+				[
+					WP_App_Make_PHPUnit_Command::class,
+				]
+			);
 		}
 
 		parent::boot();
 	}
 
 	public function get_name(): string {
-		return 'EnpiiBase';
+		return 'Enpii Base';
 	}
 
 	public function get_version(): string {
 		return ENPII_BASE_PLUGIN_VERSION;
-	}
-
-	public function get_text_domain(): string {
-		return 'enpii';
 	}
 
 	/**
@@ -109,11 +124,14 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 
 		add_action( App_Const::ACTION_WP_APP_SCHEDULE_RUN, [ $this, 'schedule_run_backup' ] );
 		add_action( App_Const::ACTION_WP_APP_WEB_WORKER, [ $this, 'web_worker' ] );
-		add_action( App_Const::ACTION_WP_APP_SETUP_APP, [ $this, 'setup_app' ] );
+
+		// We want to use the priority 100 to let this run at the end for running migration
+		add_action( App_Const::ACTION_WP_APP_SETUP_APP, [ $this, 'setup_app' ], 1000 );
 
 		add_filter( App_Const::FILTER_WP_APP_MAIN_SERVICE_PROVIDERS, [ $this, 'register_more_providers' ] );
 
 		/** Other hooks */
+		add_action( 'plugins_loaded', [ $this, 'load_textdomain' ], 100 );
 		if ( $this->is_blade_for_template_available() ) {
 			add_filter( 'template_include', [ $this, 'use_blade_to_compile_template' ], 99999 );
 		}
@@ -149,6 +167,10 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 				);
 			}
 		}
+
+		// We use the filter `status_header` to get the status code
+		//  to store to the wp_app() instance
+		add_filter( 'status_header', [ $this, 'store_status_header' ], 999999, 4 );
 
 		/** WP CLI */
 		add_action( 'cli_init', [ $this, 'register_wp_cli_commands' ] );
@@ -320,6 +342,18 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 			$wp_app_response->header( $wp_header_key, $wp_header_value );
 		}
 
+		// We need to check response status code from WP
+		if ( is_404() ) {
+			$code = 404;
+		}
+		! isset( $code ) || $wp_app_response->setStatusCode( $code );
+
+		// We need to check status code sent by `status_header()` to override the status code
+		if ( wp_app()->has( 'status_header' ) ) {
+			$status_header = wp_app( 'status_header' );
+			! isset( $status_header['code'] ) || $wp_app_response->setStatusCode( $status_header['code'] );
+		}
+
 		$wp_app_response->sendHeaders();
 	}
 
@@ -341,6 +375,34 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 		Logout_WP_App_User::execute_now();
 	}
 
+	public function load_textdomain() {
+		$locale = determine_locale();
+		load_textdomain( 'enpii', $this->get_base_path() . '/languages/enpii-' . $locale . '.mo' );
+	}
+
+	/**
+	 * We want to store status code when using `status_header()` to `wp_app()` instance
+	 * @param mixed $status_header
+	 * @param mixed $code
+	 * @param mixed $description
+	 * @param mixed $protocol
+	 * @return mixed
+	 * @throws BindingResolutionException
+	 */
+	public function store_status_header( $status_header, $code, $description, $protocol ) {
+		wp_app()->instance(
+			'status_header',
+			[
+				'status_header' => $status_header,
+				'code' => $code,
+				'description' => $description,
+				'protocol' => $protocol,
+			]
+		);
+
+		return $status_header;
+	}
+
 	/**
 	 * We want to terminate the wp_app on shutdown event
 	 * @return void
@@ -354,7 +416,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * All hooks created by this plugin should be enrolled here
+	 * Prevent some default behaviors from WP
 	 * @return void
 	 */
 	private function prevent_defaults(): void {

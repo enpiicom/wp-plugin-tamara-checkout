@@ -106,7 +106,7 @@ class WP_Application extends Application {
 	 */
 	public function resourcePath( $path = '' ): string {
 		// Todo: refactor this using constant
-		return dirname( dirname( dirname( __DIR__ ) ) ) . DIRECTORY_SEPARATOR . 'resources' . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
+		return $this->basePath() . DIRECTORY_SEPARATOR . 'resources' . ( $path ? DIRECTORY_SEPARATOR . $path : $path );
 	}
 
 	/**
@@ -130,8 +130,8 @@ class WP_Application extends Application {
 	public function runningInConsole(): ?bool {
 		if ( $this->isRunningInConsole === null ) {
 			if (
-				strpos( wp_app_request()->getPathInfo(), '/admin' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ||
-				strpos( wp_app_request()->getPathInfo(), '/web-worker' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ||
+				( strpos( wp_app_request()->getPathInfo(), '/admin' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ) ||
+				( strpos( wp_app_request()->getPathInfo(), '/web-worker' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ) ||
 				Enpii_Base_Helper::at_setup_app_url()
 			) {
 				$this->isRunningInConsole = true;
@@ -355,6 +355,9 @@ class WP_Application extends Application {
 			\Enpii_Base\App\Providers\Log_Service_Provider::class,
 			\Enpii_Base\App\Providers\Routing_Service_Provider::class,
 			\Enpii_Base\App\Providers\Bus_Service_Provider::class,
+
+			// We put the DB Service Provider here as it's the base one with WP
+			\Enpii_Base\App\Providers\Database_Service_Provider::class,
 		];
 
 		foreach ( $providers as $provider_classname ) {

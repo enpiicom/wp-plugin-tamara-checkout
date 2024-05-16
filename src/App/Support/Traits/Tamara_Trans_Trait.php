@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Support\Traits;
 
-use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
-
 trait Tamara_Trans_Trait {
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 	protected function __( $untranslated_text ) {

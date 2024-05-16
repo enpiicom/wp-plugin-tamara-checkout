@@ -30,11 +30,16 @@ class Bootstrap_WP_App {
 		$console_kernel->bootstrap();
 
 		// As we don't use the LoadConfiguration boostrapper, we need the below snippets
-		//	taken from Illuminate\Foundation\Bootstrap\LoadConfiguration
-        $wp_app->detectEnvironment( function () use ( $config ) {
-            return $config->get( 'app.env', 'production' );
-        } );
-        date_default_timezone_set( $config->get( 'app.timezone', 'UTC' ) );
-        mb_internal_encoding( 'UTF-8' );
+		//  taken from Illuminate\Foundation\Bootstrap\LoadConfiguration
+		$wp_app->detectEnvironment(
+			function () use ( $config ) {
+				return $config->get( 'app.env', 'production' );
+			}
+		);
+
+		// We want to set the timezone for the WP App
+		// phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set
+		date_default_timezone_set( $config->get( 'app.timezone', 'UTC' ) );
+		mb_internal_encoding( 'UTF-8' );
 	}
 }

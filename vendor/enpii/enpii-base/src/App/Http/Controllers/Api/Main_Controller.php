@@ -11,23 +11,15 @@ use Enpii_Base\Foundation\Http\Base_Controller;
 
 class Main_Controller extends Base_Controller {
 	public function home(): JsonResponse {
-		return wp_app_response()->json(
-			[
-				'message' => 'Welcome to WP App API',
-			]
-		);
-	}
-
-	public function wp_admin(): JsonResponse {
 		$data = Get_WP_App_Info::execute_now();
-		if ( ! empty( wp_get_current_user() ) ) {
+		if ( ! empty( wp_get_current_user()->ID ) ) {
 			$data['current_logged_in_user'] = wp_get_current_user();
 		}
 
 		return wp_app_response()->json(
 			[
-				'message' => 'WP App API Info',
-				'data'    => $data,
+				'message' => 'Welcome to Enpii Base WP App API',
+				'data' => $data,
 			]
 		);
 	}

@@ -4,11 +4,33 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\Support\Traits;
 
-use Enpii_Base\App\WP\Enpii_Base_WP_Plugin;
-
 trait Enpii_Base_Trans_Trait {
+	/**
+	 * Translate a text using the plugin's text domain
+	 *
+	 * @param string $untranslated_text Text to be translated
+	 *
+	 * @return string Translated text
+	 * @throws \Exception
+	 */
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _t( $untranslated_text ) {
-		return Enpii_Base_WP_Plugin::wp_app_instance()->_t( $untranslated_text );
+	public function __( $untranslated_text ): string {
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
+		return __( $untranslated_text, 'enpii' );
+	}
+
+	/**
+	 * Translate a text using the plugin's text domain
+	 *
+	 * @param string $untranslated_text Text to be translated
+	 * @param string $context for the translation
+	 *
+	 * @return string Translated text
+	 * @throws \Exception
+	 */
+	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+	public function _x( $untranslated_text, $context ): string {
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralContext, WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
+		return _x( $untranslated_text, $context, 'enpii' );
 	}
 }

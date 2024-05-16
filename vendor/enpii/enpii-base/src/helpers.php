@@ -134,8 +134,8 @@ if ( ! function_exists( 'enpii_base_wp_app_check' ) ) {
 			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_is_writable
 			if ( ! is_writable( dirname( $wp_app_base_path ) ) ) {
 				$error_message = sprintf(
-					// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain, WordPress.WP.I18n.MissingTranslatorsComment
-					__( 'Folder <strong>%s</strong> must be writable, please make it 0777.', Enpii_Base_Helper::TEXT_DOMAIN ),
+					// translators: %s is replaced by a string, pathname
+					__( 'Folder <strong>%s</strong> must be writable, please make it 0777.', 'enpii' ),
 					dirname( $wp_app_base_path )
 				);
 				if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
@@ -146,8 +146,8 @@ if ( ! function_exists( 'enpii_base_wp_app_check' ) ) {
 
 		if ( enpii_base_wp_app_setup_failed() && ! Enpii_Base_Helper::at_setup_app_url() && ! Enpii_Base_Helper::at_admin_setup_app_url() ) {
 			$error_message = sprintf(
-				// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralDomain, WordPress.WP.I18n.MissingTranslatorsComment
-				__( 'The setup has not been done correctly. Please go to this URL <a href="%1$s">%1$s</a> to complete the setup', Enpii_Base_Helper::TEXT_DOMAIN ),
+				// translators: %1$s is replaced by a string, url
+				__( 'The setup has not been done correctly. Please go to this URL <a href="%1$s">%1$s</a> to complete the setup', 'enpii' ),
 				Enpii_Base_Helper::get_admin_setup_app_uri( true )
 			);
 			if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
@@ -199,14 +199,14 @@ if ( ! function_exists( 'enpii_base_wp_app_get_timezone' ) ) {
 		$timezone_string = get_option( 'timezone_string' );
 
 		// Remove old Etc mappings. Fallback to gmt_offset.
-		if ( false !== strpos( $timezone_string, 'Etc/GMT' ) ) {
+		if ( strpos( $timezone_string, 'Etc/GMT' ) !== false ) {
 			$timezone_string = '';
 		}
 
 		// Create Etc/GMT time zone id that match date_default_timezone_set function
-		//	https://www.php.net/manual/en/timezones.others.php
+		//  https://www.php.net/manual/en/timezones.others.php
 		if ( empty( $timezone_string ) ) {
-			if ( 0 == $current_offset ) {
+			if ( (int) $current_offset === 0 ) {
 				$timezone_string = 'Etc/GMT';
 			} elseif ( $current_offset < 0 ) {
 				$timezone_string = 'Etc/GMT+' . abs( $current_offset );
@@ -215,8 +215,8 @@ if ( ! function_exists( 'enpii_base_wp_app_get_timezone' ) ) {
 			}
 		}
 
-		if ( function_exists('wp_timezone') ) {
-			return false !== strpos( wp_timezone()->getName(), '/' ) ? wp_timezone()->getName() : $timezone_string;
+		if ( function_exists( 'wp_timezone' ) ) {
+			return strpos( wp_timezone()->getName(), '/' ) !== false ? wp_timezone()->getName() : $timezone_string;
 		}
 
 		return defined( 'WP_APP_TIMEZONE' ) ? WP_APP_TIMEZONE : $timezone_string;

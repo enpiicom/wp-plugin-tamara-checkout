@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\Jobs;
 
+use Enpii_Base\App\Support\Traits\Enpii_Base_Trans_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Enpii_Base\Foundation\WP\WP_Plugin_Interface;
 use Illuminate\Support\Facades\Session;
 
 class Show_Admin_Notice_And_Disable_Plugin {
 	use Executable_Trait;
+	use Enpii_Base_Trans_Trait;
 
 	/**
 	 * @var \Enpii_Base\Foundation\WP\WP_Plugin
@@ -33,8 +35,8 @@ class Show_Admin_Notice_And_Disable_Plugin {
 		Session::push(
 			'caution',
 			sprintf(
-				// phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment, WordPress.WP.I18n.NonSingularStringLiteralDomain
-				__( 'Plugin <strong>%s</strong> is disabled.', $this->plugin->get_text_domain() ),
+				// translators: %s is replaced with "string" plugin name
+				$this->__( 'Plugin <strong>%s</strong> is disabled.' ),
 				$this->plugin->get_name() . ' ' . $this->plugin->get_version()
 			)
 		);

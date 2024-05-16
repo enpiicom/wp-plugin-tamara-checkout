@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Enpii_Base\App\Support;
 
 class Enpii_Base_Helper {
-	const TEXT_DOMAIN = 'enpii';
-
 	public static function get_current_url(): string {
 		if ( empty( $_SERVER['SERVER_NAME'] ) && empty( $_SERVER['HTTP_HOST'] ) ) {
 			return '';
@@ -93,5 +91,21 @@ class Enpii_Base_Helper {
 		$site_url_parts = wp_parse_url( site_url() );
 
 		return empty( $site_url_parts['path'] ) ? '' : $site_url_parts['path'];
+	}
+
+	public static function get_current_blog_path() {
+		$site_url = site_url();
+		$network_site_url = network_site_url();
+
+		if ( $site_url === $network_site_url ) {
+			return false;
+		}
+
+		$reverse_pos = strpos( strrev( $site_url ), strrev( $network_site_url ) );
+		if ( $reverse_pos === false ) {
+			return false;
+		}
+
+		return trim( substr( $site_url, $reverse_pos * ( -1 ) ), '/' );
 	}
 }

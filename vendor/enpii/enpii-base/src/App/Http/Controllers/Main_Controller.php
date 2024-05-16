@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Main_Controller extends Base_Controller {
 	public function index() {
+		if ( ! wp_app_config( 'app.debug' ) ) {
+			header( 'Location: ' . home_url() );
+			exit( 0 );
+		}
+
 		return Enpii_Base_WP_Plugin::wp_app_instance()->view(
 			'main/index',
 			[

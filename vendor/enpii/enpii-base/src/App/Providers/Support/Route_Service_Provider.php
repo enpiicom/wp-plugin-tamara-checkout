@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Enpii_Base\App\Providers\Support;
 
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +33,9 @@ class Route_Service_Provider extends RouteServiceProvider {
 	 * @return void
 	 */
 	public function map() {
-		Route::prefix( '/' . wp_app()->get_wp_app_slug() )
+		$path = Enpii_Base_Helper::get_current_blog_path();
+		$prefix = $path ? '/' . $path . '/' : '/';
+		Route::prefix( $prefix . wp_app()->get_wp_app_slug() )
 			->as( 'wp-app::' )
 			->middleware( [ 'web' ] )
 			->group(
@@ -41,7 +44,7 @@ class Route_Service_Provider extends RouteServiceProvider {
 				}
 			);
 
-		Route::prefix( '/' . wp_app()->get_wp_api_slug() )
+		Route::prefix( $prefix . wp_app()->get_wp_api_slug() )
 			->as( 'wp-api::' )
 			->middleware( [ 'api' ] )
 			->group(

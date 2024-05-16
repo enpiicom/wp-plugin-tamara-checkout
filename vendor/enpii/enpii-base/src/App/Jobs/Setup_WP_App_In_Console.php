@@ -30,9 +30,9 @@ class Setup_WP_App_In_Console {
 		/** @var \Illuminate\Console\Command $console_command */
 		$console_command = $this->console_command;
 
-		// We need to publish EnpiiBase assets and Migrations latest
+		// We need to publish Enpii Base assets and Migrations latest
 		//  to be able to override other assets
-		$console_command->comment( 'Publishing EnpiiBase Migrations...' );
+		$console_command->comment( 'Publishing Enpii Base Migrations...' );
 		$console_command->call(
 			'vendor:publish',
 			[
@@ -41,7 +41,7 @@ class Setup_WP_App_In_Console {
 			]
 		);
 
-		$console_command->comment( 'Publishing EnpiiBase Assets...' );
+		$console_command->comment( 'Publishing Enpii Base Assets...' );
 		$console_command->call(
 			'vendor:publish',
 			[
@@ -63,6 +63,6 @@ class Setup_WP_App_In_Console {
 		//  for security reason
 		$console_command->comment( 'Cleanup migrations rule' );
 		$filesystem = new Filesystem();
-		$filesystem->cleanDirectory( wp_app()->databasePath( 'migrations' ) );
+		// $filesystem->cleanDirectory( wp_app()->databasePath( 'migrations' ) );
 	}
 }

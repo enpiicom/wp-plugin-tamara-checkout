@@ -13,13 +13,13 @@ do_action( 'get_header' );
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
 	<style type="text/css">
-		html { font-size: 10px; line-height: 1.5em; }
+		html { font-size: 10px; line-height: 1.5; }
 		body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; }
 		a { text-decoration: none; }
 		.site-toolbar { padding: 0.4rem 2rem; display: flex; font-size: 1.2rem; background-color: #1f2245; color: #e1e1e1; justify-content: space-between; align-items: center; }
 		.site-toolbar a { color: #e1e1e1; }
 		.site-toolbar a:hover { color: #e6b420; }
-		.site-toolbar h2 { padding: 12px 4px; color: #e1e1e1; margin-bottom: 0; }
+		.site-toolbar h2 { padding: 0.2rem 4px; color: #e1e1e1; }
 		.site-toolbar .guide-link { padding: 4px; }
 
 		.site-body { font-size: 1.6rem; padding-top: 1em; padding-bottom: 1em; }
@@ -40,7 +40,7 @@ do_action( 'get_header' );
 
 <body>
 	<div class="site-toolbar">
-		<h2>EnpiiBase plugin</h2>
+		<h2>Enpii Base plugin</h2>
 		<div class="guide-link">
 			<a href="https//enpii.com/wp-plugins/enpii-base/docs" target="_blank">Guides - Docs</a>
 		</div>
