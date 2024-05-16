@@ -326,7 +326,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 			'plugin_version' => [
 				'type' => 'title',
 				'description' =>
-					'<p style="margin-top: 2.6rem;">' . sprintf( $this->__( 'Tamara Checkout Plugin Version: %s' ), TAMARA_CHECKOUT_VERSION ) . ', ' . sprintf( $this->__( 'WooCommece Version: %s' ), WC()->version ) . ', ' . sprintf( $this->__( 'WordPress Version: %s' ), get_bloginfo( 'version' ) ) . ', ' . sprintf( $this->__( 'PHP Version: %s' ), phpversion() ) . '</p>',
+					'<p style="margin-top: 2.6rem;">' . sprintf( $this->__( 'Tamara Checkout Plugin Version: %s' ), TAMARA_CHECKOUT_VERSION ) . ', ' . sprintf( $this->__( 'WooCommerce Version: %s' ), WC()->version ) . ', ' . sprintf( $this->__( 'WordPress Version: %s' ), get_bloginfo( 'version' ) ) . ', ' . sprintf( $this->__( 'PHP Version: %s' ), phpversion() ) . '</p>',
 			],
 		];
 	}
@@ -353,7 +353,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
                             <li>' . $this->__( 'For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->__( 'For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->__( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>
-                            <li>' . sprintf( $this->__( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process.' ), $this->build_solve_stuck_orders_link() ) . '</li>
+                            <li>' . sprintf( $this->__( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process).' ), $this->build_solve_stuck_orders_link() ) . '</li>
                         </ul>
                     </div>
                 </div>';

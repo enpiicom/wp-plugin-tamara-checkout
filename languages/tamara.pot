@@ -546,7 +546,7 @@ msgid "Tamara Checkout Plugin Version: %s"
 msgstr ""
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:329
-msgid "WooCommece Version: %s"
+msgid "WooCommerce Version: %s"
 msgstr ""
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:329
@@ -594,7 +594,7 @@ msgid "All the debug log messages sent from Tamara will be written and saved to 
 msgstr ""
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:356
-msgid "If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process."
+msgid "If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process)."
 msgstr ""
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:378

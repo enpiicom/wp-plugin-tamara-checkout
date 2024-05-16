@@ -35,7 +35,7 @@ msgstr "اختر وضع التشغيل لخدمة تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:57
 msgid "This setting specifies whether you will process live transactions, or whether you will process simulated transactions using the Tamara Sandbox."
-msgstr ""
+msgstr "هذا الحقل يحدد وضع التشغيل, اذ ما كان على وضع البيئة الفعلية أو البيئة التجريبية."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:60
 msgid "Live API URL"
@@ -51,630 +51,629 @@ msgstr "شكرا لاختيارك تمارا! سيتم تنويهك عند شح�
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:350
 msgid "Please make sure the Tamara payment status of the order is <strong>captured</strong> before making a refund."
-msgstr ""
-
+msgstr "فضلاً يرجى التأكد من حالة الطلب أنها <strong>تم تسليمه</strong> قبل عمل استرجاع."
 #. Plugin Name of the plugin
 msgid "Tamara Checkout"
-msgstr ""
+msgstr "دفع تمارا"
 
 #. Plugin URI of the plugin
 #. Author URI of the plugin
 msgid "https://tamara.co/"
-msgstr ""
+msgstr "https://tamara.co/"
 
 #. Description of the plugin
 msgid "Allow to Buy Now Pay Later with Tamara payment gateway, based on Enpii Base"
-msgstr ""
+msgstr "اسمح بالشراء الآن والدفع لاحقًا باستخدام بوابة الدفع تمارا، المبنية على Enpii Base"
 
 #. Author of the plugin
 msgid "dev@tamara.co"
-msgstr ""
+msgstr "dev@tamara.co"
 
 #: src/App/Http/Controllers/Main_Controller.php:17
 msgid "Log file not found or it contains nothing"
-msgstr ""
+msgstr "لم يتم العثور على ملف السجل أو أنه لا يحتوي على أي شيء"
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:62
 msgid "Error! Incorrect Order."
-msgstr ""
+msgstr "خطأ! الطلب غير صحيح."
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:118
 msgid "Order authorisation process failed."
-msgstr ""
+msgstr "فشلت عملية تأكيد الطلب."
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:121
 msgid "Order authorised failed."
-msgstr ""
+msgstr "فشلت عملية قبول الطلب."
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:137
 msgid "Order authorised successfully."
-msgstr ""
+msgstr "تم التأكيد على الطلب بنجاح."
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:141
 msgid "Payment Status: %s, Payment Type: %s, Payment Instalments: %s."
-msgstr ""
+msgstr "حالة الدفع: %s, نوع الدفع: %s, أقساط الدفع: %s."
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:148
 msgid "Payment Status: %s, Payment Type: %s."
-msgstr ""
+msgstr "حالة الدفع: %s, نوع الدفع: %s."
 
 #: src/App/Jobs/Authorise_Tamara_Order_If_Possible_Job.php:177
 msgid "Error! Incorrect Order. WC Order ID: "
-msgstr ""
+msgstr "خطأ! الطلب غير صحيح. WC Order ID: "
 
 #: src/App/Jobs/Cancel_Tamara_Order_If_Possible_Job.php:100
 msgid "Order cancelled successfully. Cancel Id: %s."
-msgstr ""
+msgstr "تم الغاء الطلب بنجاح. معرف الألغاء: %s"
 
 #: src/App/Jobs/Cancel_Tamara_Order_If_Possible_Job.php:114
 msgid "Error when trying to cancel order with Tamara."
-msgstr ""
+msgstr "حدث خطأ أثناء محاولة إلغاء الطلب مع تمارا."
 
 #: src/App/Jobs/Cancel_Tamara_Order_If_Possible_Job.php:117
 #: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:141
 #: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:140
 msgid "Error with Tamara API: %s"
-msgstr ""
+msgstr "خطأ مع تمارا API: %s"
 
 #: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:108
 msgid "Order fully captured successfully. Capture Id: %s, Captured Amount %s."
-msgstr ""
+msgstr "تم تسليم الطلب بالكامل بنجاح. معرف التسوية: %s, مبلغ التسوية %s"
 
 #: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:138
 msgid "Error when trying to capture order with Tamara."
-msgstr ""
+msgstr "حدث خطأ أثناء محاولة تسليم الطلب مع تمارا."
 
 #: src/App/Jobs/Complete_Order_If_Tamara_Captured_Job.php:66
 msgid "Update order status because the order is captured on Tamara. Capture Id: %s, Captured Amount %s."
-msgstr ""
+msgstr "قم بتحديث حالة الطلب لأنه تم تسليم الطلب في تمارا. معرف التسوية: %s، مبلغ التسوية %s."
 
 #: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:122
 msgid "Order has been refunded successfully. Capture Id: %1$s, Refund Id: %2$s, Refunded amount: %3$s."
-msgstr ""
+msgstr "تم استرجاع الطلب بنجاح. معرف التسليم: %1$s، معرف الاسترجاع: %2$s، المبلغ المسترجع: %3$s."
 
 #: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:137
 msgid "Error when trying to refund with Tamara."
-msgstr ""
+msgstr "حدث خطأ أثناء محاولة استرجاع الأموال مع تمارا."
 
 #: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:164
 msgid "Unable to create a refund. Capture ID not found."
-msgstr ""
+msgstr "تعذر النظام من إنشاء استرجاع. لم يتم العثور على معرف التسليم."
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:18
 #: src/App/Queries/Add_Tamara_Custom_Statuses.php:22
 msgctxt "Order status"
 msgid "Tamara Cancelled"
-msgstr ""
+msgstr "تمارا ألغت"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:23
 msgid "Tamara Cancelled <span class=\"count\">(%s)</span>"
 msgid_plural "Tamara Cancelled <span class=\"count\">(%s)</span>"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "تمارا ألغت <span class=\"count\">(%s)</span>"
+msgstr[1] "تمارا ألغت <span class=\"count\">(%s)</span>"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:33
 #: src/App/Queries/Add_Tamara_Custom_Statuses.php:26
 msgctxt "Order status"
 msgid "Tamara Failed"
-msgstr ""
+msgstr "تمارا فشلت"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:38
 msgid "Tamara Failed <span class=\"count\">(%s)</span>"
 msgid_plural "Tamara Failed <span class=\"count\">(%s)</span>"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "تمارا فشلت <span class=\"count\">(%s)</span>"
+msgstr[1] "تمارا فشلت <span class=\"count\">(%s)</span>"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:48
 #: src/App/Queries/Add_Tamara_Custom_Statuses.php:30
 msgctxt "Order status"
 msgid "Tamara Capture Failed"
-msgstr ""
+msgstr "فشلت تسليم تمارا"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:53
 msgid "Tamara Capture Failed <span class=\"count\">(%s)</span>"
 msgid_plural "Tamara Capture Failed <span class=\"count\">(%s)</span>"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "فشلت تسليم تمارا <span class=\"count\">(%s)</span>"
+msgstr[1] "فشلت تسليم تمارا <span class=\"count\">(%s)</span>"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:63
 #: src/App/Queries/Add_Tamara_Custom_Statuses.php:34
 msgctxt "Order status"
 msgid "Tamara Authorise Failed"
-msgstr ""
+msgstr "فشل تأكيد تمارا"
 
 #: src/App/Jobs/Register_Tamara_Custom_Order_Statuses.php:68
 msgid "Tamara Authorise Failed <span class=\"count\">(%s)</span>"
 msgid_plural "Tamara Authorise Failed <span class=\"count\">(%s)</span>"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "فشل تأكيد تمارا <span class=\"count\">(%s)</span>"
+msgstr[1] "فشل تأكيد تمارا <span class=\"count\">(%s)</span>"
 
 #: src/App/Jobs/Register_Tamara_Webhook_Job.php:88
 msgid "Tamara Service timeout or disconnected. Error message: \"%s\"."
-msgstr ""
+msgstr "أنتهت مهلة خدمة تمارا أو تم قطع الإتصال بها. رسالة الخطأ: \"%s\"."
 
 #: src/App/Jobs/Update_Tamara_Webhook_Event_Job.php:71
 msgid "Tamara webhook event `%s` for this order has just happened. Tamara Order Id `%s`"
-msgstr ""
+msgstr "لقد حدث للتو حدث webhook تمارا `%s` لهذا الطلب. معرف طلب تمارا `%s`"
 
 #: src/App/Jobs/Validate_Admin_Settings_Job.php:69
 #: src/App/Jobs/Validate_Admin_Settings_Job.php:143
 msgid "%s: required."
-msgstr ""
+msgstr "%s: مطلوب."
 
 #: src/App/Jobs/Validate_Admin_Settings_Job.php:72
 msgid "Sandbox API Token"
-msgstr ""
+msgstr "Sandbox API Token"
 
 #: src/App/Jobs/Validate_Admin_Settings_Job.php:73
 msgid "Live API Token"
-msgstr ""
+msgstr "Live API Token"
 
 #: src/App/Jobs/Validate_Admin_Settings_Job.php:153
 msgid "%s is incorrect."
-msgstr ""
+msgstr "%s غير صحيح."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:39
 msgid "Tamara Settings Help Texts"
-msgstr ""
+msgstr "نصوص تعليمات إعدادات تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:44
 msgid "Confidential Configuration"
-msgstr ""
+msgstr "إعدادات الخصوصية"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:46
 msgid "Update Your Confidential Configuration Received From Tamara. You can find that on http://partners.tamara.co."
-msgstr ""
+msgstr "قم بتحديث إعدادات الخصوصية الذي تم تلقيها من تمارا. يمكنك العثور على ذلك على http://partners.tamara.co."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:54
 msgid "Live Mode"
-msgstr ""
+msgstr "Live Mode"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:55
 msgid "Sandbox Mode"
-msgstr ""
+msgstr "Sandbox Mode"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:63
 msgid "The Tamara Live API URL <span class=\"tamara-highlight\">(https://api.tamara.co)</span>"
-msgstr ""
+msgstr "The Tamara Live API URL <span class=\"tamara-highlight\">(https://api.tamara.co)</span>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:72
 msgid "Live API Token (Merchant Token)"
-msgstr ""
+msgstr "Live API Token (Merchant Token)"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:76
 msgid "Get your API token from Tamara."
-msgstr ""
+msgstr "Get your API token from Tamara."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:82
 msgid "Live Notification Key"
-msgstr ""
+msgstr "Live Notification Key"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:85
 msgid "Get your Notification key from Tamara."
-msgstr ""
+msgstr "Get your Notification key from Tamara."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:92
 msgid "Live Public Key"
-msgstr ""
+msgstr "Live Public Key"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:95
 msgid "Get your Public key from Tamara."
-msgstr ""
+msgstr "Get your Public key from Tamara."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:104
 msgid "The Tamara Sandbox API URL <span class=\"tamara-highlight\">(https://api-sandbox.tamara.co)</span>"
-msgstr ""
+msgstr "The Tamara Sandbox API URL <span class=\"tamara-highlight\">(https://api-sandbox.tamara.co)</span>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:112
 msgid "Sandbox API Token (Merchant Token)"
-msgstr ""
+msgstr "Sandbox API Token (Merchant Token)"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:116
 msgid "Get your API token for testing from Tamara."
-msgstr ""
+msgstr "Get your API token for testing from Tamara."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:122
 msgid "Sandbox Notification Key"
-msgstr ""
+msgstr "Sandbox Notification Key"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:125
 msgid "Get your Notification key for testing from Tamara."
-msgstr ""
+msgstr "Get your Notification key for testing from Tamara."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:131
 msgid "Sandbox Public Key"
-msgstr ""
+msgstr "Sandbox Public Key"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:134
 msgid "Get your Public key for testing from Tamara."
-msgstr ""
+msgstr "Get your Public key for testing from Tamara."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:140
 msgid "Order Statuses Mappings"
-msgstr ""
+msgstr "تعيينات حالات الطلب"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:143
 msgid "Manage Order Statuses Mappings"
-msgstr ""
+msgstr "إدارة تعيينات حالات الطلب"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:146
 msgid "Order Status when Tamara Order is Authorised"
-msgstr ""
+msgstr "حالة الطلب عندما يتم تأكيد طلب تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:150
 msgid "Mapping status for orders that have Tamara Payment authorised successfully on Tamara side. This process happens after the Customers complete the checkout on Tamara side successfully."
-msgstr ""
+msgstr "حالة التعيين للطلبات التي تم تأكيد دفع تمارا لها بنجاح من جانب تمارا. تحدث هذه العملية بعد أن يكمل العملاء عملية الدفع على جانب تمارا بنجاح."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:153
 msgid "Order Status when Tamara Order is Canceled"
-msgstr ""
+msgstr "حالة الطلب عند إلغاء طلب تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:157
 msgid "Mapping status for orders that are cancelled (Tamara calls `canceled`). The cancellation may happen because the customer actively cancel the order or the cancellation happens on the Partners portal or from Tamara side. Tamara triggers the Cancellation process and send to the website (via the webhook)."
-msgstr ""
+msgstr "تعيين حالة الطلبات التي تم إلغاؤها (تتصل تمارا بـ "canceled"). قد يحدث الإلغاء لأن العميل يقوم بإلغاء الطلب بشكل فعال أو يحدث الإلغاء على بوابة الشركاء أو من جانب تمارا. تقوم تمارا بتشغيل عملية الإلغاء وإرسالها إلى موقع الويب (عبر webhook)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:160
 msgid "Order Status when Tamara Order Fails"
-msgstr ""
+msgstr "حالة الطلب عند فشل طلب تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:164
 msgid "Mapping status for orders that are declined by Tamara. The Order failure may happen because the customer does not have a good credit history or having on-going orders with Tamara. Tamara triggers the Decline process and send to the website (via the webhook)."
-msgstr ""
+msgstr "حالة التعيين للطلبات التي تم رفضها بواسطة تمارا. قد يحدث فشل الطلب لأن العميل ليس لديه سجل ائتماني جيد أو لديه طلبات مستمرة مع تمارا. تقوم تمارا بتشغيل عملية الرفض وإرسالها إلى موقع الويب (عبر webhook)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:167
 msgid "Order Status when Tamara Authorisation fails"
-msgstr ""
+msgstr "حالة الطلب عند فشل تأكيد تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:171
 msgid "Mapping status for orders when the payment failed at the Authorisation process on Tamara."
-msgstr ""
+msgstr "تعيين حالة الطلبات عند فشل الدفع في عملية التأكيد في تمارا."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:174
 msgid "Order Status when Capture fails on Tamara"
-msgstr ""
+msgstr "حالة الطلب عند فشل التسليم على تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:178
 msgid "Mapping status for orders when the payment failed at the Capture process on Tamara."
-msgstr ""
+msgstr "تعيين حالة الطلبات عند فشل الدفع في عملية التسليم في تمارا."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:181
 msgid "Order Statuses to Trigger Tamara Events"
-msgstr ""
+msgstr "حالات الطلب لتشغيل أحداث تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:184
 msgid "Manage Order Statuses Trigger"
-msgstr ""
+msgstr "إدارة مشغل حالات الطلب"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:187
 msgid "Order Status that triggers the Tamara Cancel process for an order"
-msgstr ""
+msgstr "حالة الطلب التي تؤدي إلى تشغيل عملية إلغاء تمارا لأحد الطلبات"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:191
 msgid "When you update an order to this status, Tamara Checkout plugin would connect to Tamara API to trigger the Cancel process for the correspoding order on Tamara side."
-msgstr ""
+msgstr "عندما تقوم بتحديث طلب إلى هذه الحالة، سيتصل ملحق Tamara Checkout بـ Tamara API لبدء عملية الإلغاء للطلب المقابل من جانب تمارا."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:194
 msgid "Order Status that triggers Tamara Capture process for an order"
-msgstr ""
+msgstr "حالة الطلب التي تؤدي إلى تشغيل عملية تسليم تمارا للطلب"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:198
 msgid "When you update an order to this status it would connect to Tamara API to trigger the Capture payment process on Tamara. Only when the Capture process done, the payment is available for the settlement."
-msgstr ""
+msgstr "عندما تقوم بتحديث طلب إلى هذه الحالة، فإنه سيتم الاتصال بـ Tamara API لبدء عملية تسليم المبلغ على Tamara. فقط عند الانتهاء من عملية التسليم، يصبح الدفع متاحًا للتسوية."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:201
 msgid "Tamara Custom Settings"
-msgstr ""
+msgstr "إعدادات تخصيص تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:203
 msgid "Configure Tamara Custom Settings"
-msgstr ""
+msgstr "ضبط إعدادات تخصيص تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:204
 msgid "Show Tamara Custom Settings"
-msgstr ""
+msgstr "إظهار إعدادات تخصيص تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:207
 msgid "Excluded Product Ids"
-msgstr ""
+msgstr "إستثناء معرفات المنتج"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:209
 msgid "Enter the product ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. `101, 205`)."
-msgstr ""
+msgstr "أدخل معرفات المنتج التي تريد إستثنائها من استخدام تمارا للدفع (يتم فصل هذه المعرفات بفواصل، على سبيل المثال `101، 205`)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:213
 msgid "Excluded Product Category Ids"
-msgstr ""
+msgstr "إستثناء معرفات فئات المنتج"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:215
 msgid "Enter the product category ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. `26, 104`)."
-msgstr ""
+msgstr "أدخل معرفات فئة المنتج التي تريد إستثنائها من استخدام تمارا للدفع (يتم فصل هذه المعرفات بفواصل، على سبيل المثال `26، 104`)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:219
 msgid "Tamara Advanced Settings"
-msgstr ""
+msgstr "إعدادات تمارا المتقدمة"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:221
 msgid "Configure Tamara Advanced Settings <br> <p class=\"tamara-highlight\">Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.</p>"
-msgstr ""
+msgstr "ضبط إعدادات تمارا المتقدمة <br> <p class=\"tamara-highlight\">يرجى قراءة أوصاف هذه الإعدادات بعناية قبل إجراء أي تغيير أو يرجى الاتصال بفريق تمارا للحصول على مزيد من التفاصيل.</p>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:222
 msgid "Show Tamara Advanced Settings"
-msgstr ""
+msgstr "إظهار إعدادات تمارا المتقدمة"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:225
 msgid "Force Enable Phone"
-msgstr ""
+msgstr "إجبار تفعيل الهاتف"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:226
 msgid "Enable Billing/Shipping Phone Field at Checkout step"
-msgstr ""
+msgstr "قم بتمكين حقل الهاتف للفتورة/الشحن  في خطوة الدفع"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:229
 msgid "If you tick on this setting, the billing/shipping Phone field will be forced to display on the checkout screen, which is required to use for Tamara payment gateway."
-msgstr ""
+msgstr "إذا قمت بتحديد هذا الإعداد، فسيتم عرض حقل هاتف الفوترة/الشحن على شاشة الدفع، وهو أمر مطلوب لاستخدامه في بوابة دفع تمارا."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:232
 msgid "Force Enable Email"
-msgstr ""
+msgstr "إجبار تفعيل البريد الإلكتروني"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:233
 msgid "Enable Email Field at Checkout step"
-msgstr ""
+msgstr "تفعيل حقل البريد الإلكتروني في خطوة الدفع"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:236
 msgid "If you tick on this setting, the billing/shipping Email field will be forced to display on the checkout screen, which is required to use for Tamara payment gateway."
-msgstr ""
+msgstr "إذا قمت بتحديد هذا الإعداد، فسيتم عرض حقل البريد الإلكتروني للفوترة/الشحن على شاشة الدفع، وهو أمر مطلوب لاستخدامه في بوابة دفع تمارا."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:239
 msgid "Disable Single Product Details Popup (PDP) Widget"
-msgstr ""
+msgstr "تعطيل ظهور واجهة المستخدم لتفاصيل المنتج الواحد 'Disable Single Product Details Popup (PDP) Widget'"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:240
 msgid "Disable PDP Widget on Single Product Page"
-msgstr ""
+msgstr "تعطيل واجهة المستخدم على صفحة المنتج الواحد 'Disable PDP Widget on Single Product Page'"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:243
 msgid "In you tick on this setting, the PDP widget will be hidden on the single product page."
-msgstr ""
+msgstr "عند تحديد هذا الإعداد، سيتم إخفاء عنصر واجهة المستخدم (widget) PDP على صفحة المنتج الفردية."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:246
 msgid "PDP Widget Position"
-msgstr ""
+msgstr "موضع واجهة المستخدم 'PDP Widget Position'"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:249
 msgid "Choose a position where you want to display the Tamara Payment Popup Widget on single product page (https://www.businessbloomer.com/woocommerce-visual-hook-guide-single-product-page/). Or, you can use shortcode with attributes to show it on custom pages e.g. [tamara_show_popup price=\"199\" currency=\"SAR\" language=\"en\"]"
-msgstr ""
+msgstr "اختر الموضع الذي تريد عرض واجهة المستخدم (Tamara Payment Popup Widget) فيه على صفحة المنتج الواحد (https://www.businessbloomer.com/woocommerce-visual-hook-guide-single-product-page/). أو يمكنك استخدام الرمز القصير مع السمات لإظهاره على الصفحات المخصصة، على سبيل المثال. [tamara_show_popup السعر=\"199\" العملة=\"SAR\" language=\"ar\"]"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:253
 msgid "Disable Cart Popup Widget"
-msgstr ""
+msgstr "تعطيل ظهور واجهة المستخدم (widget) لسلة التسوق"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:254
 msgid "Force to Disable Cart Popup Widget"
-msgstr ""
+msgstr "إجبار تعطيل ظهور واجهة المستخدم (widget) لسلة التسوق"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:257
 msgid "In you tick on this setting, the popup widget will be hidden on the cart page."
-msgstr ""
+msgstr "عند تحديد هذا الإعداد، سيتم إخفاء ظهور واجهة المستخدم (widget) في صفحة سلة التسوق."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:260
 msgid "Cart Popup Widget Position"
-msgstr ""
+msgstr "موضع واجهة المستخدم (widget) لسلة التسوق"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:263
 msgid "Choose a position where you want to display the Tamara Payment Popup Widget on cart page."
-msgstr ""
+msgstr "اختر الموضع الذي تريد عرض أداة Tamara Payment Popup Widget فيه على صفحة سلة التسوق"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:274
 msgid "Tamara Payment Success Url"
-msgstr ""
+msgstr "عنوان تمارا لنجاح الدفع Url"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:276
 msgid "Enter the custom SUCCESS url for customers to be redirected to after PAYMENT is SUCCESSFUL (leave it blank to use the default one)."
-msgstr ""
+msgstr "أدخل عنوان URL المخصص للنجاح ليتم إعادة توجيه العملاء إليه بعد نجاح الدفع (اتركه فارغًا لاستخدام العنوان الافتراضي)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:280
 msgid "Tamara Payment Cancel Url"
-msgstr ""
+msgstr "عنوان تمارا لإلغاء الدفع Url"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:282
 msgid "Enter the custom CANCEL url for customers to be redirected to after PAYMENT is CANCELLED (leave it blank to use the default one)."
-msgstr ""
+msgstr "أدخل عنوان URL المخصص للإلغاء ليتم إعادة توجيه العملاء إليه بعد إلغاء الدفع (اتركه فارغًا لاستخدام العنوان الافتراضي)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:286
 msgid "Tamara Payment Failure Url"
-msgstr ""
+msgstr "عنوان تمارا لفشل الدفع Url"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:288
 msgid "Enter the custom FAILURE url for customers to be redirected to after PAYMENT is FAILED (leave it blank to use the default one)."
-msgstr ""
+msgstr "أدخل عنوان URL المخصص للفشل ليتم إعادة توجيه العملاء إليه بعد فشل الدفع (اتركه فارغًا لاستخدام العنوان الافتراضي)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:292
 msgid "Debug Info"
-msgstr ""
+msgstr "معلومات التصحيح"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:295
 msgid "Show Debug Info"
-msgstr ""
+msgstr "إظهار معلومات التصحيح"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:299
 msgid "Platform & Extensions:"
-msgstr ""
+msgstr "النظام الأساسي والإضافات:"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:302
 msgid "PHP loaded extensions"
-msgstr ""
+msgstr "ملحقات PHP المحملة"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:304
 msgid "Tamara Success URL: "
-msgstr ""
+msgstr "Tamara Success URL: "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:305
 msgid "Tamara Cancel URL: "
-msgstr ""
+msgstr "Tamara Cancel URL: "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:306
 msgid "Tamara Failure URL: "
-msgstr ""
+msgstr "Tamara Failure URL: "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:307
 msgid "Tamara Notification URL: "
-msgstr ""
+msgstr "Tamara Notification URL: "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:308
 msgid "Tamara Webhook Id: "
-msgstr ""
+msgstr "Tamara Webhook Id: "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:309
 msgid "Tamara Webhook URL: "
-msgstr ""
+msgstr "Tamara Webhook URL: "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:312
 msgid "Enable Tamara Custom Log Message"
-msgstr ""
+msgstr "تمكين تخصيص رسالة سجل تمارا "
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:315
 msgid "In you tick on this setting, all the message logs will be written and saved to the Tamara custom log file in your upload directory."
-msgstr ""
+msgstr "عند تحديد هذا الإعداد، سيتم كتابة جميع سجلات الرسائل وحفظها في ملف سجل تمارا المخصص في ملف التحميل الخاص بك."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:318
 msgid "Tamara Custom Log file"
-msgstr ""
+msgstr "تخصيص سجل ملف تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:324
 msgid "The log download link will be <strong>available below</strong>, if the value is not empty"
-msgstr ""
+msgstr "سيكون رابط تنزيل السجل <strong>متاحًا أدناه</strong>، إذا لم تكن القيمة فارغة"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:329
 msgid "Tamara Checkout Plugin Version: %s"
-msgstr ""
+msgstr "إصدار ملحق دفع تمارا: %s"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:329
-msgid "WooCommece Version: %s"
-msgstr ""
+msgid "WooCommerce Version: %s"
+msgstr "إصدار ووكومرس: %s"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:329
 msgid "WordPress Version: %s"
-msgstr ""
+msgstr "إصدار ووردبريس: %s"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:329
 msgid "PHP Version: %s"
-msgstr ""
+msgstr "إصدار PHP: %s"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:341
 msgid "Here you can browse some help texts and find solutions for common issues with our plugin."
-msgstr ""
+msgstr "يمكنك هنا تصفح بعض نصوص المساعدة والعثور على حلول للمشكلات الشائعة باستخدام الملحق الإضافي الخاص بنا."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:343
 msgid "If there is any issue with your API URL, API Token, Notification Key or Public Key please contact Tamara Team for support at <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co</a>"
-msgstr ""
+msgstr "إذا كانت هناك أي مشكلة في عنوان URL لواجهة برمجة التطبيقات أو رمز واجهة برمجة التطبيقات أو مفتاح الإشعارات أو المفتاح العام، فيرجى الاتصال بفريق Tamara للحصول على الدعم على <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co </أ>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:347
 msgid "Show More Help Texts"
-msgstr ""
+msgstr "عرض المزيد من نصوص المساعدة"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:351
 msgid "You can use the shortcode with attributes to show Tamara product widget on custom pages e.g. <strong>[tamara_show_popup price=\"600\" currency=\"SAR\" language=\"en\"].</strong>"
-msgstr ""
+msgstr "يمكنك استخدام الرمز القصير مع السمات لإظهار أداة منتج تمارا على الصفحات المخصصة، على سبيل المثال. <strong>[tamara_show_popup السعر=\"600\" العملة=\"SAR\" language=\"en\"].</strong>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:352
 msgid "For Tamara payment success URL, you can use action <strong>after_tamara_success</strong> to handle further actions."
-msgstr ""
+msgstr "بالنسبة إلى عنوان URL لنجاح دفع تمارا، يمكنك استخدام الإجراء <strong>after_tamara_success</strong> للتعامل مع المزيد من الإجراءات."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:353
 msgid "For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions."
-msgstr ""
+msgstr "بالنسبة إلى عنوان URL لإلغاء دفع تمارا، يمكنك استخدام الإجراء <strong>after_tamara_cancel</strong> للتعامل مع المزيد من الإجراءات."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:354
 msgid "For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions."
-msgstr ""
+msgstr "بالنسبة إلى عنوان URL لفشل دفع تمارا، يمكنك استخدام الإجراء <strong>after_tamara_failure</strong> للتعامل مع المزيد من الإجراءات."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:355
 msgid "All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server."
-msgstr ""
+msgstr "ستتم كتابة جميع رسائل سجل التصحيح المرسلة من تمارا وحفظها في ملف سجل تمارا المخصص على الخادم الخاص بك."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:356
-msgid "If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process."
-msgstr ""
+msgid "If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process)."
+msgstr "إذا كنت تريد حل الطلبات المتعلقة عندما تعلمك تمارا، قد ترغب في النقر فوق %s لتمكين المعالجة."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:378
 msgid "Solve Stuck Orders"
-msgstr ""
+msgstr "حل الطلبات المعلقة"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:382
 msgid "Download Custom Log file"
-msgstr ""
+msgstr "تنزيل ملف سجل مخصص"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:449
 msgid "Done! The script to resolve the Stuck Orders has been executed."
-msgstr ""
+msgstr "تم! تم تنفيذ البرنامج النصي لحل الطلبات المعلقة."
 
 #: src/App/Services/Tamara_Client.php:230
 msgid "Tamara Service unavailable! Please try again later."
-msgstr ""
+msgstr "خدمة تمارا غير متوفرة! الرجاء معاودة المحاولة في وقت لاحق."
 
 #: src/App/Services/Tamara_Widget.php:220
 msgid "ATTENTION! SANDBOX MODE, FOR TESTING PURPOSES ONLY, NO REAL TRANSACTIONS HAPPEN. IF YOU ARE THE CUSTOMER, PLEASE DON'T PROCEED!"
-msgstr ""
+msgstr "تنبيه! وضع البيئة التجريبية (SANDBOX MODE) لأغراض الاختبار فقط، لا تحدث أي معاملات حقيقية. إذا كنت العميل، يرجى عدم المتابعة!"
 
 #: src/App/Services/Tamara_Widget.php:221
 msgid "See the <a target=\"_blank\" href=\"https://docs.tamara.co/docs/testing-scenarios\">Tamara Sandbox Testing Guide</a> for more details."
-msgstr ""
+msgstr "راجع <a target=\"_blank\" href=\"https://docs.tamara.co/docs/testing-scenarios\">دليل الاختبار في البيئة التجريبية</a> لمزيد من التفاصيل."
 
 #: src/App/WP/Data/Tamara_WC_Order.php:61
 msgid "Invalid WC_Order"
-msgstr ""
+msgstr "WC_Order غير صالح"
 
 #: src/App/WP/Data/Tamara_WC_Order.php:460
 msgid "Phone and Email are mandatory when checking out with Tamara"
-msgstr ""
+msgstr "يعد الهاتف والبريد الإلكتروني إلزاميين عند تسجيل المغادرة مع تمارا"
 
 #: src/App/WP/Data/Tamara_WC_Order_Refund.php:39
 msgid "Invalid WC_Order_Refund"
-msgstr ""
+msgstr "WC_Order_Refund غير صالح"
 
 #: src/App/WP/Payment_Gateways/Tamara_WC_Payment_Gateway.php:57
 msgid "Tamara - Buy Now Pay Later"
-msgstr ""
+msgstr "تمارا - اشتري الآن وادفع لاحقًا"
 
 #: src/App/WP/Payment_Gateways/Tamara_WC_Payment_Gateway.php:58
 #: src/App/WP/Payment_Gateways/Tamara_WC_Payment_Gateway.php:60
 msgid "Buy Now Pay Later, no hidden fees, with Tamara"
-msgstr ""
+msgstr "اشترِ الآن وادفع لاحقًا، بدون رسوم مخفية، مع تمارا"
 
 #: src/App/WP/Payment_Gateways/Tamara_WC_Payment_Gateway.php:59
 msgid "Tamara Payment Method"
-msgstr ""
+msgstr "طريقة الدفع مع تمارا"
 
 #: src/App/WP/Payment_Gateways/WC_Tamara_Payment_Type.php:29
 msgid "Tamara Pay In 3"
-msgstr ""
+msgstr "قسم فاتورتك على 3 دفعات مع تمارا"
 
 #: src/App/WP/Tamara_Checkout_WP_Plugin.php:420
 msgid "Settings"
-msgstr ""
+msgstr "الإعدادات"
 
 #: src/App/WP/Tamara_Checkout_WP_Plugin.php:539
 #: src/App/WP/Tamara_Checkout_WP_Plugin.php:561
 msgid "Phone"
-msgstr ""
+msgstr "الهاتف"
 
 #: src/App/WP/Tamara_Checkout_WP_Plugin.php:583
 #: src/App/WP/Tamara_Checkout_WP_Plugin.php:605
 msgid "Email"
-msgstr ""
+msgstr "البريد إلاكتروني"
 
 #. translators: %s is for the name of the plugin
 #: tamara-checkout.php:40
 #: tamara-checkout.php:46
 msgid "Plugin <strong>%s</strong> is required."
-msgstr ""
+msgstr "ملحق <strong>%s</strong> مطلوب."
 
 #. translators: %s is for the name of the plugin
 #: tamara-checkout.php:55
 msgid "Plugin <strong>%s</strong> is disabled."
-msgstr ""
+msgstr "ملحق <strong>%s</strong> معطل."
 
 #: public-assets/src/blocks/js/index.js:9
 msgid "Tamara Buy Now Pay Later"
-msgstr ""
+msgstr "اشتري الآن وادفع لاحقًا مع تمارا"
