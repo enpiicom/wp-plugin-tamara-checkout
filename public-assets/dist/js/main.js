@@ -1,1 +1,0 @@
-(()=>{"use strict";var a;(a=jQuery)(document).ready(function(){a(".variations_form").each(function(){a(this).on("found_variation",function(t,n){var i;i=n.display_price,setTimeout(function(){a("tamara-widget").attr("amount",i),window.TamaraWidgetV2.refresh()},1e3)})}),a("input[name=billing_phone]").change(function(){a("body").trigger("update_checkout")})})})();

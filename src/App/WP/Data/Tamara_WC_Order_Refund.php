@@ -36,7 +36,7 @@ class Tamara_WC_Order_Refund extends Tamara_WC_Order {
 	 */
 	public function __construct( WC_Order_Refund $wc_order_refund, $wc_order_id ) {
 		if ( empty( $wc_order_refund->get_id() ) ) {
-			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Invalid WC_Order_Refund' ) ) );
+			throw new Tamara_Exception( wp_kses_post( $this->__( 'Invalid WC_Order_Refund' ) ) );
 		}
 		$this->wc_order_refund = $wc_order_refund;
 

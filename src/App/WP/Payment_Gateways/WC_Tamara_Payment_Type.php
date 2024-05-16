@@ -26,7 +26,7 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 		$this->bind_config( $config );
 		$current_language = Tamara_Checkout_Helper::get_current_language_code();
 		$this->title = ( $current_language === 'ar' ? $this->description_ar : $this->description_en );
-		$this->title = ! empty( $this->title ) ? $this->title : $this->_t( 'Tamara Pay In 3' );
+		$this->title = ! empty( $this->title ) ? $this->title : $this->__( 'Tamara Pay In 3' );
 
 		$this->method_title = $this->title;
 	}

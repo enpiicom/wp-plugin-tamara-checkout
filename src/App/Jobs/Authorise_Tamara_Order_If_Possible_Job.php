@@ -59,7 +59,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	public function __construct( array $config ) {
 		$this->bind_config( $config );
 		if ( empty( $this->wc_order_id ) ) {
-			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Error! Incorrect Order.' ) ) );
+			throw new Tamara_Exception( wp_kses_post( $this->__( 'Error! Incorrect Order.' ) ) );
 		}
 
 		parent::__construct();
@@ -115,10 +115,10 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$new_order_status = $settings->order_status_when_tamara_authorisation_fails;
 		$update_order_status_note = 'Tamara - ';
-		$update_order_status_note .= $this->_t( 'Order authorisation process failed.' );
+		$update_order_status_note .= $this->__( 'Order authorisation process failed.' );
 		$wc_order->update_status( $new_order_status, $update_order_status_note );
 
-		throw new Tamara_Exception( wp_kses_post( $this->_t( 'Order authorised failed.' ) ) );
+		throw new Tamara_Exception( wp_kses_post( $this->__( 'Order authorised failed.' ) ) );
 	}
 
 	/**
@@ -134,18 +134,18 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$this->tamara_wc_order->get_wc_order()->save();
 
 		$new_order_status = $this->tamara_settings()->order_status_on_tamara_authorised;
-		$this->tamara_wc_order->add_tamara_order_note( $this->_t( 'Order authorised successfully.' ) );
+		$this->tamara_wc_order->add_tamara_order_note( $this->__( 'Order authorised successfully.' ) );
 
 		if ( $this->tamara_wc_order->get_tamara_instalments() ) {
 			$update_order_status_note = 'Tamara - ' . sprintf(
-				$this->_t( 'Payment Status: %s, Payment Type: %s, Payment Instalments: %s.' ),
+				$this->__( 'Payment Status: %s, Payment Type: %s, Payment Instalments: %s.' ),
 				$this->tamara_wc_order->get_tamara_payment_status(),
 				$this->tamara_wc_order->get_tamara_payment_type(),
 				$this->tamara_wc_order->get_tamara_instalments()
 			);
 		} else {
 			$update_order_status_note = 'Tamara - ' . sprintf(
-				$this->_t( 'Payment Status: %s, Payment Type: %s.' ),
+				$this->__( 'Payment Status: %s, Payment Type: %s.' ),
 				$this->tamara_wc_order->get_tamara_payment_status(),
 				$this->tamara_wc_order->get_tamara_payment_type()
 			);
@@ -174,7 +174,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			( $tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
 			$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED )
 		) {
-			throw new Tamara_Exception( wp_kses_post( $this->_t( 'Error! Incorrect Order. WC Order ID: ' . $this->wc_order_id . ', Tamara order Status: ' . $tamara_client_response->getStatus() ) ) );
+			throw new Tamara_Exception( wp_kses_post( $this->__( 'Error! Incorrect Order. WC Order ID: ' . $this->wc_order_id . ', Tamara order Status: ' . $tamara_client_response->getStatus() ) ) );
 		}
 
 		$tamara_meta_dto = new WC_Order_Tamara_Meta_DTO();

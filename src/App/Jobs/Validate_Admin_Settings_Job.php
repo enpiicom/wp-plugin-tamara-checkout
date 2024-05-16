@@ -66,11 +66,11 @@ class Validate_Admin_Settings_Job extends Base_Job implements ShouldQueue {
 				],
 			],
 			[
-				'required' => sprintf( $this->_t( '%s: required.' ), ':attribute' ),
+				'required' => sprintf( $this->__( '%s: required.' ), ':attribute' ),
 			],
 			[
-				'sandbox_api_token' => $this->_t( 'Sandbox API Token' ),
-				'live_api_token' => $this->_t( 'Live API Token' ),
+				'sandbox_api_token' => $this->__( 'Sandbox API Token' ),
+				'live_api_token' => $this->__( 'Live API Token' ),
 			]
 		);
 
@@ -140,7 +140,7 @@ class Validate_Admin_Settings_Job extends Base_Job implements ShouldQueue {
 		}
 
 		if ( empty( $value ) ) {
-			return $fail_callback( sprintf( $this->_t( '%s: required.' ), ':attribute' ) );
+			return $fail_callback( sprintf( $this->__( '%s: required.' ), ':attribute' ) );
 		}
 
 		// We validate the attribute `sandbox_api_token` and `live_api_token`
@@ -150,7 +150,7 @@ class Validate_Admin_Settings_Job extends Base_Job implements ShouldQueue {
 		$tamara_client_response = $this->tamara_client()->get_merchant_public_configs( new GetPublicConfigsRequest() );
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
-			return $fail_callback( sprintf( $this->_t( '%s is incorrect.' ), ':attribute' ) );
+			return $fail_callback( sprintf( $this->__( '%s is incorrect.' ), ':attribute' ) );
 		}
 
 		return true;

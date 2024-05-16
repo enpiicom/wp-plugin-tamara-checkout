@@ -152,8 +152,8 @@ class Tamara_Checkout_Helper {
 	 */
 	public static function convert_message( $tamara_message ): string {
 		return ! empty( static::get_error_map()[ $tamara_message ] ) ?
-			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( static::get_error_map()[ $tamara_message ] ) :
-			Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( $tamara_message );
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->__( static::get_error_map()[ $tamara_message ] ) :
+			Tamara_Checkout_WP_Plugin::wp_app_instance()->__( $tamara_message );
 	}
 
 	/**

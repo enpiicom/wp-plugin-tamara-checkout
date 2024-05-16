@@ -14,7 +14,7 @@ class Main_Controller extends Base_Controller {
 		$filepath = realpath( $request->get( 'filepath' ) );
 		if ( ! $filepath ) {
 			throw new Tamara_Exception(
-				wp_kses_post( Tamara_Checkout_WP_Plugin::wp_app_instance()->_t( 'Log file not found or it contains nothing' ) )
+				wp_kses_post( Tamara_Checkout_WP_Plugin::wp_app_instance()->__( 'Log file not found or it contains nothing' ) )
 			);
 		}
 

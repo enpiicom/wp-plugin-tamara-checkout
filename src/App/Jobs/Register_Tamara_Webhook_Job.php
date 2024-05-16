@@ -85,7 +85,7 @@ class Register_Tamara_Webhook_Job extends Base_Job implements ShouldQueue {
 			throw new Exception(
 				wp_kses_post(
 					sprintf(
-						$this->_t( 'Tamara Service timeout or disconnected. Error message: "%s".' ),
+						$this->__( 'Tamara Service timeout or disconnected. Error message: "%s".' ),
 						esc_attr( $tamara_client_response->error_message )
 					)
 				)

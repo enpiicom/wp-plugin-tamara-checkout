@@ -119,7 +119,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 		);
 
 		$order_note = sprintf(
-			$this->_t( 'Order has been refunded successfully. Capture Id: %1$s, Refund Id: %2$s, Refunded amount: %3$s.' ),
+			$this->__( 'Order has been refunded successfully. Capture Id: %1$s, Refund Id: %2$s, Refunded amount: %3$s.' ),
 			$latest_response_tamara_refund->getCaptureId(),
 			$latest_response_tamara_refund->getRefundId(),
 			$latest_request_tamara_refund->getTotalAmount()->getAmount()
@@ -134,10 +134,10 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 * @throws Tamara_Exception
 	 */
 	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
-		$error_message = $this->_t( 'Error when trying to refund with Tamara.' );
+		$error_message = $this->__( 'Error when trying to refund with Tamara.' );
 		$error_message .= "\n";
 		$error_message .= sprintf(
-			$this->_t( 'Error with Tamara API: %s' ),
+			$this->__( 'Error with Tamara API: %s' ),
 			$tamara_api_error->error_message
 		);
 		$this->tamara_wc_order_refund->add_tamara_order_note( $error_message );
@@ -161,7 +161,7 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 
 		$tamara_capture_id = $tamara_wc_order_refund->get_tamara_capture_id();
 		if ( empty( $tamara_capture_id ) ) {
-			$error_message = $this->_t( 'Unable to create a refund. Capture ID not found.' );
+			$error_message = $this->__( 'Unable to create a refund. Capture ID not found.' );
 			$tamara_wc_order_refund->add_tamara_order_note( $error_message );
 
 			throw new Tamara_Exception( wp_kses_post( $error_message ) );

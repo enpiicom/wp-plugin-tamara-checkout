@@ -27,6 +27,7 @@ use Tamara_Checkout\App\Services\Tamara_Client;
 use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
@@ -38,11 +39,13 @@ use Tamara_Checkout\Deps\Tamara\Model\Money;
  */
 class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	use Queue_Trait;
+	use Tamara_Trans_Trait;
 
 	protected $checkout_data_on_runtime = [];
 
 	public function manipulate_hooks(): void {
 		add_action( 'init', [ $this, 'register_tamara_custom_order_statuses' ] );
+		add_action( 'init', [ $this, 'load_text_domain' ] );
 
 		/** For WooCommerce */
 		// Add more payment gateways
@@ -359,35 +362,6 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-	 * Translate a text with gettext context using the plugin's text domain
-	 *
-	 * @param mixed $untranslated_text Text to be translated
-	 *
-	 * @return string Translated tet
-	 * @throws \Exception
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _x( $untranslated_text, $context ): string {
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralContext, WordPress.WP.I18n.NonSingularStringLiteralDomain
-		return _x( $untranslated_text, $context, $this->get_text_domain() );
-	}
-
-	/**
-	 *
-	 * Registers plural strings in POT file using the plugin's text domain, but does not translate them
-	 *
-	 * @param  string  $singular
-	 * @param  string  $plural
-	 *
-	 * @return array
-	 */
-	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-	public function _n_noop( string $singular, string $plural ): array {
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralSingular, WordPress.WP.I18n.NonSingularStringLiteralPlural, WordPress.WP.I18n.NonSingularStringLiteralDomain
-		return _n_noop( $singular, $plural, $this->get_text_domain() );
-	}
-
-	/**
 	 * Register Tamara new statuses
 	 *
 	 * @throws \Exception
@@ -415,7 +389,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	 * @throws Exception
 	 */
 	public function add_plugin_settings_link( $plugin_links ) {
-		$settings_link = '<a href="' . Tamara_Checkout_Helper::get_admin_settings_section_url() . '">' . $this->_t( 'Settings' ) . '</a>';
+		$settings_link = '<a href="' . Tamara_Checkout_Helper::get_admin_settings_section_url() . '">' . $this->__( 'Settings' ) . '</a>';
 		array_unshift( $plugin_links, $settings_link );
 
 		return $plugin_links;
@@ -620,6 +594,17 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 			);
 		}
 	}
+
+	/**
+     * Localize the plugin
+     */
+    public function load_text_domain()
+    {
+        $locale = determine_locale();
+        $mofile = $locale.'.mo';
+		$text_domain = 'tamara';
+        load_textdomain( $text_domain, $this->get_base_path() . '/languages/' . $text_domain . '-' . $mofile);
+    }
 
 	/**
 	 * We want to register all services with this plugin here

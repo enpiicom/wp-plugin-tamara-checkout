@@ -159,15 +159,14 @@ JS_SCRIPT;
 		if ( Tamara_Checkout_Helper::is_tamara_payment_option( $id ) ) {
 			$widget_inline_type = 3;
 			$cart_amount = Tamara_Checkout_Helper::define_total_amount_to_calculate( WC()->cart->total );
-			$description = Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
+			$description = $this->populate_default_description_text_on_checkout();
+			$description .= Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
 				'blocks/tamara-widget',
 				[
 					'widget_inline_type' => $widget_inline_type,
 					'widget_amount' => $cart_amount,
 				]
 			);
-
-			$description .= $this->populate_default_description_text_on_checkout();
 		}
 
 		return $description;
@@ -216,13 +215,10 @@ JS_SCRIPT;
 	 * @throws \Exception
 	 */
 	protected function populate_default_description_text_on_checkout(): string {
-		$description = $this->_t( '*Exclusive for shoppers in Saudi Arabia, UAE, Kuwait and Qatar only.<br>' );
+		$description = '';
 		if ( ! $this->tamara_gateway()->get_settings_vo()->is_live_mode ) {
-			$description .= '<br/>' . $this->_t(
-				'SANDBOX ENABLED.
-							See the <a target="_blank" href="https://app-sandbox.tamara.co">Tamara Sandbox Testing Guide
-							</a> for more details.'
-			);
+			$description .= '<strong style="color: orange;">' . $this->__(
+				"ATTENTION! SANDBOX MODE, FOR TESTING PURPOSES ONLY, NO REAL TRANSACTIONS HAPPEN. IF YOU ARE THE CUSTOMER, PLEASE DON'T PROCEED!") . '</strong><br />' . $this->__('See the <a target="_blank" href="https://docs.tamara.co/docs/testing-scenarios">Tamara Sandbox Testing Guide</a> for more details.');
 		}
 
 		return trim( $description );

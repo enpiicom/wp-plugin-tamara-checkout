@@ -68,7 +68,7 @@ class Update_Tamara_Webhook_Event_Job extends Base_Job implements ShouldQueue {
 		$this->before_handle();
 
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
-		$this->tamara_wc_order->add_tamara_order_note( sprintf( $this->_t( 'Tamara webhook event `%s` for this order has just happened. Tamara Order Id `%s`' ), $this->event_type, $this->tamara_order_id ) );
+		$this->tamara_wc_order->add_tamara_order_note( sprintf( $this->__( 'Tamara webhook event `%s` for this order has just happened. Tamara Order Id `%s`' ), $this->event_type, $this->tamara_order_id ) );
 
 		if ( ! empty( $new_order_status ) ) {
 			$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status );

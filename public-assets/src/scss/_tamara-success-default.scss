@@ -23,7 +23,7 @@
     }
 
     &__logo {
-      background-image: url(../img/tamara-logo.svg);
+      background-image: url(../../img/tamara-logo.svg);
       animation-name: twinkle;
       animation-duration: 0.5s;
       animation-iteration-count: infinite;
@@ -81,7 +81,7 @@ html[dir='rtl'] body {
   .tamara-success-default {
     &__heading {
       &__logo {
-        background-image: url(../img/tamara-logo-ar.svg);
+        background-image: url(../../img/tamara-logo-ar.svg);
       }
     }
   }
