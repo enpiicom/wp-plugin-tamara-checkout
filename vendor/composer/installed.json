@@ -7,16 +7,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "21e75b02e76d0b182dadd81eb0c63638f0685236"
+                "reference": "e64cd075e00ee985ea83ace065bd8281af864476"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/21e75b02e76d0b182dadd81eb0c63638f0685236",
-                "reference": "21e75b02e76d0b182dadd81eb0c63638f0685236",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/e64cd075e00ee985ea83ace065bd8281af864476",
+                "reference": "e64cd075e00ee985ea83ace065bd8281af864476",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3|^8.0.0"
+                "php": "^7.3|^8.0"
             },
             "time": "2024-05-16T15:14:04+00:00",
             "type": "wordpress-muplugin",
@@ -47,12 +47,12 @@
                 {
                     "name": "Trac Nguyen",
                     "email": "npbtrac@yahoo.com",
-                    "homepage": "https://enpii.com/users/trac-nguyen",
+                    "homepage": "https://enpii.com/members/trac-nguyen",
                     "role": "Developer"
                 },
                 {
                     "name": "Loi Le",
-                    "homepage": "https://enpii.com/users/loi-le",
+                    "homepage": "https://enpii.com/members/loi-le",
                     "role": "Developer"
                 }
             ],
@@ -63,6 +63,61 @@
                 "source": "https://github.com/enpiicom/wp-plugin-enpii-base/tree/wp-release"
             },
             "install-path": "../enpii/enpii-base"
+        },
+        {
+            "name": "mcaskill/composer-exclude-files",
+            "version": "v3.0.1",
+            "version_normalized": "3.0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mcaskill/composer-plugin-exclude-files.git",
+                "reference": "f7dd8dbb0b1bf9b0269db07e05460f81066cf22b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/f7dd8dbb0b1bf9b0269db07e05460f81066cf22b",
+                "reference": "f7dd8dbb0b1bf9b0269db07e05460f81066cf22b",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.3",
+                "php": "^7.2.5 || ^8.0"
+            },
+            "require-dev": {
+                "composer/composer": "^2.3",
+                "phpstan/phpstan": "^1.7",
+                "symfony/phpunit-bridge": "^6.0"
+            },
+            "time": "2023-05-24T17:29:24+00:00",
+            "type": "composer-plugin",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                },
+                "class": "McAskill\\Composer\\ExcludeFilePlugin"
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "McAskill\\Composer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chauncey McAskill",
+                    "email": "chauncey@mcaskill.ca"
+                }
+            ],
+            "description": "Exclude files from autoload_files.php",
+            "support": {
+                "issues": "https://github.com/mcaskill/composer-plugin-exclude-files/issues",
+                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v3.0.1"
+            },
+            "install-path": "../mcaskill/composer-exclude-files"
         }
     ],
     "dev": true,

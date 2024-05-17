@@ -22,6 +22,10 @@ class ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a
             'Tamara_Checkout\\Deps\\' => 21,
             'Tamara_Checkout\\' => 16,
         ),
+        'M' => 
+        array (
+            'McAskill\\Composer\\' => 18,
+        ),
         'E' => 
         array (
             'Enpii_Base\\Deps\\' => 16,
@@ -45,6 +49,10 @@ class ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a
         'Tamara_Checkout\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+        'McAskill\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mcaskill/composer-exclude-files/src',
         ),
         'Enpii_Base\\Deps\\' => 
         array (

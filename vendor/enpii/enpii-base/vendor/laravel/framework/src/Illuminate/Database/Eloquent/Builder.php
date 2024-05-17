@@ -108,13 +108,11 @@ class Builder implements BuilderContract
         'getbindings',
         'getconnection',
         'getgrammar',
-        'getrawbindings',
         'implode',
         'insert',
         'insertgetid',
         'insertorignore',
         'insertusing',
-        'insertorignoreusing',
         'max',
         'min',
         'raw',
@@ -1455,9 +1453,9 @@ class Builder implements BuilderContract
         // Here we'll check if the given subset of where clauses contains any "or"
         // booleans and in this case create a nested where expression. That way
         // we don't add any unnecessary nesting thus keeping the query clean.
-        if ($whereBooleans->contains(fn ($logicalOperator) => str_contains($logicalOperator, 'or'))) {
+        if ($whereBooleans->contains('or')) {
             $query->wheres[] = $this->createNestedWhere(
-                $whereSlice, str_replace(' not', '', $whereBooleans->first())
+                $whereSlice, $whereBooleans->first()
             );
         } else {
             $query->wheres = array_merge($query->wheres, $whereSlice);
@@ -1726,18 +1724,6 @@ class Builder implements BuilderContract
         return $this->getQuery()->getConnection()->transactionLevel() > 0
             ? $this->getQuery()->getConnection()->transaction($scope)
             : $scope();
-    }
-
-    /**
-     * Get the Eloquent builder instances that are used in the union of the query.
-     *
-     * @return \Illuminate\Support\Collection
-     */
-    protected function getUnionBuilders()
-    {
-        return isset($this->query->unions)
-            ? collect($this->query->unions)->pluck('query')
-            : collect();
     }
 
     /**

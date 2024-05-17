@@ -40,15 +40,9 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	use Enpii_Base_Trans_Trait;
 
 	public function boot() {
-		if ( $this->app->runningInConsole() ) {
-			// Publish migrations rules
-			$this->publishes(
-				[
-					$this->get_base_path() . '/database/migrations' => database_path( 'migrations' ),
-				],
-				[ 'enpii-base-migrations', 'laravel-migrations' ]
-			);
+		parent::boot();
 
+		if ( $this->app->runningInConsole() ) {
 			// Publish assets
 			$this->publishes(
 				[
@@ -78,8 +72,7 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 				]
 			);
 		}
-
-		parent::boot();
+		$this->loadMigrationsFrom( __DIR__ . '/../../../database/migrations' );
 	}
 
 	public function get_name(): string {

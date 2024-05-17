@@ -42,9 +42,7 @@
   "config": {
     "platform-check": false,
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "mcaskill/composer-exclude-files": true,
-      "composer/installers": true
+      "mcaskill/composer-exclude-files": true
     }
   },
   "extra": {

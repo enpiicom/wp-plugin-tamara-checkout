@@ -165,7 +165,7 @@ class Tamara_Checkout_Helper {
 		return [
 			'total_amount_invalid_limit_24hrs_gmv' => 'We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method.',
 			'tamara_disabled' => 'Tamara is currently unavailable, please try again later.',
-			'consumer_invalid_phone_number' => 'Invalid Consumer Phone Number',
+			'consumer_invalid_phone_number' => 'Invalid Consumer Phone Number.',
 			'invalid_phone_number' => 'Invalid Phone Number.',
 			'total_amount_invalid_currency' => 'We do not support cross currencies. Please select the correct currency for your country.',
 			'billing_address_invalid_phone_number' => 'Invalid Billing Address Phone Number.',

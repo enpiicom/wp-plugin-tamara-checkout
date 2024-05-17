@@ -43,7 +43,7 @@ class Session_Service_Provider extends SessionServiceProvider {
 			|
 			*/
 
-			'driver' => env( 'WP_APP_SESSION_DRIVER', 'file' ),
+			'driver' => \Enpii_Base\App\Support\Enpii_Base_Helper::is_setup_app_completed() ? env( 'WP_APP_SESSION_DRIVER', 'database' ) : 'file',
 
 			/*
 			|--------------------------------------------------------------------------

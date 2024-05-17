@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b
+class ComposerStaticInit3cae76ab2ed774fad6e5d3aacce26696
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -26,7 +26,6 @@ class ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
         '265b4faa2b3a9766332744949e83bf97' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/helpers.php',
         'c7a3c339e7e14b60e06a2d7fcce9476b' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Events/functions.php',
-        'f57d353b41eb2e234b26064d63d8c5dd' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Filesystem/functions.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
         'eed9c7469f94573c0d97cc45de79b754' => __DIR__ . '/..' . '/spatie/laravel-html/src/helpers.php',
         '05606250504f1174fd702cad64105781' => __DIR__ . '/../..' . '/src/Foundation/Support/helpers-utils.php',
@@ -141,8 +140,6 @@ class ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b
             'Doctrine\\Deprecations\\' => 22,
             'Doctrine\\DBAL\\' => 14,
             'Doctrine\\Common\\Lexer\\' => 22,
-            'Doctrine\\Common\\Cache\\' => 22,
-            'Doctrine\\Common\\' => 16,
             'Dflydev\\DotAccessData\\' => 22,
         ),
         'C' => 
@@ -424,14 +421,6 @@ class ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b
         array (
             0 => __DIR__ . '/..' . '/doctrine/lexer/src',
         ),
-        'Doctrine\\Common\\Cache\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/cache/lib/Doctrine/Common/Cache',
-        ),
-        'Doctrine\\Common\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/event-manager/src',
-        ),
         'Dflydev\\DotAccessData\\' => 
         array (
             0 => __DIR__ . '/..' . '/dflydev/dot-access-data/src',
@@ -539,9 +528,9 @@ class ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit5ce82e003b54020ea5cbf52cab81086b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit3cae76ab2ed774fad6e5d3aacce26696::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit3cae76ab2ed774fad6e5d3aacce26696::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit3cae76ab2ed774fad6e5d3aacce26696::$classMap;
 
         }, null, ClassLoader::class);
     }

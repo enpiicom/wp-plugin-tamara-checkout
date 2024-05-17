@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Enpii_Base\App\Support;
 
 class Enpii_Base_Helper {
+	public static $version_option;
+
 	public static function get_current_url(): string {
 		if ( empty( $_SERVER['SERVER_NAME'] ) && empty( $_SERVER['HTTP_HOST'] ) ) {
 			return '';
@@ -107,5 +109,13 @@ class Enpii_Base_Helper {
 		}
 
 		return trim( substr( $site_url, $reverse_pos * ( -1 ) ), '/' );
+	}
+
+	public static function is_setup_app_completed() {
+		if ( empty( static::$version_option ) ) {
+			static::$version_option = (string) get_option( App_Const::OPTION_VERSION, '0.0.0' );
+		}
+
+		return version_compare( static::$version_option, ENPII_BASE_PLUGIN_VERSION, '>=' );
 	}
 }

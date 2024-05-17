@@ -919,27 +919,6 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     }
 
     /**
-     * Select specific values from the items within the collection.
-     *
-     * @param  \Illuminate\Support\Enumerable<array-key, TKey>|array<array-key, TKey>|string|null  $keys
-     * @return static
-     */
-    public function select($keys)
-    {
-        if (is_null($keys)) {
-            return new static($this->items);
-        }
-
-        if ($keys instanceof Enumerable) {
-            $keys = $keys->all();
-        }
-
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        return new static(Arr::select($this->items, $keys));
-    }
-
-    /**
      * Get and remove the last N items from the collection.
      *
      * @param  int  $count
@@ -998,11 +977,8 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     /**
      * Push all of the given items onto the collection.
      *
-     * @template TConcatKey of array-key
-     * @template TConcatValue
-     *
-     * @param  iterable<TConcatKey, TConcatValue>  $source
-     * @return static<TKey|TConcatKey, TValue|TConcatValue>
+     * @param  iterable<array-key, TValue>  $source
+     * @return static
      */
     public function concat($source)
     {
@@ -1400,7 +1376,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
     public function sortBy($callback, $options = SORT_REGULAR, $descending = false)
     {
         if (is_array($callback) && ! is_callable($callback)) {
-            return $this->sortByMany($callback, $options);
+            return $this->sortByMany($callback);
         }
 
         $results = [];
@@ -1431,14 +1407,13 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      * Sort the collection using multiple comparisons.
      *
      * @param  array<array-key, (callable(TValue, TValue): mixed)|(callable(TValue, TKey): mixed)|string|array{string, string}>  $comparisons
-     * @param  int  $options
      * @return static
      */
-    protected function sortByMany(array $comparisons = [], int $options = SORT_REGULAR)
+    protected function sortByMany(array $comparisons = [])
     {
         $items = $this->items;
 
-        uasort($items, function ($a, $b) use ($comparisons, $options) {
+        uasort($items, function ($a, $b) use ($comparisons) {
             foreach ($comparisons as $comparison) {
                 $comparison = Arr::wrap($comparison);
 
@@ -1456,21 +1431,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
                         $values = array_reverse($values);
                     }
 
-                    if (($options & SORT_FLAG_CASE) === SORT_FLAG_CASE) {
-                        if (($options & SORT_NATURAL) === SORT_NATURAL) {
-                            $result = strnatcasecmp($values[0], $values[1]);
-                        } else {
-                            $result = strcasecmp($values[0], $values[1]);
-                        }
-                    } else {
-                        $result = match ($options) {
-                            SORT_NUMERIC => intval($values[0]) <=> intval($values[1]),
-                            SORT_STRING => strcmp($values[0], $values[1]),
-                            SORT_NATURAL => strnatcmp($values[0], $values[1]),
-                            SORT_LOCALE_STRING => strcoll($values[0], $values[1]),
-                            default => $values[0] <=> $values[1],
-                        };
-                    }
+                    $result = $values[0] <=> $values[1];
                 }
 
                 if ($result === 0) {
@@ -1493,16 +1454,6 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      */
     public function sortByDesc($callback, $options = SORT_REGULAR)
     {
-        if (is_array($callback) && ! is_callable($callback)) {
-            foreach ($callback as $index => $key) {
-                $comparison = Arr::wrap($key);
-
-                $comparison[1] = 'desc';
-
-                $callback[$index] = $comparison;
-            }
-        }
-
         return $this->sortBy($callback, $options, true);
     }
 

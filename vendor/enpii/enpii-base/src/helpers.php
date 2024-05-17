@@ -108,8 +108,7 @@ if ( ! function_exists( 'enpii_base_maybe_redirect_to_setup_app' ) ) {
 	 * @return bool
 	 */
 	function enpii_base_maybe_redirect_to_setup_app(): void {
-		$version_option = get_option( App_Const::OPTION_VERSION );
-		if ( ( empty( $version_option ) ) ) {
+		if ( ! Enpii_Base_Helper::is_setup_app_completed() ) {
 			// We only want to redirect if the setup did not fail previously
 			if ( ! enpii_base_wp_app_setup_failed() ) {
 				Enpii_Base_Helper::redirect_to_setup_url();

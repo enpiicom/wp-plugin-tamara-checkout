@@ -10,17 +10,17 @@
     {
       "name": "Trac Nguyen",
       "email": "npbtrac@yahoo.com",
-      "homepage": "https://enpii.com/users/trac-nguyen",
+      "homepage": "https://enpii.com/members/trac-nguyen",
       "role": "Developer"
     },
     {
       "name": "Loi Le",
-      "homepage": "https://enpii.com/users/loi-le",
+      "homepage": "https://enpii.com/members/loi-le",
       "role": "Developer"
     }
   ],
   "require": {
-    "php": "^7.3|^8.0.0"
+    "php": "^7.3|^8.0"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -61,9 +61,9 @@
     },
     "platform-check": false,
     "allow-plugins": {
-      "composer/installers": true,
       "mcaskill/composer-exclude-files": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
     },
     "vendor-dir": "./vendor",
     "sort-packages": true
