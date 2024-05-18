@@ -139,7 +139,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 			'tamara_order_statuses_mapping' => [
 				'title' => $this->__( 'Order Statuses Mappings' ),
 				'type' => 'title',
-				'description' => '<p>Mapping status for order according to Tamara action result.</p>
+				'description' => '<p>' . $this->__( 'Mapping status for order according to Tamara action result.' ) . '</p>
                 <div class="tamara-order-statuses-mappings-manage button-primary">' . $this->__( 'Manage Order Statuses Mappings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'tamara_authorise_done' => [
@@ -180,7 +180,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 			'tamara_order_statuses_trigger' => [
 				'title' => $this->__( 'Order Statuses to Trigger Tamara Events' ),
 				'type' => 'title',
-				'description' => '<p>Update order statuses used to trigger events to Tamara.</p>
+				'description' => '<p>' . $this->__( 'Update order statuses used to trigger events to Tamara.' ) . '</p>
                 <div class="tamara-order-statuses-trigger-manage button-primary">' . $this->__( 'Manage Order Statuses Trigger' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'tamara_cancel_order' => [
@@ -218,7 +218,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 			'tamara_general_settings' => [
 				'title' => $this->__( 'Tamara Advanced Settings' ),
 				'type' => 'title',
-				'description' => __( 'Configure Tamara Advanced Settings <br> <p class="tamara-highlight">Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.</p>' )
+				'description' => $this->__( 'Configure Tamara Advanced Settings' ) . '<br> <p class="tamara-highlight">' . $this->__( 'Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.') . '</p>'
 				. '<div class="tamara-advanced-settings-manage button-primary">' . $this->__( 'Show Tamara Advanced Settings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'force_checkout_phone' => [
@@ -226,7 +226,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 				'label' => $this->__( 'Enable Billing/Shipping Phone Field at Checkout step' ),
 				'default' => 'yes',
 				'type' => 'checkbox',
-				'description' => __( 'If you tick on this setting, the billing/shipping Phone field will be forced to display on the checkout screen, which is required to use for Tamara payment gateway.' ),
+				'description' => $this->__( 'If you tick on this setting, the billing/shipping Phone field will be forced to display on the checkout screen, which is required to use for Tamara payment gateway.' ),
 			],
 			'force_checkout_email' => [
 				'title' => $this->__( 'Force Enable Email' ),

@@ -705,4 +705,13 @@ msgstr ""
 msgid "We do not support your delivery country."
 msgstr ""
 
+msgid "Mapping status for order according to Tamara action result."
+msgstr ""
+
+msgid "Configure Tamara Advanced Settings"
+msgstr ""
+
+msgid "Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details."
+msgstr ""
+
 

@@ -45,7 +45,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 
 	public function manipulate_hooks(): void {
 		add_action( 'init', [ $this, 'register_tamara_custom_order_statuses' ] );
-		add_action( 'init', [ $this, 'load_text_domain' ] );
+		add_action( 'woocommerce_init', [ $this, 'load_text_domain' ] );
 
 		/** For WooCommerce */
 		// Add more payment gateways
