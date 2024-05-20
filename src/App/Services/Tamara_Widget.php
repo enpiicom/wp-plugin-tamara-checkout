@@ -218,7 +218,8 @@ JS_SCRIPT;
 		$description = '';
 		if ( ! $this->tamara_gateway()->get_settings_vo()->is_live_mode ) {
 			$description .= '<strong style="color: orange;">' . $this->__(
-				"ATTENTION! SANDBOX MODE, FOR TESTING PURPOSES ONLY, NO REAL TRANSACTIONS HAPPEN. IF YOU ARE THE CUSTOMER, PLEASE DON'T PROCEED!") . '</strong><br />' . $this->__('See the <a target="_blank" href="https://docs.tamara.co/docs/testing-scenarios">Tamara Sandbox Testing Guide</a> for more details.');
+				"ATTENTION! SANDBOX MODE, FOR TESTING PURPOSES ONLY, NO REAL TRANSACTIONS HAPPEN. IF YOU ARE THE CUSTOMER, PLEASE DON'T PROCEED!"
+			) . '</strong><br />' . $this->__( 'See the <a target="_blank" href="https://docs.tamara.co/docs/testing-scenarios">Tamara Sandbox Testing Guide</a> for more details.' );
 		}
 
 		return trim( $description );

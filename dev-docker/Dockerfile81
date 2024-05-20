@@ -1,19 +1,33 @@
 FROM npbtrac/php81_web
 
-# Putting config files to their locations
-COPY ./dev-docker/config/nginx/http.conf /etc/nginx/site-opts.d/http.conf
-COPY ./dev-docker/config/nginx/https.conf /etc/nginx/site-opts.d/https.conf
+RUN apt update -y
+RUN apt install php8.1-xdebug
 
-COPY ./dev-docker/wordpress/ /var/www/html/public
-COPY ./dev-docker/config/wordpress/wp-config.php /var/www/html/public/wp-config.php
-COPY ./dev-miscs/wp-cli.yml /var/www/html/public/wp-cli.yml
-COPY ./ /var/www/html/public/wp-content/plugins/tamara-checkout/
+# Install Node 20 and Yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+	&& apt install -y nodejs \
+	&& npm install -g yarn
 
+# Install WP CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-# Prepare folders
+# Putting config files to their locations
+COPY ./dev-docker/config/nginx/http.conf /etc/nginx/site-opts.d/http.conf
+COPY ./dev-docker/config/nginx/https.conf /etc/nginx/site-opts.d/https.conf
+COPY ./dev-docker/config/php/custom.ini /etc/php/8.1/cli/conf.d/99-custom.ini
+COPY ./dev-docker/config/php/xdebug.ini /etc/php/8.1/cli/conf.d/20-xdebug.ini
+
+# Do not mount the /init file in docker command or docker compose as it would cause the
+#	the script cannot be executed
+COPY ./dev-docker/init /init
+RUN chmod +x /init
+
+COPY ./dev-docker/wordpress/ /var/www/html/public
+COPY ./ /var/www/html/public/wp-content/plugins/tamara-checkout/
+
+### Prepare WP folders
 RUN mkdir -p /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
 RUN chmod -R 777 /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
 

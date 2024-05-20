@@ -3,40 +3,28 @@
   "type": "wordpress-plugin",
   "description": "The WordPress plugin for Tamara payment gateway http://tamara.co",
   "license": "MIT",
-  "keywords": [
-    "wordpress",
-    "tamara",
-    "payment gateway",
-    "bnpl",
-    "mena",
-    "enpii",
-    "enpii-base",
-    "laravel",
-    "wordpress laravel"
-  ],
-  "authors": [
-    {
-      "name": "Tamara Team",
-      "email": "dev@tamara.co",
-      "homepage": "https://tamara.co"
-    },
-    {
-      "name": "Trac Nguyen",
-      "email": "npbtrac@yahoo.com",
-      "homepage": "https://github.com/npbtrac"
-    }
-  ],
   "require": {
+    "composer/installers": "~1.12.0",
+    "mcaskill/composer-exclude-files": "~3.0.0",
     "enpii/enpii-base": "dev-wp-release",
     "php": "^7.3|^8.0"
   },
   "require-dev": {
-    "composer/installers": "~1.0",
-    "johnpbloch/wordpress-core": "~5.2.0",
+    "johnpbloch/wordpress-core": "~5.4.0",
     "wpackagist-plugin/woocommerce-product-price-based-on-countries": "^3.0.0",
     "wpackagist-plugin/query-monitor": "^2.15",
     "wpackagist-theme/storefront": "^4.0",
-    "wp-plugins/woocommerce": "4.1.0"
+    "wp-plugins/woocommerce": "*",
+    "automattic/vipwpcs": "^3.0.0",
+    "phpcompatibility/php-compatibility": "^9.3.5",
+    "dealerdirect/phpcodesniffer-composer-installer": "~1.0.0",
+    "phpunit/phpunit": "^9.6",
+    "mockery/mockery": "^1.6",
+    "brain/monkey": "^2.6.0",
+    "10up/wp_mock": "^1.0.0",
+    "codeception/codeception": "^5.0.0",
+    "codeception/module-asserts": "^3.0",
+    "codeception/module-phpbrowser": "^3.0"
   },
   "repositories": [
     {
@@ -71,10 +59,11 @@
     }
   },
   "config": {
-    "platform-check": false,
+    "platform-check": true,
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
-      "composer/installers": true
+      "composer/installers": true,
+      "mcaskill/composer-exclude-files": true
     }
   },
   "extra": {

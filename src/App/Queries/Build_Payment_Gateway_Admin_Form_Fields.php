@@ -352,8 +352,9 @@ class Build_Payment_Gateway_Admin_Form_Fields {
                             <li>' . $this->__( 'For Tamara payment success URL, you can use action <strong>after_tamara_success</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->__( 'For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->__( 'For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions.' ) . '</li>
-                            <li>' . $this->__( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>
-                            <li>' . sprintf( $this->__( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process).' ), $this->build_solve_stuck_orders_link() ) . '</li>
+                            <li>' . $this->__( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>' .
+							( $this->current_settings->api_token ? '<li>' . sprintf( $this->__( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process).' ), $this->build_solve_stuck_orders_link() ) . '</li>' : '' )
+							. '
                         </ul>
                     </div>
                 </div>';

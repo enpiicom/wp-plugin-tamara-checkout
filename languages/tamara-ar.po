@@ -677,3 +677,41 @@ msgstr "ملحق <strong>%s</strong> معطل."
 #: public-assets/src/blocks/js/index.js:9
 msgid "Tamara Buy Now Pay Later"
 msgstr "اشتري الآن وادفع لاحقًا مع تمارا"
+
+msgid "We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method."
+msgstr ""
+
+msgid "Tamara is currently unavailable, please try again later."
+msgstr ""
+
+msgid "Invalid Consumer Phone Number."
+msgstr ""
+
+msgid "Invalid Phone Number."
+msgstr ""
+
+msgid "We do not support cross currencies. Please select the correct currency for your country."
+msgstr ""
+
+msgid "Invalid Billing Address Phone Number."
+msgstr ""
+
+msgid "Invalid Shipping Address Phone Number."
+msgstr ""
+
+msgid "The grand total of order is over/under limit of Tamara."
+msgstr ""
+
+msgid "We do not support your delivery country."
+msgstr ""
+
+msgid "Mapping status for order according to Tamara action result."
+msgstr ""
+
+msgid "Configure Tamara Advanced Settings"
+msgstr ""
+
+msgid "Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details."
+msgstr ""
+
+

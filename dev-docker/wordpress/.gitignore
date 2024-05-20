@@ -2,3 +2,6 @@
 !.gitignore
 !wp-content
 !wp-content/**/.gitignore
+!wp-cli.yml
+!wp-enpii-base-artisan
+!wp-config.php

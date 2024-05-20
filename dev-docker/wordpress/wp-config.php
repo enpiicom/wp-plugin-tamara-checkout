@@ -18,6 +18,20 @@
  * @package WordPress
  */
 
+$dotenv_filepath = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
+if ( file_exists( $dotenv_filepath ) ) {
+	require_once dirname(__FILE__) . '/vendor/autoload.php';
+
+	$dotenv_loader = new josegonzalez\Dotenv\Loader( $dotenv_filepath );
+	// Parse the .env file and send the parsed .env file to the $_ENV variable
+	//	and put to getenv()
+	$dotenv_loader->parse()->toEnv()->putenv( true );
+}
+
+// We want to define this constant for getting the correct vendor folder
+//	in plugins, mu-plugins, themes..
+define( 'COMPOSER_VENDOR_DIR', dirname(__FILE__) . '/vendor' );
+
 // ** MySQL settings ** //
 /** The name of the database for WordPress */
 define( 'DB_NAME', getenv( 'DB_NAME' ) );
@@ -37,24 +51,12 @@ define( 'DB_CHARSET', 'utf8' );
 /** The Database Collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', '' );
 
-define( 'DB_TABLE_PREFIX', getenv( 'DB_TABLE_PREFIX' ) ? getenv( 'DB_TABLE_PREFIX' ) : 'wp_' );
-
 // Extra db params
-if ( getenv( 'DB_PORT' ) ) {
-	define( 'DB_PORT', getenv( 'DB_PORT' ) );
-}
-
-if ( getenv( 'DB_SOCKET' ) && ! DB_HOST ) {
-	define( 'DB_SOCKET', getenv( 'DB_SOCKET' ) );
-}
-
-if ( getenv( 'DB_STRICT_MODE' ) ) {
-	define( 'DB_STRICT_MODE', getenv( 'DB_STRICT_MODE' ) );
-}
-
-if ( getenv( 'DB_ENGINE' ) ) {
-	define( 'DB_ENGINE', getenv( 'DB_ENGINE' ) );
-}
+define( 'DB_PORT', getenv( 'DB_PORT' ) !== false ? getenv( 'DB_PORT' ) : '3306' );
+define( 'DB_SOCKET', getenv( 'DB_SOCKET' ) !== false ? getenv( 'DB_SOCKET' ) : '/var/lib/mysql/mysql.sock' );
+define( 'DB_TABLE_PREFIX', getenv( 'DB_TABLE_PREFIX' ) !== false ? getenv( 'DB_TABLE_PREFIX' ) : 'wp_' );
+define( 'DB_STRICT_MODE', getenv( 'DB_STRICT_MODE' ) !== false ? ! ! getenv( 'DB_STRICT_MODE' ) : false );
+define( 'DB_ENGINE', getenv( 'DB_ENGINE' ) !== false ? getenv( 'DB_ENGINE' ) : 'INNODB' );
 
 /**
  * Authentication Unique Keys and Salts.
@@ -85,31 +87,38 @@ $table_prefix = DB_TABLE_PREFIX;
 
 /* That's all, stop editing! Happy blogging. */
 define( 'WP_ENV', getenv( 'WP_ENV' ) );
-define( 'WP_DEBUG', isset($debug_override) ? $debug_override : ! ! getenv( 'WP_DEBUG' ) );
-define( 'WP_DEBUG_DISPLAY', ! ! getenv( 'WP_DEBUG_DISPLAY' )  );
+define( 'WP_DEBUG', isset( $debug_override ) ? $debug_override : ! ! getenv( 'WP_DEBUG' ) );
+define( 'WP_DEBUG_DISPLAY', ! ! getenv( 'WP_DEBUG_DISPLAY' ) );
 define( 'WP_DEBUG_LOG', ( getenv( 'WP_DEBUG_LOG' ) ? getenv( 'WP_DEBUG_LOG' ) : 1 ) ); // set to 'true' or 1 means the default debug.log file would be wp-content/debug.log
-
 define( 'SAVEQUERIES', ! ! getenv( 'SAVEQUERIES' ) );
+
+define( 'ALLOW_UNFILTERED_UPLOADS', getenv( 'ALLOW_UNFILTERED_UPLOADS' ) ? ! ! getenv( 'ALLOW_UNFILTERED_UPLOADS' ) : false);
+
+define( 'AUTOMATIC_UPDATER_DISABLED', ! ! getenv( 'AUTOMATIC_UPDATER_DISABLED' ) ?: true);
+define( 'WP_AUTO_UPDATE_CORE', ! ! getenv( 'WP_AUTO_UPDATE_CORE' ) ?: false);
+
+define( 'DISABLE_WP_CRON', ! ! getenv( 'DISABLE_WP_CRON' ) ?: true);
+define( 'WP_CRON_LOCK_TIMEOUT', getenv( 'WP_CRON_LOCK_TIMEOUT' ) ?: 60 );
 
 // For Multisite
 // https://wordpress.org/documentation/article/nginx/
-define( 'WP_ALLOW_MULTISITE', isset($_ENV['WP_ALLOW_MULTISITE']) ? ! ! getenv( 'WP_ALLOW_MULTISITE' ) : false );
-define( 'MULTISITE', isset($_ENV['MULTISITE']) ? ! ! getenv( 'MULTISITE' ) : false );
-define( 'SUBDOMAIN_INSTALL', isset($_ENV['SUBDOMAIN_INSTALL']) ? ! ! getenv( 'SUBDOMAIN_INSTALL' ) : false );
-define( 'DOMAIN_CURRENT_SITE', isset($_ENV['DOMAIN_CURRENT_SITE']) ? getenv( 'DOMAIN_CURRENT_SITE' ) : '' );
-define( 'PATH_CURRENT_SITE', isset($_ENV['PATH_CURRENT_SITE']) ? getenv( 'PATH_CURRENT_SITE' ) : '/' );
-define( 'SITE_ID_CURRENT_SITE', isset($_ENV['SITE_ID_CURRENT_SITE']) ? (int) getenv( 'SITE_ID_CURRENT_SITE' ) : 1 );
-define( 'BLOG_ID_CURRENT_SITE', isset($_ENV['BLOG_ID_CURRENT_SITE']) ? (int) getenv( 'BLOG_ID_CURRENT_SITE' ) : 1 );
+define( 'WP_ALLOW_MULTISITE', getenv( 'WP_ALLOW_MULTISITE' ) !== false ? ! ! getenv( 'WP_ALLOW_MULTISITE' ) : false );
+define( 'MULTISITE', getenv( 'MULTISITE' ) !== false ? ! ! getenv( 'MULTISITE' ) : false );
+define( 'SUBDOMAIN_INSTALL', getenv( 'SUBDOMAIN_INSTALL' ) !== false ? ! ! getenv( 'SUBDOMAIN_INSTALL' ) : false );
+define( 'DOMAIN_CURRENT_SITE', getenv( 'DOMAIN_CURRENT_SITE' ) !== false ? getenv( 'DOMAIN_CURRENT_SITE' ) : '' );
+define( 'PATH_CURRENT_SITE', getenv( 'PATH_CURRENT_SITE' ) !== false ? getenv( 'PATH_CURRENT_SITE' ) : '/' );
+define( 'SITE_ID_CURRENT_SITE', getenv( 'SITE_ID_CURRENT_SITE' ) !== false ? (int) getenv( 'SITE_ID_CURRENT_SITE' ) : 1 );
+define( 'BLOG_ID_CURRENT_SITE', getenv( 'BLOG_ID_CURRENT_SITE' ) !== false ? (int) getenv( 'BLOG_ID_CURRENT_SITE' ) : 1 );
 
 // Important on using different domain
 // The domain structure should be: a domain for the main site of the network and sub-domains for the sub-site or other domains for the sub site e.g.:
-//	- demo.dev-srv.net for the main site
-//  - sub1.demo.dev-srv.net sub2.demo.dev-srv.net ... for the sub sites
+//	- demo.enpii.com for the main site
+//  - sub1.demo.enpii.com sub2.demo.enpii.com ... for the sub sites
 //	- or abc.com, xyz.dev ... for the sub sites, this time, the cookie domain
 //		should be set to that domain
-if (MULTISITE) {
+if ( defined( 'WP_ALLOW_MULTISITE' ) && WP_ALLOW_MULTISITE && defined( 'MULTISITE' ) && MULTISITE) {
 	$current_domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
-	if ($current_domain and strpos($current_domain, DOMAIN_CURRENT_SITE) === false) {
+	if (DOMAIN_CURRENT_SITE && $current_domain && strpos($current_domain, DOMAIN_CURRENT_SITE) === false) {
 		define( 'COOKIE_DOMAIN', $current_domain );
 	}
 }
@@ -126,10 +135,23 @@ if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_P
 	$_SERVER['HTTPS'] = 'on';
 }
 
+define('WP_FORCE_HTTPS', getenv('WP_FORCE_HTTPS') ? !! getenv('WP_FORCE_HTTPS'): false);
+define('WP_HTTPS_EXCLUDE_DOMAINS', getenv('WP_HTTPS_EXCLUDE_DOMAINS') ?: '');
+if (!empty($_SERVER['HTTP_HOST']) && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') && (WP_FORCE_HTTPS && strpos($_SERVER['HTTP_HOST'], WP_HTTPS_EXCLUDE_DOMAINS) === false)) {
+	header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], 301);
+	exit;
+}
+
 if ( isset( $_SERVER['HTTP_HOST'] ) ) {
 	$http_protocol = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
-	define( 'WP_HOME', $http_protocol . '://' . $_SERVER['HTTP_HOST'] );
-	define( 'WP_SITEURL', $http_protocol . '://' . $_SERVER['HTTP_HOST'] );
+
+	$wp_siteurl = $http_protocol . '://' . $_SERVER['HTTP_HOST'];
+	if ( getenv('WP_BASE_PATH') ) {
+		$wp_siteurl = $wp_siteurl . '/'. getenv('WP_BASE_PATH');
+	}
+
+	define( 'WP_HOME', $wp_siteurl );
+	define( 'WP_SITEURL', $wp_siteurl );
 }
 
 // For WP App

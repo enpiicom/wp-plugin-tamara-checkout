@@ -1,10 +1,14 @@
 FROM npbtrac/php73_web
 
+# Install Node 20 and Yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+	&& apt install -y nodejs \
+	&& npm install -g yarn
+
 RUN mkdir -p /etc/nginx/site-opts.d/
 
 # Putting config files to their locations
-COPY ./dev-docker/config/nginx/http.conf /etc/nginx/site-opts.d/http.conf
-COPY ./dev-docker/config/nginx/https.conf /etc/nginx/site-opts.d/https.conf
+COPY ./dev-docker/config/nginx/default.conf /etc/nginx/sites-available/default
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
