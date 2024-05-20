@@ -19,7 +19,7 @@ XDEBUG_MODE=off COMPOSER=composer-dev73.json composer73 install
 ```
 or if you don't have PHP 7.3 locally
 ```
-docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev73.json -v $PWD:/app npbtrac/php73_cli composer install
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev73.json -v $PWD:/app -v ~/.composer:/root/.composer npbtrac/php73_cli composer install
 ```
 - Start the docker
 ```
@@ -38,7 +38,7 @@ XDEBUG_MODE=off COMPOSER=composer-dev81.json composer81 install
 ```
 or if you don't have PHP 8.0 locally
 ```
-docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev81.json -v $PWD:/app npbtrac/php81_cli composer install
+docker run --rm --interactive --tty -e XDEBUG_MODE=off -e COMPOSER=composer-dev81.json -v $PWD:/app -v ~/.composer:/root/.composer npbtrac/php81_cli composer install
 ```
 - Start the docker
 ```
@@ -49,11 +49,8 @@ docker-compose up -d wordpress81
 ### Troubleshooting
 - If you see the errors, try to do:
 ```
-docker compose exec wordpress81 wp --allow-root enpii-base prepare
-```
-or without the root
-```
-docker compose exec wordpress81 --user=webuser wp enpii-base artisan wp-app:setup
+docker compose exec --user=webuser wordpress81 wp enpii-base enpii-base prepare
+docker compose exec --user=webuser wordpress81 wp enpii-base artisan wp-app:setup
 ```
 
 ## Update `wp-release` branch
@@ -122,6 +119,8 @@ $foo = 'bar';
 ```
 
 ## Running Unit Test
+- We use PHPUnit with the directory structure from CodeCeption.
+
 Install/update dependencies (you should use PHP 8.0+)
 ```
 composer install
@@ -131,35 +130,37 @@ We must run the composer and codecept run test using PHP 8.0+ (considering `php8
 
 If you don't have PHP 8.0 locally, you can use the docker:
 ```
-docker pull serversideup/php:8.0-cli
+docker pull npbtrac/php80_cli
 ```
-and whenever you want to rin something, you can do something like this:
+and whenever you want to run unit test, you can do something like this:
 ```
-docker run --rm --interactive --tty -v $PWD:/var/www/html serversideup/php:8.0-cli ./vendor/bin/codecept build
-```
-- Set up
-```
-php80 ./vendor/bin/codecept build
-```
-- Run Unit Test with Codeception on a specific file (for development purposes)
-```
-php80 ./vendor/bin/codecept run -vvv unit tests/unit/App/Support/Tamara_Checkout_Helper_Test.php
-```
-- Run Unit Test with PhpUnit on a specific file (for development purposes)
-```
-php80 ./vendor/bin/phpunit --verbose tests/unit/App/Support/Tamara_Checkout_Helper_Test.php
+docker run --rm --interactive --tty -v $PWD:/app npbtrac/php80_cli ./vendor/bin/phpunit
 ```
 - Run Unit Test with Codeception (for the whole unit suite)
 ```
-php80 ./vendor/bin/codecept run unit
+php80 ./vendor/bin/phpunit
+```
+
+- Create a Unit Test file
+```
+docker-compose exec --user=webuser --workdir=/var/www/html/public/wp-content/plugins/tamara-checkout wordpress81 wp enpii-base artisan wp-app:make:phpunit <relative/path/without/.php>
+```
+e.g.
+```
+docker-compose exec --user=webuser --workdir=/var/www/html/public/wp-content/plugins/tamara-checkout wordpress81 wp enpii-base artisan wp-app:make:phpunit tests/Unit/App/Support/Tmp
 ```
 
 ### Using Coverage report
-- Run Unit Test with Codeception (with coverage report)
+- Run Unit Test with PHPUnit (with coverage report)
 ```
-XDEBUG_MODE=coverage php80 ./vendor/bin/codecept run --coverage --coverage-xml --coverage-html unit
+docker-compose exec --workdir=/var/www/html/public/wp-content/plugins/tamara-checkout wordpress81 yarn phpunit:coverage
 ```
+
 - Run Unit Test with PhpUnit (with coverage report)
 ```
-XDEBUG_MODE=coverage php80 ./vendor/bin/phpunit --coverage-text -vvv tests/unit
+docker-compose exec --workdir=/var/www/html/public/wp-content/plugins/tamara-checkout wordpress81 yarn phpunit:coverage-single --whitelist=<path/to/folder/to/perform/the/coverage> <path/to/test/folder>
+```
+e.g.
+```
+docker-compose exec --workdir=/var/www/html/public/wp-content/plugins/tamara-checkout wordpress81 yarn phpunit:coverage-single --whitelist=src/App/Support/Tamara_Checkout_Helper.php tests/Unit/App/Support/Tamara_Checkout_Helper_Test.php
 ```

@@ -1,6 +1,7 @@
 <?php
 
-use AspectMock\Kernel;
+// We need to add WooCommerce libs here
+require_once './dev-docker/wordpress/wp-content/plugins/woocommerce/vendor/autoload.php';
 
 /**
  * Now we include any plugin files that we need to be able to run the tests. This

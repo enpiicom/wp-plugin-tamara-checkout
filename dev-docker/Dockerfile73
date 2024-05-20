@@ -21,4 +21,6 @@ RUN chmod -R 777 /var/www/html/public/wp-content/uploads/ /var/www/html/public/w
 RUN mkdir -p /var/www/html/public/wp-content/plugins var/www/html/public/wp-content/themes
 RUN chmod 777 /var/www/html/public/wp-content/plugins var/www/html/public/wp-content/themes
 
+RUN useradd -G root webuser
+
 WORKDIR /var/www/html/public
