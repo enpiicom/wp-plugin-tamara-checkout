@@ -1,5 +1,16 @@
 namespace: Tamara_Checkout\Tests
 support_namespace: Support
+suites:
+  unit:
+    bootstrap: ../bootstrap-unit.php
+    path: ./Unit
+    actor: UnitTester
+    step_decorators: ~
+    settings:processIsolation: true
+    modules:
+      enabled:
+        - Asserts
+        - Tamara_Checkout\Tests\Support\Helpers\Unit
 paths:
   tests  : tests          # where the tests stored
   data   : tests/_data    # directory for fixture data

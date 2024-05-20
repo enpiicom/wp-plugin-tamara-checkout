@@ -54,8 +54,7 @@
     "psr-4": {
       "Tamara_Checkout\\": "src",
       "Tamara_Checkout\\Deps\\": "src-deps",
-      "Tamara_Checkout\\Tests\\": "tests",
-      "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
+      "Tamara_Checkout\\Tests\\": "tests"
     }
   },
   "config": {
