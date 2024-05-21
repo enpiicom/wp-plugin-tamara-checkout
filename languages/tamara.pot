@@ -9,24 +9,28 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-05-13T10:24:04+00:00\n"
+"POT-Creation-Date: 2024-05-21T16:16:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.9.0\n"
+"X-Generator: WP-CLI 2.10.0\n"
 
 #. Plugin Name of the plugin
+#: tamara-checkout.php
 msgid "Tamara Checkout"
 msgstr ""
 
 #. Plugin URI of the plugin
 #. Author URI of the plugin
+#: tamara-checkout.php
 msgid "https://tamara.co/"
 msgstr ""
 
 #. Description of the plugin
+#: tamara-checkout.php
 msgid "Allow to Buy Now Pay Later with Tamara payment gateway, based on Enpii Base"
 msgstr ""
 
 #. Author of the plugin
+#: tamara-checkout.php
 msgid "dev@tamara.co"
 msgstr ""
 
@@ -79,16 +83,16 @@ msgid "Error when trying to cancel order with Tamara."
 msgstr ""
 
 #: src/App/Jobs/Cancel_Tamara_Order_If_Possible_Job.php:117
-#: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:141
-#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:140
+#: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:143
+#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:145
 msgid "Error with Tamara API: %s"
 msgstr ""
 
-#: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:108
+#: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:110
 msgid "Order fully captured successfully. Capture Id: %s, Captured Amount %s."
 msgstr ""
 
-#: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:138
+#: src/App/Jobs/Capture_Tamara_Order_If_Possible_Job.php:140
 msgid "Error when trying to capture order with Tamara."
 msgstr ""
 
@@ -96,15 +100,15 @@ msgstr ""
 msgid "Update order status because the order is captured on Tamara. Capture Id: %s, Captured Amount %s."
 msgstr ""
 
-#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:122
+#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:127
 msgid "Order has been refunded successfully. Capture Id: %1$s, Refund Id: %2$s, Refunded amount: %3$s."
 msgstr ""
 
-#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:137
+#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:142
 msgid "Error when trying to refund with Tamara."
 msgstr ""
 
-#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:164
+#: src/App/Jobs/Refund_Tamara_Order_If_Possible_Job.php:169
 msgid "Unable to create a refund. Capture ID not found."
 msgstr ""
 
@@ -289,6 +293,10 @@ msgstr ""
 msgid "Order Statuses Mappings"
 msgstr ""
 
+#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:142
+msgid "Mapping status for order according to Tamara action result."
+msgstr ""
+
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:143
 msgid "Manage Order Statuses Mappings"
 msgstr ""
@@ -335,6 +343,10 @@ msgstr ""
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:181
 msgid "Order Statuses to Trigger Tamara Events"
+msgstr ""
+
+#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:183
+msgid "Update order statuses used to trigger events to Tamara"
 msgstr ""
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:184
@@ -597,15 +609,15 @@ msgstr ""
 msgid "If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process)."
 msgstr ""
 
-#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:378
+#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:379
 msgid "Solve Stuck Orders"
 msgstr ""
 
-#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:382
+#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:383
 msgid "Download Custom Log file"
 msgstr ""
 
-#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:449
+#: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:450
 msgid "Done! The script to resolve the Stuck Orders has been executed."
 msgstr ""
 
@@ -617,7 +629,7 @@ msgstr ""
 msgid "ATTENTION! SANDBOX MODE, FOR TESTING PURPOSES ONLY, NO REAL TRANSACTIONS HAPPEN. IF YOU ARE THE CUSTOMER, PLEASE DON'T PROCEED!"
 msgstr ""
 
-#: src/App/Services/Tamara_Widget.php:221
+#: src/App/Services/Tamara_Widget.php:222
 msgid "See the <a target=\"_blank\" href=\"https://docs.tamara.co/docs/testing-scenarios\">Tamara Sandbox Testing Guide</a> for more details."
 msgstr ""
 
@@ -625,7 +637,7 @@ msgstr ""
 msgid "Invalid WC_Order"
 msgstr ""
 
-#: src/App/WP/Data/Tamara_WC_Order.php:460
+#: src/App/WP/Data/Tamara_WC_Order.php:491
 msgid "Phone and Email are mandatory when checking out with Tamara"
 msgstr ""
 
@@ -650,17 +662,17 @@ msgstr ""
 msgid "Tamara Pay In 3"
 msgstr ""
 
-#: src/App/WP/Tamara_Checkout_WP_Plugin.php:420
+#: src/App/WP/Tamara_Checkout_WP_Plugin.php:392
 msgid "Settings"
 msgstr ""
 
-#: src/App/WP/Tamara_Checkout_WP_Plugin.php:539
-#: src/App/WP/Tamara_Checkout_WP_Plugin.php:561
+#: src/App/WP/Tamara_Checkout_WP_Plugin.php:511
+#: src/App/WP/Tamara_Checkout_WP_Plugin.php:533
 msgid "Phone"
 msgstr ""
 
-#: src/App/WP/Tamara_Checkout_WP_Plugin.php:583
-#: src/App/WP/Tamara_Checkout_WP_Plugin.php:605
+#: src/App/WP/Tamara_Checkout_WP_Plugin.php:555
+#: src/App/WP/Tamara_Checkout_WP_Plugin.php:577
 msgid "Email"
 msgstr ""
 

@@ -310,7 +310,7 @@ msgstr "حالة الطلب عند إلغاء طلب تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:157
 msgid "Mapping status for orders that are cancelled (Tamara calls `canceled`). The cancellation may happen because the customer actively cancel the order or the cancellation happens on the Partners portal or from Tamara side. Tamara triggers the Cancellation process and send to the website (via the webhook)."
-msgstr "تعيين حالة الطلبات التي تم إلغاؤها (تتصل تمارا بـ "canceled"). قد يحدث الإلغاء لأن العميل يقوم بإلغاء الطلب بشكل فعال أو يحدث الإلغاء على بوابة الشركاء أو من جانب تمارا. تقوم تمارا بتشغيل عملية الإلغاء وإرسالها إلى موقع الويب (عبر webhook)."
+msgstr "تعيين حالة الطلبات التي تم إلغاؤها (تتصل تمارا بـ 'canceled'). قد يحدث الإلغاء لأن العميل يقوم بإلغاء الطلب بشكل فعال أو يحدث الإلغاء على بوابة الشركاء أو من جانب تمارا. تقوم تمارا بتشغيل عملية الإلغاء وإرسالها إلى موقع الويب (عبر webhook)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:160
 msgid "Order Status when Tamara Order Fails"
@@ -700,7 +700,7 @@ msgid "Invalid Shipping Address Phone Number."
 msgstr "رقم هاتف عنوان الشحن غير صحيح."
 
 msgid "The grand total of order is over/under limit of Tamara."
-msgstr "المبلغ الإجمالي للطلب أكثر\أقل من الحد في تمارا."
+msgstr "المبلغ الإجمالي للطلب أكثر\\أقل من الحد في تمارا."
 
 msgid "We do not support your delivery country."
 msgstr "لا ندعم بلد التوصيل الخاص بك."
@@ -712,11 +712,7 @@ msgid "Configure Tamara Advanced Settings"
 msgstr "ضبط إعدادات تمارا المتقدمة"
 
 msgid "Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details."
-msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بعناية قبل إجراء اي تغيير أو قم بالتواصل مع فريق تمارا للمزيد من المعلوما
-."
+msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بعناية قبل إجراء اي تغيير أو قم بالتواصل مع فريق تمارا للمزيد من المعلوما."
 
 msgid "Update order statuses used to trigger events to Tamara"
 msgstr "تحديث حالات الطلب المستخدمة لتشغيل الأحداث إلى تمارة"
-
-
-
