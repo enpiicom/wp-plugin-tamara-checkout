@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"Project-Id-Version: Tamara Checkout 2.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/tamara-solution/wp-plugin-tamara-checkout/issues/new\n"
+"Last-Translator: Tamara Team <dev@tamara.co>\n"
+"Language-Team: Tamara Team <dev@tamara.co>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -52,6 +52,7 @@ msgstr "شكرا لاختيارك تمارا! سيتم تنويهك عند شح�
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:350
 msgid "Please make sure the Tamara payment status of the order is <strong>captured</strong> before making a refund."
 msgstr "فضلاً يرجى التأكد من حالة الطلب أنها <strong>تم تسليمه</strong> قبل عمل استرجاع."
+
 #. Plugin Name of the plugin
 msgid "Tamara Checkout"
 msgstr "دفع تمارا"
@@ -310,7 +311,7 @@ msgstr "حالة الطلب عند إلغاء طلب تمارا"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:157
 msgid "Mapping status for orders that are cancelled (Tamara calls `canceled`). The cancellation may happen because the customer actively cancel the order or the cancellation happens on the Partners portal or from Tamara side. Tamara triggers the Cancellation process and send to the website (via the webhook)."
-msgstr "تعيين حالة الطلبات التي تم إلغاؤها (تتصل تمارا بـ "canceled"). قد يحدث الإلغاء لأن العميل يقوم بإلغاء الطلب بشكل فعال أو يحدث الإلغاء على بوابة الشركاء أو من جانب تمارا. تقوم تمارا بتشغيل عملية الإلغاء وإرسالها إلى موقع الويب (عبر webhook)."
+msgstr "تعيين حالة الطلبات التي تم إلغاؤها (تتصل تمارا بـ 'canceled'). قد يحدث الإلغاء لأن العميل يقوم بإلغاء الطلب بشكل فعال أو يحدث الإلغاء على بوابة الشركاء أو من جانب تمارا. تقوم تمارا بتشغيل عملية الإلغاء وإرسالها إلى موقع الويب (عبر webhook)."
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:160
 msgid "Order Status when Tamara Order Fails"
@@ -566,7 +567,7 @@ msgstr "يمكنك هنا تصفح بعض نصوص المساعدة والعثو
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:343
 msgid "If there is any issue with your API URL, API Token, Notification Key or Public Key please contact Tamara Team for support at <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co</a>"
-msgstr "إذا كانت هناك أي مشكلة في عنوان URL لواجهة برمجة التطبيقات أو رمز واجهة برمجة التطبيقات أو مفتاح الإشعارات أو المفتاح العام، فيرجى الاتصال بفريق Tamara للحصول على الدعم على <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co </أ>"
+msgstr "إذا كانت هناك أي مشكلة في عنوان URL لواجهة برمجة التطبيقات أو رمز واجهة برمجة التطبيقات أو مفتاح الإشعارات أو المفتاح العام، فيرجى الاتصال بفريق Tamara للحصول على الدعم على <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co</a>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:347
 msgid "Show More Help Texts"
@@ -700,7 +701,7 @@ msgid "Invalid Shipping Address Phone Number."
 msgstr "رقم هاتف عنوان الشحن غير صحيح."
 
 msgid "The grand total of order is over/under limit of Tamara."
-msgstr "المبلغ الإجمالي للطلب أكثر\أقل من الحد في تمارا."
+msgstr "المبلغ الإجمالي للطلب أكثر\\أقل من الحد في تمارا."
 
 msgid "We do not support your delivery country."
 msgstr "لا ندعم بلد التوصيل الخاص بك."
@@ -712,11 +713,7 @@ msgid "Configure Tamara Advanced Settings"
 msgstr "ضبط إعدادات تمارا المتقدمة"
 
 msgid "Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details."
-msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بعناية قبل إجراء اي تغيير أو قم بالتواصل مع فريق تمارا للمزيد من المعلوما
-."
+msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بعناية قبل إجراء اي تغيير أو قم بالتواصل مع فريق تمارا للمزيد من المعلوما."
 
 msgid "Update order statuses used to trigger events to Tamara"
 msgstr "تحديث حالات الطلب المستخدمة لتشغيل الأحداث إلى تمارة"
-
-
-
