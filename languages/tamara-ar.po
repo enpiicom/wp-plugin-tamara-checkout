@@ -52,6 +52,7 @@ msgstr "شكرا لاختيارك تمارا! سيتم تنويهك عند شح�
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:350
 msgid "Please make sure the Tamara payment status of the order is <strong>captured</strong> before making a refund."
 msgstr "فضلاً يرجى التأكد من حالة الطلب أنها <strong>تم تسليمه</strong> قبل عمل استرجاع."
+
 #. Plugin Name of the plugin
 msgid "Tamara Checkout"
 msgstr "دفع تمارا"
@@ -566,7 +567,7 @@ msgstr "يمكنك هنا تصفح بعض نصوص المساعدة والعثو
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:343
 msgid "If there is any issue with your API URL, API Token, Notification Key or Public Key please contact Tamara Team for support at <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co</a>"
-msgstr "إذا كانت هناك أي مشكلة في عنوان URL لواجهة برمجة التطبيقات أو رمز واجهة برمجة التطبيقات أو مفتاح الإشعارات أو المفتاح العام، فيرجى الاتصال بفريق Tamara للحصول على الدعم على <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co </أ>"
+msgstr "إذا كانت هناك أي مشكلة في عنوان URL لواجهة برمجة التطبيقات أو رمز واجهة برمجة التطبيقات أو مفتاح الإشعارات أو المفتاح العام، فيرجى الاتصال بفريق Tamara للحصول على الدعم على <a href=\"mailto:merchant.support@tamara.co\">merchant.support@tamara.co</a>"
 
 #: src/App/Queries/Build_Payment_Gateway_Admin_Form_Fields.php:347
 msgid "Show More Help Texts"
