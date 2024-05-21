@@ -260,7 +260,7 @@ class Tamara_Client {
 		array_walk(
 			$errors,
 			function ( &$tmp_item ) {
-				$tmp_item = Tamara_Checkout_Helper::convert_message( $tmp_item['error_code'] ) ?? null;
+				$tmp_item = Tamara_Checkout_Helper::convert_message( $tmp_item['error_code'] ) ? Tamara_Checkout_Helper::convert_message( $tmp_item['error_code'] ) : null;
 			}
 		);
 		$error_message = Tamara_Checkout_Helper::convert_message( $error_message );

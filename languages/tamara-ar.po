@@ -679,39 +679,40 @@ msgid "Tamara Buy Now Pay Later"
 msgstr "اشتري الآن وادفع لاحقًا مع تمارا"
 
 msgid "We are not able to process your order via Tamara currently, please try again later or proceed with a different payment method."
-msgstr ""
+msgstr "نحن غير قادرين على معالجة طلبك عبر تمارا حاليًا, يرجى المحاولة مرة أخرى لاحقًا أو المتابعة بطريقة دفع مختلفة."
 
 msgid "Tamara is currently unavailable, please try again later."
-msgstr ""
+msgstr "خدمة تمارا غير متوفرة حاليا، فضلًا المحاولة مرة اخرى في وقت لاحق."
 
 msgid "Invalid Consumer Phone Number."
-msgstr ""
+msgstr "رقم هاتف العميل غير صحيح."
 
 msgid "Invalid Phone Number."
-msgstr ""
+msgstr "رقم الهاتف غير صحيح."
 
 msgid "We do not support cross currencies. Please select the correct currency for your country."
-msgstr ""
+msgstr "لا ندعم التحويل بين العملات. يرجى اختيار العملة الصحيحة لبلدتك."
 
 msgid "Invalid Billing Address Phone Number."
-msgstr ""
+msgstr "رقم هاتف عنوان الفاتورة غير صحيح."
 
 msgid "Invalid Shipping Address Phone Number."
-msgstr ""
+msgstr "رقم هاتف عنوان الشحن غير صحيح."
 
 msgid "The grand total of order is over/under limit of Tamara."
-msgstr ""
+msgstr "المبلغ الإجمالي للطلب أكثر\أقل من الحد في تمارا."
 
 msgid "We do not support your delivery country."
-msgstr ""
+msgstr "لا ندعم بلد التوصيل الخاص بك."
 
 msgid "Mapping status for order according to Tamara action result."
-msgstr ""
+msgstr "تعيين حالة الطلب وفقًا لنتيجة إجراء تمارا."
 
 msgid "Configure Tamara Advanced Settings"
-msgstr ""
+msgstr "ضبط إعدادات تمارا المتقدمة"
 
 msgid "Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details."
-msgstr ""
+msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بعناية قبل إجراء اي تغيير أو قم بالتواصل مع فريق تمارا للمزيد من المعلوما
+."
 
 

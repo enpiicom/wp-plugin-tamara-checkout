@@ -584,7 +584,7 @@ class Tamara_WC_Order {
 
 		$wc_order_item_regular_price = $wc_order_item_product->get_regular_price();
 		$wc_order_item_sale_price = $wc_order_item_product->get_sale_price();
-		$item_price = $wc_order_item_sale_price ?? $wc_order_item_regular_price;
+		$item_price = $wc_order_item_sale_price ? $wc_order_item_sale_price : $wc_order_item_regular_price;
 		$wc_order_item_discount_amount = (int) $item_price * $wc_order_item_quantity
 										- ( (int) $wc_order_item_total - (int) $wc_order_item_total_tax );
 		$order_item->setName( $wc_order_item_name );

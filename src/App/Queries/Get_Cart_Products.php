@@ -27,7 +27,7 @@ class Get_Cart_Products {
 			// Check if a product is a variation add add its parent id to the list.
 			$product_id = null;
 			if ( $product instanceof \WC_Product_Variation ) {
-				$product_parent_id = $product->get_parent_id() ?? null;
+				$product_parent_id = $product->get_parent_id();
 				if ( ! in_array( $product_parent_id, $product_ids ) ) {
 					$product_id = $product_parent_id;
 				}

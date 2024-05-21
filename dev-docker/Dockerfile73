@@ -14,6 +14,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
+COPY ./dev-docker/wordpress/ /var/www/html/public
+COPY ./ /var/www/html/public/wp-content/plugins/tamara-checkout/
+
 # Prepare folders
 RUN mkdir -p /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
 RUN chmod -R 777 /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
