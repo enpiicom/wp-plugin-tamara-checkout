@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "e64cd075e00ee985ea83ace065bd8281af864476"
+                "reference": "8197e6ae38597a8fad0d738e35d3d58e5ba0dd47"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/e64cd075e00ee985ea83ace065bd8281af864476",
-                "reference": "e64cd075e00ee985ea83ace065bd8281af864476",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/8197e6ae38597a8fad0d738e35d3d58e5ba0dd47",
+                "reference": "8197e6ae38597a8fad0d738e35d3d58e5ba0dd47",
                 "shasum": ""
             },
             "require": {
@@ -120,6 +120,6 @@
             "install-path": "../mcaskill/composer-exclude-files"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }

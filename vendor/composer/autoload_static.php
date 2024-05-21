@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a
+class ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12
 {
     public static $files = array (
         '05606250504f1174fd702cad64105781' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/Support/helpers-utils.php',
@@ -17,7 +17,6 @@ class ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
-            'Tamara_Checkout\\Tests\\Unit\\' => 27,
             'Tamara_Checkout\\Tests\\' => 22,
             'Tamara_Checkout\\Deps\\' => 21,
             'Tamara_Checkout\\' => 16,
@@ -34,10 +33,6 @@ class ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a
     );
 
     public static $prefixDirsPsr4 = array (
-        'Tamara_Checkout\\Tests\\Unit\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/tests/unit',
-        ),
         'Tamara_Checkout\\Tests\\' => 
         array (
             0 => __DIR__ . '/../..' . '/tests',
@@ -71,9 +66,9 @@ class ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit49d6a9677612ab82388bf2e365e8b01a::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12::$classMap;
 
         }, null, ClassLoader::class);
     }

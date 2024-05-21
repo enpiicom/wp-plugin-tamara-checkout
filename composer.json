@@ -29,20 +29,35 @@
   "require": {
     "php": "^7.3|^8.0"
   },
+  "require-dev": {
+    "automattic/vipwpcs": "~3.0.0",
+    "phpcompatibility/php-compatibility": "~9.3.5",
+    "dealerdirect/phpcodesniffer-composer-installer": "~1.0.0",
+    "phpunit/phpunit": "~9.6",
+    "mockery/mockery": "~1.6",
+    "brain/monkey": "~2.6.0",
+    "10up/wp_mock": "~1.0.0",
+    "symfony/console": "~5.4.39",
+    "symfony/yaml": "~5.4.39",
+    "symfony/var-dumper": "~5.4.39",
+    "codeception/codeception": "^5.0.0",
+    "codeception/module-asserts": "^3.0",
+    "codeception/module-phpbrowser": "^3.0"
+  },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
       "Tamara_Checkout\\": "src",
       "Tamara_Checkout\\Deps\\": "src-deps",
-      "Tamara_Checkout\\Tests\\": "tests",
-      "Tamara_Checkout\\Tests\\Unit\\": "tests/unit"
+      "Tamara_Checkout\\Tests\\": "tests"
     }
   },
   "config": {
     "platform-check": false,
     "allow-plugins": {
-      "mcaskill/composer-exclude-files": true
+      "mcaskill/composer-exclude-files": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   },
   "extra": {

@@ -6,7 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Tamara_Checkout\\Tests\\Unit\\' => array($baseDir . '/tests/unit'),
     'Tamara_Checkout\\Tests\\' => array($baseDir . '/tests'),
     'Tamara_Checkout\\Deps\\' => array($baseDir . '/src-deps'),
     'Tamara_Checkout\\' => array($baseDir . '/src'),

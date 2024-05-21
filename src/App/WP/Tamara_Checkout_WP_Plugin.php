@@ -329,7 +329,7 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				return $available_gateways;
 			}
 
-			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info() ?? [];
+			$current_cart_info = Tamara_Checkout_Helper::get_current_cart_info();
 			$cart_total = $current_cart_info['cart_total'] ?? 0;
 			$customer_phone = $current_cart_info['customer_phone'] ?? '';
 
@@ -596,15 +596,14 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	/**
-     * Localize the plugin
-     */
-    public function load_text_domain()
-    {
-        $locale = determine_locale();
-        $mofile = $locale.'.mo';
+	 * Localize the plugin
+	 */
+	public function load_text_domain() {
+		$locale = determine_locale();
+		$mofile = $locale . '.mo';
 		$text_domain = 'tamara';
-        load_textdomain( $text_domain, $this->get_base_path() . '/languages/' . $text_domain . '-' . $mofile);
-    }
+		load_textdomain( $text_domain, $this->get_base_path() . '/languages/' . $text_domain . '-' . $mofile );
+	}
 
 	/**
 	 * We want to register all services with this plugin here

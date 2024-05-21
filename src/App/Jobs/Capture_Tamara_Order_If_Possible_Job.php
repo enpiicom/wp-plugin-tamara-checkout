@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
@@ -102,6 +103,7 @@ class Capture_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQue
 
 		$capture_id = $tamara_client_response->getCaptureId();
 		$tamara_wc_order->update_tamara_meta( 'tamara_capture_id', $tamara_client_response->getCaptureId() );
+		$tamara_wc_order->update_tamara_meta( 'tamara_payment_status', Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_FULLY_CAPTURED );
 
 		$tamara_wc_order->add_tamara_order_note(
 			sprintf(

@@ -14,6 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use InvalidArgumentException;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
@@ -117,6 +118,10 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 			$latest_response_tamara_refund->getRefundId(),
 			$latest_response_tamara_refund->getCaptureId()
 		);
+
+		$response_body = json_decode( $tamara_client_response->getContent(), true );
+		$tamara_payment_status = $response_body['status'] ?? Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_PARTIALLY_REFUNDED;
+		$this->tamara_wc_order_refund->update_tamara_meta( 'tamara_payment_status', $tamara_payment_status );
 
 		$order_note = sprintf(
 			$this->__( 'Order has been refunded successfully. Capture Id: %1$s, Refund Id: %2$s, Refunded amount: %3$s.' ),

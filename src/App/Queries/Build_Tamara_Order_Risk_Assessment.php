@@ -38,26 +38,22 @@ class Build_Tamara_Order_Risk_Assessment {
 
 	protected function get_current_user_register_date() {
 		if ( is_user_logged_in() ) {
-			$current_user_id = get_current_user_id() ?? null;
-
-			return gmdate(
-				'd-m-Y',
-				strtotime( get_the_author_meta( 'user_registered', $current_user_id ) )
-			)
-					?? gmdate( 'd-m-Y', time() );
-		} else {
-			return gmdate( 'd-m-Y', time() );
+			$user_registered_date = get_the_author_meta( 'user_registered', get_current_user_id() );
+			if ( $user_registered_date && strtotime( $user_registered_date ) !== false ) {
+				return gmdate( 'd-m-Y', strtotime( $user_registered_date ) );
+			}
 		}
+
+		return gmdate( 'd-m-Y', time() );
 	}
 
 	protected function get_current_user_has_delivered_order(): bool {
 		if ( is_user_logged_in() ) {
-			$current_user_id  = get_current_user_id() ?? null;
 			$args           = [
-				'customer_id' => $current_user_id,
+				'customer_id' => get_current_user_id(),
 				'post_status' => [ 'shipped', 'completed', 'wc-shipped', 'wc-completed' ],
-				'post_type'   => 'shop_order',
-				'return'      => 'ids',
+				'post_type' => 'shop_order',
+				'return' => 'ids',
 			];
 			$order_completed = count( wc_get_orders( $args ) );
 
@@ -69,14 +65,13 @@ class Build_Tamara_Order_Risk_Assessment {
 
 	protected function get_current_user_total_order_count() {
 		if ( is_user_logged_in() ) {
-			$current_user_id = get_current_user_id() ?? null;
-			$args          = [
-				'customer_id' => $current_user_id,
-				'post_type'   => 'shop_order',
-				'return'      => 'ids',
+			$args = [
+				'customer_id' => get_current_user_id(),
+				'post_type' => 'shop_order',
+				'return' => 'ids',
 			];
 
-			return count( wc_get_orders( $args ) ) ?? 0;
+			return count( wc_get_orders( $args ) );
 		} else {
 			return 0;
 		}
@@ -84,18 +79,21 @@ class Build_Tamara_Order_Risk_Assessment {
 
 	protected function get_current_user_date_of_first_transaction() {
 		if ( is_user_logged_in() ) {
-			$currentUserId = get_current_user_id() ?? null;
-			$args          = [
-				'customer_id' => $currentUserId,
-				'post_type'   => 'shop_order',
-				'orderby'     => 'date',
-				'order'       => 'ASC',
+			$args = [
+				'customer_id' => get_current_user_id(),
+				'post_type' => 'shop_order',
+				'orderby' => 'date',
+				'order' => 'ASC',
 			];
-			$orders        = wc_get_orders( $args );
-			if ( $orders ) {
-				return gmdate( 'd-m-Y', strtotime( (string) $orders[0]->get_date_created() ) ) ?? gmdate( 'd-m-Y', time() );
+			$orders = wc_get_orders( $args );
+			if ( ! empty( $orders[0] ) ) {
+				$first_order_date = (string) $orders[0]->get_date_created();
+				if ( $first_order_date && strtotime( $first_order_date ) !== false ) {
+					return gmdate( 'd-m-Y', strtotime( $first_order_date ) );
+				}
 			}
 		}
+
 		return gmdate( 'd-m-Y', time() );
 	}
 
@@ -103,11 +101,10 @@ class Build_Tamara_Order_Risk_Assessment {
 		$total_amount = 0;
 		$currency = $this->wc_order->get_currency();
 		if ( is_user_logged_in() ) {
-			$current_user_id = get_current_user_id() ?? null;
-			$args          = [
-				'customer_id' => $current_user_id,
-				'post_type'   => 'shop_order',
-				'date_query'  =>
+			$args = [
+				'customer_id' => get_current_user_id(),
+				'post_type' => 'shop_order',
+				'date_query' =>
 					[
 						[
 							'after' => gmdate( 'Y-m-d', strtotime( '3 months ago' ) ),
@@ -117,7 +114,7 @@ class Build_Tamara_Order_Risk_Assessment {
 			];
 
 			$orders = wc_get_orders( $args );
-			if ( $orders ) {
+			if ( ! empty( $orders ) ) {
 				foreach ( $orders as $order ) {
 					$total_amount += $order->get_total();
 				}
@@ -129,11 +126,10 @@ class Build_Tamara_Order_Risk_Assessment {
 
 	protected function get_current_user_order_count_last_3_months() {
 		if ( is_user_logged_in() ) {
-			$current_user_id = get_current_user_id() ?? null;
-			$args          = [
-				'customer_id' => $current_user_id,
-				'post_type'   => 'shop_order',
-				'date_query'  =>
+			$args = [
+				'customer_id' => get_current_user_id(),
+				'post_type' => 'shop_order',
+				'date_query' =>
 					[
 						[
 							'after' => gmdate( 'Y-m-d', strtotime( '3 months ago' ) ),
@@ -142,9 +138,9 @@ class Build_Tamara_Order_Risk_Assessment {
 				'inclusive'   => true,
 			];
 
-			return count( wc_get_orders( $args ) ) ?? 0;
-		} else {
-			return 0;
+			return count( wc_get_orders( $args ) );
 		}
+
+		return 0;
 	}
 }

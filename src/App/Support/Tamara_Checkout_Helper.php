@@ -77,7 +77,7 @@ class Tamara_Checkout_Helper {
 	 * @return string
 	 */
 	public static function get_current_language_code(): string {
-		$lang = substr( get_locale(), 0, 2 ) ?? 'en';
+		$lang = substr( get_locale(), 0, 2 ) ? substr( get_locale(), 0, 2 ) : 'en';
 		return strtolower( $lang );
 	}
 

@@ -180,7 +180,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 			'tamara_order_statuses_trigger' => [
 				'title' => $this->__( 'Order Statuses to Trigger Tamara Events' ),
 				'type' => 'title',
-				'description' => '<p>' . $this->__( 'Update order statuses used to trigger events to Tamara.' ) . '</p>
+				'description' => '<p>' . $this->__( 'Update order statuses used to trigger events to Tamara' ) . '</p>
                 <div class="tamara-order-statuses-trigger-manage button-primary">' . $this->__( 'Manage Order Statuses Trigger' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'tamara_cancel_order' => [
@@ -212,13 +212,13 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 			'excluded_product_categories' => [
 				'title' => $this->__( 'Excluded Product Category Ids' ),
 				'type' => 'text',
-				'description' => __( 'Enter the product category ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. `26, 104`).' ),
+				'description' => $this->__( 'Enter the product category ids that you want to exclude from using Tamara to checkout (These ids are separated by commas e.g. `26, 104`).' ),
 				'default' => '',
 			],
 			'tamara_general_settings' => [
 				'title' => $this->__( 'Tamara Advanced Settings' ),
 				'type' => 'title',
-				'description' => $this->__( 'Configure Tamara Advanced Settings' ) . '<br> <p class="tamara-highlight">' . $this->__( 'Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.') . '</p>'
+				'description' => $this->__( 'Configure Tamara Advanced Settings <br> <p class="tamara-highlight">Please read the descriptions of these settings carefully before making a change or please contact Tamara Team for more details.</p>' )
 				. '<div class="tamara-advanced-settings-manage button-primary">' . $this->__( 'Show Tamara Advanced Settings' ) . '<i class="tamara-toggle-btn fa-solid fa-chevron-down"></i></div>',
 			],
 			'force_checkout_phone' => [
@@ -352,8 +352,9 @@ class Build_Payment_Gateway_Admin_Form_Fields {
                             <li>' . $this->__( 'For Tamara payment success URL, you can use action <strong>after_tamara_success</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->__( 'For Tamara payment cancel URL, you can use action <strong>after_tamara_cancel</strong> to handle further actions.' ) . '</li>
                             <li>' . $this->__( 'For Tamara payment failed URL, you can use action <strong>after_tamara_failure</strong> to handle further actions.' ) . '</li>
-                            <li>' . $this->__( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>
-                            <li>' . sprintf( $this->__( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process).' ), $this->build_solve_stuck_orders_link() ) . '</li>
+                            <li>' . $this->__( 'All the debug log messages sent from Tamara will be written and saved to the Tamara custom log file on your server.' ) . '</li>' .
+							( $this->current_settings->api_token ? '<li>' . sprintf( $this->__( 'If you want to solve stuck orders (when Tamara inform you, you may want to click %s to enable to process).' ), $this->build_solve_stuck_orders_link() ) . '</li>' : '' )
+							. '
                         </ul>
                     </div>
                 </div>';
