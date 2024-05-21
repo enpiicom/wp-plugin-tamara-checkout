@@ -61,7 +61,7 @@ docker compose exec --user=webuser wordpress81 wp enpii-base artisan wp-app:setu
   ```
   - Update needed files from the main branches
   ```
-  gco develop -- public-assets resources src src-deps languages composer.* package* tamara* webpack* yarn* readme*
+  gco develop -- public-assets resources src src-deps languages composer.* package* tamara* webpack* yarn* readme* tsconfig.json readme.txt icon-* banner-*
   ```
   - Compile css and js
   ```
