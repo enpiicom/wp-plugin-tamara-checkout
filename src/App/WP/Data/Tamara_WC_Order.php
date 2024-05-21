@@ -253,7 +253,7 @@ class Tamara_WC_Order {
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
-			throw new Tamara_Exception( wp_kses_post( $tamara_client_response ) );
+			throw new Tamara_Exception( wp_kses_post( $tamara_client_response->getMessage() ) );
 		}
 
 		return $tamara_client_response;
@@ -436,11 +436,42 @@ class Tamara_WC_Order {
 		$params = [
 			'wc_order_id' => $wc_order->get_id(),
 			'payment_type' => $payment_type,
+			'locale' => determine_locale(),
 		];
 
-		$merchant_url->setSuccessUrl( wp_app_route_wp_url( 'wp-api::tamara-success', $params ) );
-		$merchant_url->setCancelUrl( wp_app_route_wp_url( 'wp-api::tamara-cancel', $params ) );
-		$merchant_url->setFailureUrl( wp_app_route_wp_url( 'wp-api::tamara-failure', $params ) );
+		$merchant_url->setSuccessUrl(
+			wp_app_route_wp_url(
+				'wp-api::tamara-success',
+				array_merge(
+					$params,
+					[
+						'redirect_url' => $wc_order->get_checkout_order_received_url(),
+					]
+				)
+			)
+		);
+		$merchant_url->setCancelUrl(
+			wp_app_route_wp_url(
+				'wp-api::tamara-cancel',
+				array_merge(
+					$params,
+					[
+						'redirect_url' => $wc_order->get_cancel_order_url_raw(),
+					]
+				)
+			)
+		);
+		$merchant_url->setFailureUrl(
+			wp_app_route_wp_url(
+				'wp-api::tamara-failure',
+				array_merge(
+					$params,
+					[
+						'redirect_url' => $wc_order->get_cancel_order_url_raw(),
+					]
+				)
+			)
+		);
 		$merchant_url->setNotificationUrl( wp_app_route_wp_url( 'wp-api::tamara-ipn', $params ) );
 
 		return $merchant_url;

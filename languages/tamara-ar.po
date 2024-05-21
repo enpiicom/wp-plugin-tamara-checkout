@@ -715,4 +715,8 @@ msgid "Please read the descriptions of these settings carefully before making a 
 msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بعناية قبل إجراء اي تغيير أو قم بالتواصل مع فريق تمارا للمزيد من المعلوما
 ."
 
+msgid "Update order statuses used to trigger events to Tamara"
+msgstr "تحديث حالات الطلب المستخدمة لتشغيل الأحداث إلى تمارة"
+
+
 

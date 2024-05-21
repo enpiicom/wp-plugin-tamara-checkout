@@ -57,11 +57,11 @@ docker compose exec --user=webuser wordpress81 wp enpii-base artisan wp-app:setu
 - Use the following commands
   - Remove vendors
   ```
-  rm -rf vendor public-assets resources src src-deps
+  rm -rf vendor public-assets resources src src-deps languages
   ```
   - Update needed files from the main branches
   ```
-  gco develop -- public-assets resources src src-deps composer.* package* tamara* webpack* yarn* phpcs*
+  gco develop -- public-assets resources src src-deps languages composer.* package* tamara* webpack* yarn* readme*
   ```
   - Compile css and js
   ```

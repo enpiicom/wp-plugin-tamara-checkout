@@ -25,7 +25,14 @@ class Main_Controller extends Base_Controller {
 	public function handle_tamara_success( Request $request, $wc_order_id ): void {
 		$custom_success_url = $this->tamara_settings()->success_url;
 		$tamara_order_id = $request->get( 'orderId' );
+		$redirect_url = $request->get( 'redirect_url' );
 		$wc_order = wc_get_order( $wc_order_id );
+
+		if ( ! $redirect_url ) {
+			$redirect_url = ! empty( $wc_order ) ?
+				esc_url_raw( $wc_order->get_checkout_order_received_url() ) :
+				home_url();
+		}
 
 		// We authorise the order
 		try {
@@ -42,13 +49,12 @@ class Main_Controller extends Base_Controller {
 		}
 
 		// Then redirect to the URL we want
-		$order_received_url = ! empty( $wc_order ) ? esc_url_raw( $wc_order->get_checkout_order_received_url() ) : home_url();
 		$success_url_from_tamara = add_query_arg(
 			[
 				'wc_order_id' => $wc_order_id,
 				'tamara_order_id' => $tamara_order_id,
 			],
-			$custom_success_url ? $custom_success_url : $order_received_url
+			$custom_success_url ? $custom_success_url : $redirect_url
 		);
 
 		wp_safe_redirect( $success_url_from_tamara );
@@ -61,6 +67,13 @@ class Main_Controller extends Base_Controller {
 	public function handle_tamara_cancel( Request $request, $wc_order_id, User $user ): void {
 		$custom_cancel_url = $this->tamara_settings()->cancel_url;
 		$wc_order = wc_get_order( $wc_order_id );
+		$redirect_url = $request->get( 'redirect_url' );
+		if ( ! $redirect_url ) {
+			$redirect_url = ! empty( $wc_order ) ?
+				$wc_order->get_cancel_order_url_raw() :
+				home_url();
+		}
+
 		$cancel_url_from_tamara = add_query_arg(
 			[
 				'redirect_from' => 'tamara',
@@ -71,7 +84,7 @@ class Main_Controller extends Base_Controller {
 				'tamara_order_id' => $request->get( 'orderId' ),
 				'tamara_payment_status' => $request->get( 'paymentStatus' ),
 			],
-			$custom_cancel_url ? $custom_cancel_url : $wc_order->get_cancel_order_url_raw()
+			$custom_cancel_url ? $custom_cancel_url : $redirect_url
 		);
 
 		wp_safe_redirect( $cancel_url_from_tamara );
@@ -84,6 +97,12 @@ class Main_Controller extends Base_Controller {
 	public function handle_tamara_failure( Request $request, $wc_order_id ): void {
 		$custom_failure_url = $this->tamara_settings()->failure_url;
 		$wc_order = wc_get_order( $wc_order_id );
+		$redirect_url = $request->get( 'redirect_url' );
+		if ( ! $redirect_url ) {
+			$redirect_url = ! empty( $wc_order ) ?
+				$wc_order->get_cancel_order_url_raw() :
+				home_url();
+		}
 		$failure_url_from_tamara = add_query_arg(
 			[
 				'redirect_from' => 'tamara',
@@ -94,7 +113,7 @@ class Main_Controller extends Base_Controller {
 				'tamara_order_id' => $request->get( 'orderId' ),
 				'tamara_payment_status' => $request->get( 'paymentStatus' ),
 			],
-			$custom_failure_url ? $custom_failure_url : $wc_order->get_cancel_order_url_raw()
+			$custom_failure_url ? $custom_failure_url : $redirect_url
 		);
 
 		wp_safe_redirect( $failure_url_from_tamara );
