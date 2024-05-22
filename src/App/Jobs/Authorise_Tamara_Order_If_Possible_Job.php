@@ -96,7 +96,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$this->tamara_wc_order->set_authorise_checked();
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
-			$this->process_failed_action();
+			$this->process_failed_action( $tamara_client_response );
 
 			return;
 		}
@@ -107,7 +107,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	protected function process_failed_action(): void {
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
 		if ( (int) $tamara_api_error->status_code === 409 ) {
 			return;
 		}
