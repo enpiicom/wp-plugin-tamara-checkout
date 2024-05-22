@@ -71,8 +71,10 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 					WP_App_Make_PHPUnit_Command::class,
 				]
 			);
+
+			$this->loadMigrationsFrom( __DIR__ . '/../../../database/migrations' );
 		}
-		$this->loadMigrationsFrom( __DIR__ . '/../../../database/migrations' );
+
 	}
 
 	public function get_name(): string {

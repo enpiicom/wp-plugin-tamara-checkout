@@ -50,11 +50,13 @@ class Setup_WP_App_In_Console {
 			]
 		);
 
+		// Perform the migration, we need to have --force to work on production
 		$console_command->comment( 'Doing Migrations...' );
 		$console_command->call(
 			'migrate',
 			[
 				'--no-interaction' => true,
+				'--force' => true,
 				'--quiet' => true,
 			]
 		);
@@ -63,6 +65,6 @@ class Setup_WP_App_In_Console {
 		//  for security reason
 		$console_command->comment( 'Cleanup migrations rule' );
 		$filesystem = new Filesystem();
-		// $filesystem->cleanDirectory( wp_app()->databasePath( 'migrations' ) );
+		$filesystem->cleanDirectory( wp_app()->databasePath( 'migrations' ) );
 	}
 }
