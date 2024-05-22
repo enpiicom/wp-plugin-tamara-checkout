@@ -36,10 +36,10 @@ class Authenticator
             throw new ForbiddenException('Access denied.');
         }
 
-		$bearerToken = $this->getBearerToken($request->headers->get(self::AUTHORIZATION));
-        $token = $bearerToken
-            ? $bearerToken
-            : $request->get(self::TOKEN);
+		$queryToken = $request->get(self::TOKEN);
+		$token = $queryToken
+            ? $queryToken
+            : $this->getBearerToken($request->headers->get(self::AUTHORIZATION));
 
         try {
             $this->decode($token);
@@ -54,7 +54,7 @@ class Authenticator
             return $matches[1];
         }
 
-        return '';
+        throw new ForbiddenException('Access denied.');
     }
 
     /**

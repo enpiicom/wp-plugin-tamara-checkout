@@ -109,6 +109,10 @@ class Cancel_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 * @throws Tamara_Exception
 	 */
 	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
+		if ( (int) $tamara_api_error->status_code === 409 ) {
+			return;
+		}
+
 		$tamara_wc_order = $this->tamara_wc_order;
 
 		$error_message = $this->__( 'Error when trying to cancel order with Tamara.' );

@@ -139,6 +139,10 @@ class Refund_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueu
 	 * @throws Tamara_Exception
 	 */
 	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
+		if ( (int) $tamara_api_error->status_code === 409 ) {
+			return;
+		}
+
 		$error_message = $this->__( 'Error when trying to refund with Tamara.' );
 		$error_message .= "\n";
 		$error_message .= sprintf(
