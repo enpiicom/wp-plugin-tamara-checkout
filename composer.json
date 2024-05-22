@@ -42,9 +42,9 @@
     "symfony/console": "~5.4.39",
     "symfony/yaml": "~5.4.39",
     "symfony/var-dumper": "~5.4.39",
-    "codeception/codeception": "^5.0.0",
-    "codeception/module-asserts": "^3.0",
-    "codeception/module-phpbrowser": "^3.0"
+    "codeception/codeception": "~5.0.0",
+    "codeception/module-asserts": "~3.0",
+    "codeception/module-phpbrowser": "~3.0"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
