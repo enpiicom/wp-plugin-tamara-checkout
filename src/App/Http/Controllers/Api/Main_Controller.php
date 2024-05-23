@@ -16,11 +16,14 @@ use Tamara_Checkout\App\Jobs\Capture_Tamara_Stuck_Authorised_Orders_Job;
 use Tamara_Checkout\App\Jobs\Update_Tamara_Webhook_Event_Job;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
+use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Http\Client\Exception;
 
 class Main_Controller extends Base_Controller {
 	use Tamara_Checkout_Trait;
 	use Queue_Trait;
+	use Tamara_Trans_Trait;
 
 	public function handle_tamara_success( Request $request, $wc_order_id ): void {
 		$custom_success_url = $this->tamara_settings()->success_url;
@@ -125,6 +128,10 @@ class Main_Controller extends Base_Controller {
 	 */
 	public function handle_tamara_ipn(): JsonResponse {
 		$authorise_message = $this->tamara_notification()->process_authorise_message();
+
+		$tamara_order = new Tamara_WC_Order( wc_get_order( $authorise_message->getOrderReferenceId() ) );
+		$tamara_order->add_tamara_order_note( sprintf( $this->__('Webhook request for the event %s'), 'authorise_notification' ) );
+
 		$this->process_authorise_tamara_order( $authorise_message->getOrderReferenceId(), $authorise_message->getOrderId() );
 
 		return wp_app_response()->json(
@@ -136,6 +143,9 @@ class Main_Controller extends Base_Controller {
 
 	public function handle_tamara_webhook(): JsonResponse {
 		$webhook_message = $this->tamara_notification()->process_webhook_message();
+
+		$tamara_order = new Tamara_WC_Order( wc_get_order( $webhook_message->getOrderReferenceId() ) );
+		$tamara_order->add_tamara_order_note( sprintf( $this->__('Webhook request for the event %s'), $webhook_message->getEventType() ) );
 
 		switch ( $webhook_message->getEventType() ) {
 			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED:

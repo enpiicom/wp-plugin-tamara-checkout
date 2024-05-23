@@ -36,9 +36,10 @@ class Authenticator
             throw new ForbiddenException('Access denied.');
         }
 
-        $token = $request->headers->get(self::AUTHORIZATION)
-            ? $this->getBearerToken($request->headers->get(self::AUTHORIZATION))
-            : $request->get(self::TOKEN);
+		$queryToken = $request->get(self::TOKEN);
+		$token = $queryToken
+            ? $queryToken
+            : $this->getBearerToken($request->headers->get(self::AUTHORIZATION));
 
         try {
             $this->decode($token);

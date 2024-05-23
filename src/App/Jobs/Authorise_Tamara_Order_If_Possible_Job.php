@@ -22,8 +22,6 @@ use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
-use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderRequest;
-use Tamara_Checkout\Deps\Tamara\Response\Order\AuthoriseOrderResponse;
 
 class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable;
@@ -97,19 +95,23 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$this->tamara_wc_order->set_authorise_checked();
 
-		if ( $tamara_client_response instanceof Tamara_Api_Error_VO && $tamara_client_response->status_code !== 409 ) {
-			$this->process_failed_action();
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
+			$this->process_failed_action( $tamara_client_response );
 
 			return;
 		}
 
-		$this->process_successful_action( $tamara_client_response );
+		$this->process_successful_action();
 	}
 
 	/**
 	 * @throws \Tamara_Checkout\App\Exceptions\Tamara_Exception
 	 */
-	protected function process_failed_action(): void {
+	protected function process_failed_action( Tamara_Api_Error_VO $tamara_api_error ): void {
+		if ( (int) $tamara_api_error->status_code === 409 ) {
+			return;
+		}
+
 		$wc_order = wc_get_order( $this->wc_order_id );
 		$settings = $this->tamara_settings();
 
@@ -124,7 +126,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 	/**
 	 * @throws \WC_Data_Exception
 	 */
-	protected function process_successful_action( AuthoriseOrderResponse $tamara_client_response ): void {
+	protected function process_successful_action(): void {
 		// We want to re-build a new Tamara_WC_Order here
 		//  to have refreshed meta data
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
