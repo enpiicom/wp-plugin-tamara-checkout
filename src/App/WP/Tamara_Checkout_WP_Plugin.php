@@ -10,6 +10,7 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
 use RuntimeException;
+use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
@@ -28,9 +29,11 @@ use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
+use WC_Order;
 
 /**
  * @inheritDoc
@@ -68,6 +71,9 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		add_filter( 'wc_order_statuses', [ $this, 'add_tamara_custom_order_statuses' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tamara_general_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_tamara_admin_scripts' ] );
+
+		add_action( 'woocommerce_before_template_part', [ $this, 'process_order_received' ], 10, 4);
+		add_action( 'woocommerce_cancelled_order', [ $this, 'process_cancelled_failed_order' ], 10, 1);
 
 		// For WP App
 		wp_app()->register_api_routes( [ $this, 'tamara_gateway_register_wp_api_routes' ] );
@@ -603,6 +609,80 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$mofile = $locale . '.mo';
 		$text_domain = 'tamara';
 		load_textdomain( $text_domain, $this->get_base_path() . '/languages/' . $text_domain . '-' . $mofile );
+	}
+
+	/**
+	 * We handle the Success here
+	 * @param mixed $template_name
+	 * @param mixed $template_path
+	 * @param mixed $located
+	 * @param mixed $params
+	 * @return void
+	 */
+	public function process_order_received( $template_name, $template_path, $located, $params ) {
+		/** @var \Enpii_Base\App\Http\Request $wp_app_request */
+		$wp_app_request = wp_app_request();
+
+		// if ((string) $template_name === 'checkout/thankyou.php' && !empty($params['order']) ) {
+		// 	/** @var \WC_Order $wc_order */
+		// 	$wc_order = $params['order'];
+		// }
+
+		if ( (string) $template_name === 'checkout/order-received.php' ) {
+			$wc_order_id = $wp_app_request->get('wc_order_id');
+			$wc_order = wc_get_order($wc_order_id);
+
+			// We authorise the order
+			try {
+				$tamara_wc_order = new Tamara_WC_Order( $wc_order );
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( Exception $e ) {
+				// We do nothing for the exception here,
+				//  just want to catch all the exception to have the redirect work
+			}
+
+			if (!empty($tamara_wc_order)) {
+				if ($tamara_wc_order->is_paid_with_tamara()) {
+					// We authorise the order
+					try {
+						Authorise_Tamara_Order_If_Possible_Job::dispatchSync(
+							[
+								'wc_order_id' => $tamara_wc_order->get_id(),
+							]
+						);
+					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+					} catch ( Exception $e ) {
+						// We do nothing for the exception here,
+						//  just want to catch all the exception to have the redirect work
+					}
+				}
+			}
+		}
+
+	}
+
+	public function process_cancelled_failed_order( $wc_order_id ) {
+		// We authorise the order
+		try {
+			$wc_order = wc_get_order($wc_order_id);
+			$tamara_wc_order = new Tamara_WC_Order( $wc_order );
+		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( Exception $e ) {
+			// We do nothing for the exception here,
+			//  just want to catch all the exception to have the redirect work
+		}
+
+		if ( !empty($tamara_wc_order)) {
+			/** @var \Enpii_Base\App\Http\Request $wp_app_request */
+			$wp_app_request = wp_app_request();
+			$tamara_payment_status = $wp_app_request->get('tamara_payment_status');
+
+			if ((string) $tamara_payment_status === Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_DECLINED) {
+				// Handle Failure here
+			} else {
+				// Handle Cancel here
+			}
+		}
 	}
 
 	/**

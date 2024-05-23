@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Tamara Checkout
+ * Plugin Name: Tamara Checkout - Alpha
  * Plugin URI:  https://tamara.co/
- * Description: Allow to Buy Now Pay Later with Tamara payment gateway, based on Enpii Base
+ * Description: Allow to Buy Now Pay Later with Tamara payment gateway
  * Author:      dev@tamara.co
  * Author URI:  https://tamara.co/
- * Version:     2.0.0
+ * Version:     2.0.0-alpha
  * Text Domain: tamara
  */
 

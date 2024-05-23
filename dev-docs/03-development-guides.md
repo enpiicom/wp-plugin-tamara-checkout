@@ -84,9 +84,9 @@ docker compose exec --user=webuser wordpress81 wp enpii-base artisan wp-app:setu
   - The add and commit everything
 
 ## Codestyling (PHPCS)
-Install/update dependencies (you should use PHP 8.0+)
+Install/update dependencies (you should use PHP 8.0)
 ```
-composer install
+composer80 install
 ```
 
 - Fix all possible phpcs issues
