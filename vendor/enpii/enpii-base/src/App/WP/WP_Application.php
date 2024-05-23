@@ -43,45 +43,39 @@ class WP_Application extends Application {
 	}
 
 	public static function load_instance() {
-		add_action(
-			ENPII_BASE_SETUP_HOOK_NAME,
-			function () {
-				// We only want to run the setup once
-				if ( static::isset() ) {
-					return;
-				}
+		// We only want to run the setup once
+		if ( static::isset() ) {
+			return;
+		}
 
-				/**
-				| Create a wp_app() instance to be used in the whole application
-				*/
-				$wp_app_base_path = enpii_base_wp_app_get_base_path();
-				$config = apply_filters(
-					App_Const::FILTER_WP_APP_PREPARE_CONFIG,
-					[
-						'app'         => require_once dirname(
-							dirname( dirname( __DIR__ ) )
-						) . DIR_SEP . 'wp-app-config' . DIR_SEP . 'app.php',
-						'wp_app_slug' => ENPII_BASE_WP_APP_PREFIX,
-						'wp_api_slug' => ENPII_BASE_WP_API_PREFIX,
-					]
-				);
-				if ( empty( $config['app']['key'] ) ) {
-					$auth_key = md5( uniqid() );
-					$config['app']['key'] = $auth_key;
-					add_option( 'wp_app_auth_key', $auth_key );
-				}
-
-				// We initiate the WP Application instance
-				static::init_instance_with_config(
-					$wp_app_base_path,
-					$config
-				);
-
-				Init_WP_App_Kernels::execute_now();
-				do_action( App_Const::ACTION_WP_APP_LOADED );
-			},
-			-100
+		/**
+		| Create a wp_app() instance to be used in the whole application
+		*/
+		$wp_app_base_path = enpii_base_wp_app_get_base_path();
+		$config = apply_filters(
+			App_Const::FILTER_WP_APP_PREPARE_CONFIG,
+			[
+				'app'         => require_once dirname(
+					dirname( dirname( __DIR__ ) )
+				) . DIR_SEP . 'wp-app-config' . DIR_SEP . 'app.php',
+				'wp_app_slug' => ENPII_BASE_WP_APP_PREFIX,
+				'wp_api_slug' => ENPII_BASE_WP_API_PREFIX,
+			]
 		);
+		if ( empty( $config['app']['key'] ) ) {
+			$auth_key = md5( uniqid() );
+			$config['app']['key'] = $auth_key;
+			add_option( 'wp_app_auth_key', $auth_key );
+		}
+
+		// We initiate the WP Application instance
+		static::init_instance_with_config(
+			$wp_app_base_path,
+			$config
+		);
+
+		Init_WP_App_Kernels::execute_now();
+		do_action( App_Const::ACTION_WP_APP_LOADED );
 	}
 
 	/**

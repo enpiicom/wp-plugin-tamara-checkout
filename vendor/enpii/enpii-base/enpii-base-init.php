@@ -29,5 +29,9 @@ if ( defined( 'WP_CONTENT_DIR' ) ) {
 
 	// We init wp_app() here
 	//  then initialization in `enpii-base-init.php` file is for non-plugin mode
-	\Enpii_Base\App\WP\WP_Application::load_instance();
+	add_action(
+		ENPII_BASE_SETUP_HOOK_NAME,
+		[ \Enpii_Base\App\WP\WP_Application::class, 'load_instance' ],
+		-100
+	);
 }

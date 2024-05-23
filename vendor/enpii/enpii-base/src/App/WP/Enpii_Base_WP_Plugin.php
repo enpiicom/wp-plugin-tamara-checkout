@@ -74,7 +74,6 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 
 			$this->loadMigrationsFrom( __DIR__ . '/../../../database/migrations' );
 		}
-
 	}
 
 	public function get_name(): string {
@@ -108,8 +107,13 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 			},
 			5
 		);
-		add_action( App_Const::ACTION_WP_APP_INIT, [ $this, 'build_wp_app_response_via_middleware' ], 5 );
-		add_action( App_Const::ACTION_WP_APP_INIT, [ $this, 'sync_wp_user_to_wp_app_user' ] );
+
+		// If running in WP_CLI, we need to skip this
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			add_action( App_Const::ACTION_WP_APP_INIT, [ $this, 'build_wp_app_response_via_middleware' ], 5 );
+			add_action( App_Const::ACTION_WP_APP_INIT, [ $this, 'sync_wp_user_to_wp_app_user' ] );
+		}
+
 		// We need to have wp_app() terminated before shutting down WP
 		add_action( App_Const::ACTION_WP_APP_COMPLETE_EXECUTION, [ $this, 'perform_wp_app_termination' ] );
 

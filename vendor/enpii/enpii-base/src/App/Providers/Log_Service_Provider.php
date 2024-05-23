@@ -150,7 +150,7 @@ class Log_Service_Provider extends LogServiceProvider {
 				],
 
 				'emergency' => [
-					'path' => storage_path( 'logs/laravel.log' ),
+					'path' => ini_get( 'error_log' ) ? ini_get( 'error_log' ) : storage_path( 'logs/laravel.log' ),
 				],
 			],
 

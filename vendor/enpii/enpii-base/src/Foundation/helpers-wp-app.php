@@ -115,18 +115,20 @@ if ( ! function_exists( 'wp_app_action' ) ) {
 if ( ! function_exists( 'wp_app' ) ) {
 	/**
 	 * Get the available container instance.
+	 *  Notes: Do not use this function before ENPII_BASE_SETUP_HOOK_NAME hook
+	 *      If you want to use this function before the hook,
+	 *      run '\Enpii_Base\App\WP\WP_Application::load_instance();' first
 	 *
-	 * @param  string|null  $abstract
+	 * @param  string|null $abstract
 	 * @param  array  $parameters
 	 * @return mixed|\Enpii_Base\App\WP\WP_Application
 	 */
-	// phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.abstractFound
-	function wp_app( $abstract = null, array $parameters = [] ) {
-		if ( is_null( $abstract ) ) {
+	function wp_app( $abstract_alias = null, array $parameters = [] ) {
+		if ( is_null( $abstract_alias ) ) {
 			return WP_Application::getInstance();
 		}
 
-		return WP_Application::getInstance()->make( $abstract, $parameters );
+		return WP_Application::getInstance()->make( $abstract_alias, $parameters );
 	}
 }
 

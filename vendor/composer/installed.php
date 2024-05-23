@@ -3,7 +3,7 @@
         'name' => 'tamara/tamara-checkout',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '0608a72408effee10155cb719607345df700c7db',
+        'reference' => '282895092a2764569040a51079b104a9c1583e46',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'enpii/enpii-base' => array(
             'pretty_version' => 'dev-wp-release',
             'version' => 'dev-wp-release',
-            'reference' => '67f72dc4c972781addaa4b9480e904a679739e20',
+            'reference' => '7bb45b36b448aeca2ab185b68aede176bac16f54',
             'type' => 'wordpress-muplugin',
             'install_path' => __DIR__ . '/../enpii/enpii-base',
             'aliases' => array(),
@@ -31,7 +31,7 @@
         'tamara/tamara-checkout' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '0608a72408effee10155cb719607345df700c7db',
+            'reference' => '282895092a2764569040a51079b104a9c1583e46',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

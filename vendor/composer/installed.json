@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "67f72dc4c972781addaa4b9480e904a679739e20"
+                "reference": "7bb45b36b448aeca2ab185b68aede176bac16f54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/67f72dc4c972781addaa4b9480e904a679739e20",
-                "reference": "67f72dc4c972781addaa4b9480e904a679739e20",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/7bb45b36b448aeca2ab185b68aede176bac16f54",
+                "reference": "7bb45b36b448aeca2ab185b68aede176bac16f54",
                 "shasum": ""
             },
             "require": {

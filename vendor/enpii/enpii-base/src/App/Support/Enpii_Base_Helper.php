@@ -116,6 +116,7 @@ class Enpii_Base_Helper {
 			static::$version_option = (string) get_option( App_Const::OPTION_VERSION, '0.0.0' );
 		}
 
-		return version_compare( static::$version_option, ENPII_BASE_PLUGIN_VERSION, '>=' );
+		// We have migration for session with db from '0.6.3'
+		return version_compare( static::$version_option, '0.6.3', '>=' );
 	}
 }
