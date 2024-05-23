@@ -717,3 +717,9 @@ msgstr "فضلًا قم بقراءة الوصف لهذه الإعدادات بع
 
 msgid "Update order statuses used to trigger events to Tamara"
 msgstr "تحديث حالات الطلب المستخدمة لتشغيل الأحداث إلى تمارة"
+
+msgid "Tamara doesn't work with block-based checkout, so you need to use the SHORTCODE [woocommmece_checkout] for your checkout page."
+msgstr "لا تعمل Tamara مع سيكّ التحقق القائم على الكتل، لذلك تحتاج إلى استخدام رمز مختصر [woocommerce_checkout] لصفحة السداد الخاصة بك."
+
+msgid "Tamara only works with qualified customers at the checkout step, so some of your customers may not see Tamara at the checkout step."
+msgstr "تعمل Tamara فقط مع العملاء المؤهلين في خطوة الدفع، لذلك قد لا يرى بعض عملائك Tamara على صفحة الدفع."
