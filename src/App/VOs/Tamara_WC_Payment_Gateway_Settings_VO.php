@@ -215,10 +215,20 @@ class Tamara_WC_Payment_Gateway_Settings_VO extends Base_VO {
 		return ! empty( $this->tamara_authorise_done ) ? $this->tamara_authorise_done : 'wc-processing';
 	}
 
+	/**
+	 * Order status to be updated to when the order cancelled on Tamara site
+	 *  and Tamara send a webhook to notify about this cancel event
+	 * @return string
+	 */
 	public function get_order_status_on_tamara_canceled(): string {
 		return ! empty( $this->tamara_order_cancel ) ? $this->tamara_order_cancel : 'wc-tamara-canceled';
 	}
 
+	/**
+	 * Order status to be updated to when the order declined on Tamara site
+	 *  and Tamara send a webhook to notify about this Decline event
+	 * @return string
+	 */
 	public function get_order_status_on_tamara_failed(): string {
 		return ! empty( $this->tamara_payment_failure ) ? $this->tamara_payment_failure : 'wc-tamara-failed';
 	}
