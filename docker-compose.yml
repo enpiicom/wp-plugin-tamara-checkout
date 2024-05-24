@@ -9,10 +9,6 @@ services:
       - "host.docker.internal:host-gateway"
     restart: always
     volumes:
-      # For config
-      - ./dev-docker/config/nginx/http.conf:/etc/nginx/site-opts.d/http.conf
-      - ./dev-docker/config/nginx/https.conf:/etc/nginx/site-opts.d/https.conf
-      - ./dev-docker/config/nginx/default.conf:/etc/nginx/sites-available/default
       # For WordPress site
       - ./dev-docker/wordpress:/var/www/html/public
       # For current plugin
@@ -85,19 +81,18 @@ services:
       - "host.docker.internal:host-gateway"
     restart: always
     volumes:
-      # For config
-      - ./dev-docker/config/nginx/http.conf:/etc/nginx/site-opts.d/http.conf
-      - ./dev-docker/config/nginx/https.conf:/etc/nginx/site-opts.d/https.conf
       # For WordPress site
       - ./dev-docker/wordpress:/var/www/html/public
       # For current plugin
       - ./:/var/www/html/public/wp-content/plugins/tamara-checkout/
       # Miscs
       - ./dev-docker/log/:/var/log/
+      - /var/www/html/public/wp-content/uploads
+      - /var/www/html/public/wp-content/cache
+      - /var/www/html/public/wp-content/upgrade
     env_file:
       - ./.env
     environment:
-      - ENPII_BASE_FORCE_LEGACY=0
       - DB_CONNECTION
       - DB_PORT
       - DB_DATABASE

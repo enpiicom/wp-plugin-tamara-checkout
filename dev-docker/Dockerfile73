@@ -1,21 +1,4 @@
-FROM npbtrac/php73_web
-
-# Install Node 20 and Yarn
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-	&& apt install -y nodejs \
-	&& npm install -g yarn
-
-RUN mkdir -p /etc/nginx/site-opts.d/
-
-# Putting config files to their locations
-COPY ./dev-docker/config/nginx/default.conf /etc/nginx/sites-available/default
-
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-RUN chmod +x wp-cli.phar
-RUN mv wp-cli.phar /usr/local/bin/wp
-
-COPY ./dev-docker/wordpress/ /var/www/html/public
-COPY ./ /var/www/html/public/wp-content/plugins/tamara-checkout/
+FROM npbtrac/php73_wordpress
 
 # Prepare folders
 RUN mkdir -p /var/www/html/public/wp-content/uploads/ /var/www/html/public/wp-content/upgrade/ /var/www/html/public/wp-content/cache/
@@ -23,7 +6,5 @@ RUN chmod -R 777 /var/www/html/public/wp-content/uploads/ /var/www/html/public/w
 
 RUN mkdir -p /var/www/html/public/wp-content/plugins var/www/html/public/wp-content/themes
 RUN chmod 777 /var/www/html/public/wp-content/plugins var/www/html/public/wp-content/themes
-
-RUN useradd -G root webuser
 
 WORKDIR /var/www/html/public
