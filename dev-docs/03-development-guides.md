@@ -1,7 +1,7 @@
 # Development Guides
 
 ## Basic guides
-- Generate Block theme blocks (e.g. Payment options block...)
+- Generate Block theme blocks (e.g. Payment options block...) (Yarn 20)
 ```
 yarn build-blocks
 ```
@@ -52,36 +52,6 @@ docker-compose up -d wordpress81
 docker compose exec --user=webuser wordpress81 wp enpii-base enpii-base prepare
 docker compose exec --user=webuser wordpress81 wp enpii-base artisan wp-app:setup
 ```
-
-## Update `wp-release` branch
-- Use the following commands
-  - Remove vendors
-  ```
-  rm -rf vendor public-assets resources src src-deps languages
-  ```
-  - Update needed files from the main branches
-  ```
-  gco develop -- public-assets resources src src-deps languages composer.* package* tamara* webpack* yarn* readme* tsconfig.json readme.txt icon-* banner-*
-  ```
-  - Compile css and js
-  ```
-  npm install
-  npm run build
-  ```
-  - Force to add the compiled css and js to the repo
-  ```
-  git add --force public-assets/dist
-  ```
-  - Install the dependencies
-  ```
-  composer install --no-dev --ignore-platform-reqs
-  ```
-  - Force to add vendor
-  ```
-  git add --force vendor
-  ```
-  - Remove require stuff in composer.json
-  - The add and commit everything
 
 ## Codestyling (PHPCS)
 Install/update dependencies (you should use PHP 8.0)
