@@ -10,15 +10,20 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 final class AsciiStringType extends StringType
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return $platform->getAsciiStringTypeDeclarationSQL($column);
     }
 
-    public function getBindingType(): ParameterType
+    public function getBindingType(): int
     {
         return ParameterType::ASCII;
+    }
+
+    public function getName(): string
+    {
+        return Types::ASCII_STRING;
     }
 }

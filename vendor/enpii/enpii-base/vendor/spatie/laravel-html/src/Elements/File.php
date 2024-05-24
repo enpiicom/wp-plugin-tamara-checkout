@@ -15,9 +15,9 @@ class File extends BaseElement
 
     protected $tag = 'input';
 
-    public const ACCEPT_AUDIO = 'audio/*';
-    public const ACCEPT_VIDEO = 'video/*';
-    public const ACCEPT_IMAGE = 'image/*';
+    const ACCEPT_AUDIO = 'audio/*';
+    const ACCEPT_VIDEO = 'video/*';
+    const ACCEPT_IMAGE = 'image/*';
 
     public function __construct()
     {

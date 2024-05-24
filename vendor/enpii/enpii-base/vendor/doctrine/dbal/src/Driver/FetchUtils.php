@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace Doctrine\DBAL\Driver;
 
-/** @internal */
+/**
+ * @internal
+ */
 final class FetchUtils
 {
-    /** @throws Exception */
-    public static function fetchOne(Result $result): mixed
+    /**
+     * @return mixed|false
+     *
+     * @throws Exception
+     */
+    public static function fetchOne(Result $result)
     {
         $row = $result->fetchNumeric();
 

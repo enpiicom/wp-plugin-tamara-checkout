@@ -130,7 +130,7 @@ class Main_Controller extends Base_Controller {
 		$authorise_message = $this->tamara_notification()->process_authorise_message();
 
 		$tamara_order = new Tamara_WC_Order( wc_get_order( $authorise_message->getOrderReferenceId() ) );
-		$tamara_order->add_tamara_order_note( sprintf( $this->__('Webhook request for the event %s'), 'authorise_notification' ) );
+		$tamara_order->add_tamara_order_note( sprintf( $this->__( 'Webhook request for the event %s' ), 'authorise_notification' ) );
 
 		$this->process_authorise_tamara_order( $authorise_message->getOrderReferenceId(), $authorise_message->getOrderId() );
 
@@ -145,7 +145,7 @@ class Main_Controller extends Base_Controller {
 		$webhook_message = $this->tamara_notification()->process_webhook_message();
 
 		$tamara_order = new Tamara_WC_Order( wc_get_order( $webhook_message->getOrderReferenceId() ) );
-		$tamara_order->add_tamara_order_note( sprintf( $this->__('Webhook request for the event %s'), $webhook_message->getEventType() ) );
+		$tamara_order->add_tamara_order_note( sprintf( $this->__( 'Webhook request for the event %s' ), $webhook_message->getEventType() ) );
 
 		switch ( $webhook_message->getEventType() ) {
 			case Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED:

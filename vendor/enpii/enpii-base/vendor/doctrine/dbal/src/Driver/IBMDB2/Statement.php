@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\IBMDB2;
 
 use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\Driver\IBMDB2\Exception\CannotCopyStreamToStream;
 use Doctrine\DBAL\Driver\IBMDB2\Exception\CannotCreateTemporaryFile;
 use Doctrine\DBAL\Driver\IBMDB2\Exception\StatementError;
+use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
 
@@ -30,8 +29,11 @@ use const DB2_PARAM_IN;
 
 final class Statement implements StatementInterface
 {
+    /** @var resource */
+    private $stmt;
+
     /** @var mixed[] */
-    private array $parameters = [];
+    private $parameters = [];
 
     /**
      * Map of LOB parameter positions to the tuples containing reference to the variable bound to the driver statement
@@ -39,38 +41,59 @@ final class Statement implements StatementInterface
      *
      * @var array<int,string|resource|null>
      */
-    private array $lobs = [];
+    private $lobs = [];
 
     /**
      * @internal The statement can be only instantiated by its driver connection.
      *
      * @param resource $stmt
      */
-    public function __construct(private readonly mixed $stmt)
+    public function __construct($stmt)
     {
+        $this->stmt = $stmt;
     }
 
-    public function bindValue(int|string $param, mixed $value, ParameterType $type): void
+    /**
+     * {@inheritdoc}
+     */
+    public function bindValue($param, $value, $type = ParameterType::STRING): bool
+    {
+        assert(is_int($param));
+
+        return $this->bindParam($param, $value, $type);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null): bool
     {
         assert(is_int($param));
 
         switch ($type) {
             case ParameterType::INTEGER:
-                $this->bind($param, $value, DB2_PARAM_IN, DB2_LONG);
+                $this->bind($param, $variable, DB2_PARAM_IN, DB2_LONG);
                 break;
 
             case ParameterType::LARGE_OBJECT:
-                $this->lobs[$param] = &$value;
+                $this->lobs[$param] = &$variable;
                 break;
 
             default:
-                $this->bind($param, $value, DB2_PARAM_IN, DB2_CHAR);
+                $this->bind($param, $variable, DB2_PARAM_IN, DB2_CHAR);
                 break;
         }
+
+        return true;
     }
 
-    /** @throws Exception */
-    private function bind(int $position, mixed &$variable, int $parameterType, int $dataType): void
+    /**
+     * @param int   $position Parameter position
+     * @param mixed $variable
+     *
+     * @throws Exception
+     */
+    private function bind($position, &$variable, int $parameterType, int $dataType): void
     {
         $this->parameters[$position] =& $variable;
 
@@ -79,11 +102,14 @@ final class Statement implements StatementInterface
         }
     }
 
-    public function execute(): Result
+    /**
+     * {@inheritdoc}
+     */
+    public function execute($params = null): ResultInterface
     {
         $handles = $this->bindLobs();
 
-        $result = @db2_execute($this->stmt, $this->parameters);
+        $result = @db2_execute($this->stmt, $params ?? $this->parameters);
 
         foreach ($handles as $handle) {
             fclose($handle);
@@ -118,8 +144,6 @@ final class Statement implements StatementInterface
             } else {
                 $this->bind($param, $value, DB2_PARAM_IN, DB2_CHAR);
             }
-
-            unset($value);
         }
 
         return $handles;

@@ -17,6 +17,7 @@ class Register_Base_WP_App_Routes {
 	 * @return void
 	 */
 	public function handle(): void {
+		// We need to add the trailing slash to the 'uri' to match the WP rewrite rule
 		// For Frontend
 		Route::get( '/', [ Main_Controller::class, 'index' ] );
 		Route::get( 'setup-app', [ Main_Controller::class, 'setup_app' ] )->name( 'setup-app' );

@@ -7,28 +7,32 @@ namespace Doctrine\DBAL\Logging;
 use Doctrine\DBAL\Driver as DriverInterface;
 use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 use Psr\Log\LoggerInterface;
-use SensitiveParameter;
 
 final class Driver extends AbstractDriverMiddleware
 {
-    /** @internal This driver can be only instantiated by its middleware. */
-    public function __construct(DriverInterface $driver, private readonly LoggerInterface $logger)
+    /** @var LoggerInterface */
+    private $logger;
+
+    /**
+     * @internal This driver can be only instantiated by its middleware.
+     */
+    public function __construct(DriverInterface $driver, LoggerInterface $logger)
     {
         parent::__construct($driver);
+
+        $this->logger = $logger;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function connect(
-        #[SensitiveParameter]
-        array $params,
-    ): Connection {
+    public function connect(array $params)
+    {
         $this->logger->info('Connecting with parameters {params}', ['params' => $this->maskPassword($params)]);
 
         return new Connection(
             parent::connect($params),
-            $this->logger,
+            $this->logger
         );
     }
 
@@ -37,12 +41,14 @@ final class Driver extends AbstractDriverMiddleware
      *
      * @return array<string,mixed>
      */
-    private function maskPassword(
-        #[SensitiveParameter]
-        array $params,
-    ): array {
+    private function maskPassword(array $params): array
+    {
         if (isset($params['password'])) {
             $params['password'] = '<redacted>';
+        }
+
+        if (isset($params['url'])) {
+            $params['url'] = '<redacted>';
         }
 
         return $params;

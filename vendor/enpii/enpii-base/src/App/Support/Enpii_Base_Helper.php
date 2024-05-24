@@ -39,15 +39,15 @@ class Enpii_Base_Helper {
 	}
 
 	public static function get_setup_app_uri( $full_url = false ): string {
-		$uri = 'wp-app/setup-app?force_app_running_in_console=1';
+		$uri = 'wp-app/setup-app/?force_app_running_in_console=1';
 
-		return $full_url ? home_url() . '/' . $uri : $uri;
+		return $full_url ? trim( site_url(), '/' ) . '/' . $uri : $uri;
 	}
 
 	public static function get_admin_setup_app_uri( $full_url = false ): string {
-		$uri = 'wp-app/admin/setup-app?force_app_running_in_console=1';
+		$uri = 'wp-app/admin/setup-app/?force_app_running_in_console=1';
 
-		return $full_url ? home_url() . '/' . $uri : $uri;
+		return $full_url ? trim( site_url(), '/' ) . '/' . $uri : $uri;
 	}
 
 	public static function get_wp_login_url( $return_url = '', $force_reauth = false ): string {
@@ -111,12 +111,16 @@ class Enpii_Base_Helper {
 		return trim( substr( $site_url, $reverse_pos * ( -1 ) ), '/' );
 	}
 
-	public static function is_setup_app_completed() {
+	public static function get_version_option() {
 		if ( empty( static::$version_option ) ) {
 			static::$version_option = (string) get_option( App_Const::OPTION_VERSION, '0.0.0' );
 		}
 
-		// We have migration for session with db from '0.6.3'
-		return version_compare( static::$version_option, '0.6.3', '>=' );
+		return static::$version_option;
+	}
+
+	public static function is_setup_app_completed() {
+		// We have migration for session with db from '0.7.0'
+		return version_compare( static::get_version_option(), '0.7.0', '>=' );
 	}
 }

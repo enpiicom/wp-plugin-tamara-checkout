@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Doctrine\DBAL\Driver\IBMDB2;
 
-use SensitiveParameter;
-
 use function implode;
 use function sprintf;
-use function str_contains;
+use function strpos;
 
 /**
  * IBM DB2 DSN
  */
 final class DataSourceName
 {
-    private function __construct(
-        #[SensitiveParameter]
-        private readonly string $string,
-    ) {
+    /** @var string */
+    private $string;
+
+    private function __construct(string $string)
+    {
+        $this->string = $string;
     }
 
     public function toString(): string
@@ -31,10 +31,8 @@ final class DataSourceName
      *
      * @param array<string,mixed> $params
      */
-    public static function fromArray(
-        #[SensitiveParameter]
-        array $params,
-    ): self {
+    public static function fromArray(array $params): self
+    {
         $chunks = [];
 
         foreach ($params as $key => $value) {
@@ -49,10 +47,9 @@ final class DataSourceName
      *
      * @param array<string,mixed> $params
      */
-    public static function fromConnectionParameters(#[SensitiveParameter]
-    array $params,): self
+    public static function fromConnectionParameters(array $params): self
     {
-        if (isset($params['dbname']) && str_contains($params['dbname'], '=')) {
+        if (isset($params['dbname']) && strpos($params['dbname'], '=') !== false) {
             return new self($params['dbname']);
         }
 

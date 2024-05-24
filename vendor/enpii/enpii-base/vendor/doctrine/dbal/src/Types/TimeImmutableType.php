@@ -1,35 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Types;
 
 use DateTimeImmutable;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\Exception\InvalidFormat;
-use Doctrine\DBAL\Types\Exception\InvalidType;
 
 /**
  * Immutable type of {@see TimeType}.
  */
-class TimeImmutableType extends Type implements PhpTimeMappingType
+class TimeImmutableType extends TimeType
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    public function getName()
     {
-        return $platform->getTimeTypeDeclarationSQL($column);
+        return Types::TIME_IMMUTABLE;
     }
 
     /**
-     * @param T $value
-     *
-     * @return (T is null ? null : string)
-     *
-     * @template T
+     * {@inheritdoc}
      */
-    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if ($value === null) {
             return $value;
@@ -39,21 +31,17 @@ class TimeImmutableType extends Type implements PhpTimeMappingType
             return $value->format($platform->getTimeFormatString());
         }
 
-        throw InvalidType::new(
+        throw ConversionException::conversionFailedInvalidType(
             $value,
-            static::class,
-            ['null', DateTimeImmutable::class],
+            $this->getName(),
+            ['null', DateTimeImmutable::class]
         );
     }
 
     /**
-     * @param T $value
-     *
-     * @return (T is null ? null : DateTimeImmutable)
-     *
-     * @template T
+     * {@inheritdoc}
      */
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?DateTimeImmutable
+    public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if ($value === null || $value instanceof DateTimeImmutable) {
             return $value;
@@ -61,14 +49,22 @@ class TimeImmutableType extends Type implements PhpTimeMappingType
 
         $dateTime = DateTimeImmutable::createFromFormat('!' . $platform->getTimeFormatString(), $value);
 
-        if ($dateTime !== false) {
-            return $dateTime;
+        if ($dateTime === false) {
+            throw ConversionException::conversionFailedFormat(
+                $value,
+                $this->getName(),
+                $platform->getTimeFormatString()
+            );
         }
 
-        throw InvalidFormat::new(
-            $value,
-            static::class,
-            $platform->getTimeFormatString(),
-        );
+        return $dateTime;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function requiresSQLCommentHint(AbstractPlatform $platform)
+    {
+        return true;
     }
 }

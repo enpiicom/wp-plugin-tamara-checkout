@@ -11,15 +11,17 @@ class AlterUsersTableAddRememberTokenColumn extends Migration {
 	 * @return void
 	 */
 	public function up() {
-		Schema::table(
-			'users',
-			function ( Blueprint $table ) {
-				$table->dateTime( 'user_registered' )->nullable()->default( null )->change();
-				if ( ! Schema::hasColumn( 'users', 'remember_token' ) ) {
-					$table->string( 'remember_token' )->nullable();
+		if ( Schema::hasTable( 'users' ) && Schema::hasColumn('users', 'user_registered') ) {
+			Schema::table(
+				'users',
+				function ( Blueprint $table ) {
+					$table->dateTime( 'user_registered' )->nullable()->default( null )->change();
+					if ( ! Schema::hasColumn( 'users', 'remember_token' ) ) {
+						$table->string( 'remember_token' )->nullable();
+					}
 				}
-			}
-		);
+			);
+		}
 	}
 
 	/**

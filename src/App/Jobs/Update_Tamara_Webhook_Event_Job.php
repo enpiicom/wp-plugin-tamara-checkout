@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
@@ -64,14 +65,38 @@ class Update_Tamara_Webhook_Event_Job extends Base_Job implements ShouldQueue {
 	/**
 	 * We want to add notes for the order whenever receiving a webhook event from Tamara
 	 */
-	public function handle() {
+	public function handle(): void {
 		$this->before_handle();
 
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
-		$this->tamara_wc_order->add_tamara_order_note( sprintf( $this->__( 'Tamara webhook event `%s` for this order has just happened. Tamara Order Id `%s`' ), $this->event_type, $this->tamara_order_id ) );
+		$this->handle_order_notes( $this->tamara_wc_order );
 
-		if ( ! empty( $new_order_status ) ) {
-			$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status );
+		$new_order_status = $this->get_new_order_status();
+		$this->update_new_order_status( $this->tamara_wc_order, $new_order_status );
+	}
+
+	protected function handle_order_notes( Tamara_WC_Order $tamara_wc_order ): void {
+		$order_note = sprintf( $this->__( 'Tamara webhook event `%s` for this order has just happened. Tamara Order Id `%s`' ), $this->event_type, $this->tamara_order_id );
+		$tamara_wc_order->add_tamara_order_note( $order_note );
+	}
+
+	protected function get_new_order_status(): string {
+		if ( (string) $this->event_type === Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_CANCELED ) {
+			return $this->tamara_settings()->order_status_on_tamara_canceled;
+		}
+
+		if ( (string) $this->event_type === Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_DECLINED ) {
+			return $this->tamara_settings()->order_status_on_tamara_failed;
+		}
+
+		return '';
+	}
+
+	protected function update_new_order_status( Tamara_WC_Order $tamara_wc_order, $new_order_status ): void {
+		// We only want to update the new WooCommerce status if the new status is different
+		//  than the current one
+		if ( ! empty( $new_order_status ) && $new_order_status !== 'wc-' . $tamara_wc_order->get_wc_order()->get_status() ) {
+			$tamara_wc_order->get_wc_order()->update_status( $new_order_status );
 		}
 	}
 }

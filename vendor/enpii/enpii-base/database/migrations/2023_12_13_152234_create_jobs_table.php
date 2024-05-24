@@ -11,6 +11,7 @@ class CreateJobsTable extends Migration {
 	 * @return void
 	 */
 	public function up() {
+		Schema::dropIfExists( 'wp_app_jobs' );
 		if ( ! Schema::hasTable( 'wp_app_jobs' ) ) {
 			Schema::create(
 				'wp_app_jobs',

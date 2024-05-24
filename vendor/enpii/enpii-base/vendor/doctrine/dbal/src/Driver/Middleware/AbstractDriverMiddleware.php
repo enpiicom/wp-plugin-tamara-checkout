@@ -1,39 +1,61 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\Middleware;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\API\ExceptionConverter;
-use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\ServerVersionProvider;
-use SensitiveParameter;
+use Doctrine\DBAL\VersionAwarePlatformDriver;
 
-abstract class AbstractDriverMiddleware implements Driver
+abstract class AbstractDriverMiddleware implements VersionAwarePlatformDriver
 {
-    public function __construct(private readonly Driver $wrappedDriver)
+    /** @var Driver */
+    private $wrappedDriver;
+
+    public function __construct(Driver $wrappedDriver)
     {
+        $this->wrappedDriver = $wrappedDriver;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function connect(
-        #[SensitiveParameter]
-        array $params,
-    ): DriverConnection {
+    public function connect(array $params)
+    {
         return $this->wrappedDriver->connect($params);
     }
 
-    public function getDatabasePlatform(ServerVersionProvider $versionProvider): AbstractPlatform
+    /**
+     * {@inheritdoc}
+     */
+    public function getDatabasePlatform()
     {
-        return $this->wrappedDriver->getDatabasePlatform($versionProvider);
+        return $this->wrappedDriver->getDatabasePlatform();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSchemaManager(Connection $conn, AbstractPlatform $platform)
+    {
+        return $this->wrappedDriver->getSchemaManager($conn, $platform);
     }
 
     public function getExceptionConverter(): ExceptionConverter
     {
         return $this->wrappedDriver->getExceptionConverter();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createDatabasePlatformForVersion($version)
+    {
+        if ($this->wrappedDriver instanceof VersionAwarePlatformDriver) {
+            return $this->wrappedDriver->createDatabasePlatformForVersion($version);
+        }
+
+        return $this->wrappedDriver->getDatabasePlatform();
     }
 }

@@ -68,7 +68,7 @@
     ],
     "test": [
       "@phpcs",
-      "@codecept-run unit"
+      "@phpunit"
     ]
   }
 }

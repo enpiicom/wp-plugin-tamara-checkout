@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Platforms\Keywords;
 
 /**
@@ -10,9 +8,17 @@ namespace Doctrine\DBAL\Platforms\Keywords;
 class OracleKeywords extends KeywordList
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    protected function getKeywords(): array
+    public function getName()
+    {
+        return 'Oracle';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getKeywords()
     {
         return [
             'ACCESS',

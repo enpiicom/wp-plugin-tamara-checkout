@@ -348,7 +348,7 @@ abstract class BaseElement implements Htmlable, HtmlElement
     public function open()
     {
         $tag = $this->attributes->isEmpty()
-            ? '<' . $this->tag . '>'
+            ? '<'.$this->tag.'>'
             : "<{$this->tag} {$this->attributes->render()}>";
 
         $children = $this->children->map(function ($child): string {
@@ -367,7 +367,7 @@ abstract class BaseElement implements Htmlable, HtmlElement
             throw InvalidChild::childMustBeAnHtmlElementOrAString();
         })->implode('');
 
-        return new HtmlString($tag . $children);
+        return new HtmlString($tag.$children);
     }
 
     /**
@@ -388,7 +388,7 @@ abstract class BaseElement implements Htmlable, HtmlElement
     public function render()
     {
         return new HtmlString(
-            $this->open() . $this->close()
+            $this->open().$this->close()
         );
     }
 

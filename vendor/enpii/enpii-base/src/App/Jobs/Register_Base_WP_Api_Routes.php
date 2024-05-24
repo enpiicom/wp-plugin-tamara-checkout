@@ -17,6 +17,6 @@ class Register_Base_WP_Api_Routes {
 	public function handle(): void {
 		// For API
 		Route::get( '/', [ Main_Controller::class, 'home' ] );
-		Route::post( 'web-worker', [ Main_Controller::class, 'web_worker' ] )->name( 'web-worker' );
+		Route::match( [ 'GET', 'POST' ], 'web-worker', [ Main_Controller::class, 'web_worker' ] )->name( 'web-worker' );
 	}
 }

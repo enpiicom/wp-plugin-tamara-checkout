@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Cache;
 
 use Doctrine\DBAL\Driver\FetchUtils;
@@ -11,19 +9,37 @@ use function array_values;
 use function count;
 use function reset;
 
-/** @internal The class is internal to the caching layer implementation. */
+/**
+ * @internal The class is internal to the caching layer implementation.
+ */
 final class ArrayResult implements Result
 {
-    private readonly int $columnCount;
-    private int $num = 0;
+    /** @var list<array<string, mixed>> */
+    private $data;
 
-    /** @param list<array<string, mixed>> $data */
-    public function __construct(private array $data)
+    /** @var int */
+    private $columnCount = 0;
+
+    /** @var int */
+    private $num = 0;
+
+    /**
+     * @param list<array<string, mixed>> $data
+     */
+    public function __construct(array $data)
     {
-        $this->columnCount = $data === [] ? 0 : count($data[0]);
+        $this->data = $data;
+        if (count($data) === 0) {
+            return;
+        }
+
+        $this->columnCount = count($data[0]);
     }
 
-    public function fetchNumeric(): array|false
+    /**
+     * {@inheritdoc}
+     */
+    public function fetchNumeric()
     {
         $row = $this->fetch();
 
@@ -34,12 +50,18 @@ final class ArrayResult implements Result
         return array_values($row);
     }
 
-    public function fetchAssociative(): array|false
+    /**
+     * {@inheritdoc}
+     */
+    public function fetchAssociative()
     {
         return $this->fetch();
     }
 
-    public function fetchOne(): mixed
+    /**
+     * {@inheritdoc}
+     */
+    public function fetchOne()
     {
         $row = $this->fetch();
 
@@ -51,7 +73,7 @@ final class ArrayResult implements Result
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function fetchAllNumeric(): array
     {
@@ -59,7 +81,7 @@ final class ArrayResult implements Result
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function fetchAllAssociative(): array
     {
@@ -67,7 +89,7 @@ final class ArrayResult implements Result
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function fetchFirstColumn(): array
     {
@@ -89,8 +111,10 @@ final class ArrayResult implements Result
         $this->data = [];
     }
 
-    /** @return array<string, mixed>|false */
-    private function fetch(): array|false
+    /**
+     * @return array<string, mixed>|false
+     */
+    private function fetch()
     {
         if (! isset($this->data[$this->num])) {
             return false;

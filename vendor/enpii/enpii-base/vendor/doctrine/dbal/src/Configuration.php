@@ -1,12 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL;
 
+use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\Cache\Psr6\CacheAdapter;
+use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\DBAL\Driver\Middleware;
-use Doctrine\DBAL\Exception\InvalidArgumentException;
-use Doctrine\DBAL\Schema\SchemaManagerFactory;
+use Doctrine\DBAL\Logging\SQLLogger;
+use Doctrine\Deprecations\Deprecation;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
@@ -15,32 +16,59 @@ use Psr\Cache\CacheItemPoolInterface;
 class Configuration
 {
     /** @var Middleware[] */
-    private array $middlewares = [];
+    private $middlewares = [];
+
+    /**
+     * The SQL logger in use. If null, SQL logging is disabled.
+     *
+     * @var SQLLogger|null
+     */
+    protected $sqlLogger;
 
     /**
      * The cache driver implementation that is used for query result caching.
+     *
+     * @var CacheItemPoolInterface|null
      */
-    private ?CacheItemPoolInterface $resultCache = null;
+    private $resultCache;
+
+    /**
+     * The cache driver implementation that is used for query result caching.
+     *
+     * @deprecated Use {@see $resultCache} instead.
+     *
+     * @var Cache|null
+     */
+    protected $resultCacheImpl;
 
     /**
      * The callable to use to filter schema assets.
      *
-     * @var callable
+     * @var callable|null
      */
     protected $schemaAssetsFilter;
 
     /**
      * The default auto-commit mode for connections.
+     *
+     * @var bool
      */
-    protected bool $autoCommit = true;
+    protected $autoCommit = true;
 
-    private ?SchemaManagerFactory $schemaManagerFactory = null;
-
-    public function __construct()
+    /**
+     * Sets the SQL logger to use. Defaults to NULL which means SQL logging is disabled.
+     */
+    public function setSQLLogger(?SQLLogger $logger = null): void
     {
-        $this->schemaAssetsFilter = static function (): bool {
-            return true;
-        };
+        $this->sqlLogger = $logger;
+    }
+
+    /**
+     * Gets the SQL logger that is used.
+     */
+    public function getSQLLogger(): ?SQLLogger
+    {
+        return $this->sqlLogger;
     }
 
     /**
@@ -52,25 +80,61 @@ class Configuration
     }
 
     /**
+     * Gets the cache driver implementation that is used for query result caching.
+     *
+     * @deprecated Use {@see getResultCache()} instead.
+     */
+    public function getResultCacheImpl(): ?Cache
+    {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/4620',
+            '%s is deprecated, call getResultCache() instead.',
+            __METHOD__
+        );
+
+        return $this->resultCacheImpl;
+    }
+
+    /**
      * Sets the cache driver implementation that is used for query result caching.
      */
     public function setResultCache(CacheItemPoolInterface $cache): void
     {
-        $this->resultCache = $cache;
+        $this->resultCacheImpl = DoctrineProvider::wrap($cache);
+        $this->resultCache     = $cache;
+    }
+
+    /**
+     * Sets the cache driver implementation that is used for query result caching.
+     *
+     * @deprecated Use {@see setResultCache()} instead.
+     */
+    public function setResultCacheImpl(Cache $cacheImpl): void
+    {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/4620',
+            '%s is deprecated, call setResultCache() instead.',
+            __METHOD__
+        );
+
+        $this->resultCacheImpl = $cacheImpl;
+        $this->resultCache     = CacheAdapter::wrap($cacheImpl);
     }
 
     /**
      * Sets the callable to use to filter schema assets.
      */
-    public function setSchemaAssetsFilter(callable $schemaAssetsFilter): void
+    public function setSchemaAssetsFilter(?callable $callable = null): void
     {
-        $this->schemaAssetsFilter = $schemaAssetsFilter;
+        $this->schemaAssetsFilter = $callable;
     }
 
     /**
      * Returns the callable to use to filter schema assets.
      */
-    public function getSchemaAssetsFilter(): callable
+    public function getSchemaAssetsFilter(): ?callable
     {
         return $this->schemaAssetsFilter;
     }
@@ -82,7 +146,7 @@ class Configuration
      * transactions. Otherwise, its SQL statements are grouped into transactions that are terminated by a call to either
      * the method commit or the method rollback. By default, new connections are in auto-commit mode.
      *
-     * @see getAutoCommit
+     * @see   getAutoCommit
      *
      * @param bool $autoCommit True to enable auto-commit mode; false to disable it
      */
@@ -115,42 +179,11 @@ class Configuration
         return $this;
     }
 
-    /** @return Middleware[] */
+    /**
+     * @return Middleware[]
+     */
     public function getMiddlewares(): array
     {
         return $this->middlewares;
-    }
-
-    public function getSchemaManagerFactory(): ?SchemaManagerFactory
-    {
-        return $this->schemaManagerFactory;
-    }
-
-    /** @return $this */
-    public function setSchemaManagerFactory(SchemaManagerFactory $schemaManagerFactory): self
-    {
-        $this->schemaManagerFactory = $schemaManagerFactory;
-
-        return $this;
-    }
-
-    /** @return true */
-    public function getDisableTypeComments(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @param true $disableTypeComments
-     *
-     * @return $this
-     */
-    public function setDisableTypeComments(bool $disableTypeComments): self
-    {
-        if (! $disableTypeComments) {
-            throw new InvalidArgumentException('Column comments cannot be enabled anymore.');
-        }
-
-        return $this;
     }
 }

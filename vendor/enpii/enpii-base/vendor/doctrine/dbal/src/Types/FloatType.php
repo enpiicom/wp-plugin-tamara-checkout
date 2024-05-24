@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -9,21 +7,25 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 class FloatType extends Type
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    public function getName()
+    {
+        return Types::FLOAT;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
     {
         return $platform->getFloatDeclarationSQL($column);
     }
 
     /**
-     * @param T $value
-     *
-     * @return (T is null ? null : float)
-     *
-     * @template T
+     * {@inheritdoc}
      */
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?float
+    public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         return $value === null ? null : (float) $value;
     }

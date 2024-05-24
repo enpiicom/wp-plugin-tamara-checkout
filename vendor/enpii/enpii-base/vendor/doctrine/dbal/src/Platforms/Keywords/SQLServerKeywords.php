@@ -1,20 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Platforms\Keywords;
 
 /**
+ * Microsoft SQL Server 2012 reserved keyword dictionary.
  * Reserved keywords list corresponding to the Microsoft SQL Server database platform of the oldest supported version.
  */
 class SQLServerKeywords extends KeywordList
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     */
+    public function getName()
+    {
+        return 'SQLServer';
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @link http://msdn.microsoft.com/en-us/library/aa238507%28v=sql.80%29.aspx
      */
-    protected function getKeywords(): array
+    protected function getKeywords()
     {
         return [
             'ADD',

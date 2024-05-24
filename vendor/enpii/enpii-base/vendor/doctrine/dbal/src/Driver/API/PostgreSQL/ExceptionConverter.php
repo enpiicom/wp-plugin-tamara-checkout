@@ -21,12 +21,16 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\Query;
 
-use function str_contains;
+use function strpos;
 
-/** @internal */
+/**
+ * @internal
+ */
 final class ExceptionConverter implements ExceptionConverterInterface
 {
-    /** @link http://www.postgresql.org/docs/9.4/static/errcodes-appendix.html */
+    /**
+     * @link http://www.postgresql.org/docs/9.4/static/errcodes-appendix.html
+     */
     public function convert(Exception $exception, ?Query $query): DriverException
     {
         switch ($exception->getSQLState()) {
@@ -37,7 +41,7 @@ final class ExceptionConverter implements ExceptionConverterInterface
             case '0A000':
                 // Foreign key constraint violations during a TRUNCATE operation
                 // are considered "feature not supported" in PostgreSQL.
-                if (str_contains($exception->getMessage(), 'truncate')) {
+                if (strpos($exception->getMessage(), 'truncate') !== false) {
                     return new ForeignKeyConstraintViolationException($exception, $query);
                 }
 
@@ -75,6 +79,13 @@ final class ExceptionConverter implements ExceptionConverterInterface
 
             case '08006':
                 return new ConnectionException($exception, $query);
+        }
+
+        // Prior to fixing https://bugs.php.net/bug.php?id=64705 (PHP 7.3.22 and PHP 7.4.10),
+        // in some cases (mainly connection errors) the PDO exception wouldn't provide a SQLSTATE via its code.
+        // We have to match against the SQLSTATE in the error message in these cases.
+        if ($exception->getCode() === 7 && strpos($exception->getMessage(), 'SQLSTATE[08006]') !== false) {
+            return new ConnectionException($exception, $query);
         }
 
         return new DriverException($exception, $query);

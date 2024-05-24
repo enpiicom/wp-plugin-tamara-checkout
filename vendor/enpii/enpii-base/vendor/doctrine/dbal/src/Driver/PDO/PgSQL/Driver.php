@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\PDO\PgSQL;
 
 use Doctrine\DBAL\Driver\AbstractPostgreSQLDriver;
@@ -9,32 +7,28 @@ use Doctrine\DBAL\Driver\PDO\Connection;
 use Doctrine\DBAL\Driver\PDO\Exception;
 use PDO;
 use PDOException;
-use SensitiveParameter;
 
 final class Driver extends AbstractPostgreSQLDriver
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     *
+     * @return Connection
      */
-    public function connect(
-        #[SensitiveParameter]
-        array $params,
-    ): Connection {
+    public function connect(array $params)
+    {
         $driverOptions = $params['driverOptions'] ?? [];
 
         if (! empty($params['persistent'])) {
             $driverOptions[PDO::ATTR_PERSISTENT] = true;
         }
 
-        $safeParams = $params;
-        unset($safeParams['password']);
-
         try {
             $pdo = new PDO(
-                $this->constructPdoDsn($safeParams),
+                $this->constructPdoDsn($params),
                 $params['user'] ?? '',
                 $params['password'] ?? '',
-                $driverOptions,
+                $driverOptions
             );
         } catch (PDOException $exception) {
             throw Exception::new($exception);
@@ -62,7 +56,7 @@ final class Driver extends AbstractPostgreSQLDriver
     /**
      * Constructs the Postgres PDO DSN.
      *
-     * @param array<string, mixed> $params
+     * @param mixed[] $params
      */
     private function constructPdoDsn(array $params): string
     {
@@ -78,6 +72,13 @@ final class Driver extends AbstractPostgreSQLDriver
 
         if (isset($params['dbname'])) {
             $dsn .= 'dbname=' . $params['dbname'] . ';';
+        } elseif (isset($params['default_dbname'])) {
+            $dsn .= 'dbname=' . $params['default_dbname'] . ';';
+        } else {
+            // Used for temporary connections to allow operations like dropping the database currently connected to.
+            // Connecting without an explicit database does not work, therefore "postgres" database is used
+            // as it is mostly present in every server setup.
+            $dsn .= 'dbname=postgres;';
         }
 
         if (isset($params['sslmode'])) {
@@ -102,10 +103,6 @@ final class Driver extends AbstractPostgreSQLDriver
 
         if (isset($params['application_name'])) {
             $dsn .= 'application_name=' . $params['application_name'] . ';';
-        }
-
-        if (isset($params['gssencmode'])) {
-            $dsn .= 'gssencmode=' . $params['gssencmode'] . ';';
         }
 
         return $dsn;

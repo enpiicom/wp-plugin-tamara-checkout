@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Tamara Checkout
+ * Plugin Name: Tamara Checkout - Alpha
  * Plugin URI:  https://tamara.co/
  * Description: Allow to Buy Now Pay Later with Tamara payment gateway
  * Author:      dev@tamara.co
  * Author URI:  https://tamara.co/
- * Version:     2.0.0
+ * Version:     2.0.0-alpha
  * Text Domain: tamara
  */
 
@@ -34,6 +34,13 @@ add_action(
 	'plugins_loaded',
 	function () {
 		$error_message = '';
+		$plugin_slug = plugin_basename( __DIR__ );
+		if ( $plugin_slug !== TAMARA_CHECKOUT_PLUGIN_SLUG ) {
+			$error_message .= $error_message ? '<br />' : '';
+			// translators: %1$s is the plugin name, %2$s is the plugin slug
+			$error_message .= sprintf( __( 'Plugin <strong>%1$s</strong> folder name must be %2$s.', 'tamara' ), 'Tamara Checkout', TAMARA_CHECKOUT_PLUGIN_SLUG );
+		}
+
 		if ( ! Tamara_Checkout_Helper::check_enpii_base_plugin() ) {
 			$error_message .= $error_message ? '<br />' : '';
 			// translators: %s is for the name of the plugin

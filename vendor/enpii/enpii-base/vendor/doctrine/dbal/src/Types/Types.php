@@ -9,6 +9,7 @@ namespace Doctrine\DBAL\Types;
  */
 final class Types
 {
+    public const ARRAY                = 'array';
     public const ASCII_STRING         = 'ascii_string';
     public const BIGINT               = 'bigint';
     public const BINARY               = 'binary';
@@ -26,6 +27,7 @@ final class Types
     public const GUID                 = 'guid';
     public const INTEGER              = 'integer';
     public const JSON                 = 'json';
+    public const OBJECT               = 'object';
     public const SIMPLE_ARRAY         = 'simple_array';
     public const SMALLINT             = 'smallint';
     public const STRING               = 'string';
@@ -33,7 +35,9 @@ final class Types
     public const TIME_MUTABLE         = 'time';
     public const TIME_IMMUTABLE       = 'time_immutable';
 
-    /** @codeCoverageIgnore */
+    /**
+     * @codeCoverageIgnore
+     */
     private function __construct()
     {
     }

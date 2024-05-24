@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12
+class ComposerStaticInit692c9313e2399c2b299f9a7dbb84a1e6
 {
     public static $files = array (
         '05606250504f1174fd702cad64105781' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/Support/helpers-utils.php',
@@ -66,9 +66,9 @@ class ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitefdd79290db7089dbd55dddb2a5d9c12::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit692c9313e2399c2b299f9a7dbb84a1e6::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit692c9313e2399c2b299f9a7dbb84a1e6::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit692c9313e2399c2b299f9a7dbb84a1e6::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -1,106 +1,70 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Schema;
+
+use Doctrine\Deprecations\Deprecation;
+
+use function in_array;
 
 /**
  * Represents the change of a column.
  */
 class ColumnDiff
 {
-    /** @internal The diff can be only instantiated by a {@see Comparator}. */
-    public function __construct(private readonly Column $oldColumn, private readonly Column $newColumn)
-    {
-    }
+    /** @var string */
+    public $oldColumnName;
 
-    public function getOldColumn(): Column
-    {
-        return $this->oldColumn;
-    }
+    /** @var Column */
+    public $column;
 
-    public function getNewColumn(): Column
-    {
-        return $this->newColumn;
-    }
+    /** @var string[] */
+    public $changedProperties = [];
 
-    public function hasTypeChanged(): bool
-    {
-        return $this->newColumn->getType()::class !== $this->oldColumn->getType()::class;
-    }
+    /** @var Column|null */
+    public $fromColumn;
 
-    public function hasLengthChanged(): bool
-    {
-        return $this->hasPropertyChanged(static function (Column $column): ?int {
-            return $column->getLength();
-        });
-    }
-
-    public function hasPrecisionChanged(): bool
-    {
-        return $this->hasPropertyChanged(static function (Column $column): ?int {
-            return $column->getPrecision();
-        });
-    }
-
-    public function hasScaleChanged(): bool
-    {
-        return $this->hasPropertyChanged(static function (Column $column): int {
-            return $column->getScale();
-        });
-    }
-
-    public function hasUnsignedChanged(): bool
-    {
-        return $this->hasPropertyChanged(static function (Column $column): bool {
-            return $column->getUnsigned();
-        });
-    }
-
-    public function hasFixedChanged(): bool
-    {
-        return $this->hasPropertyChanged(static function (Column $column): bool {
-            return $column->getFixed();
-        });
-    }
-
-    public function hasNotNullChanged(): bool
-    {
-        return $this->hasPropertyChanged(static function (Column $column): bool {
-            return $column->getNotnull();
-        });
-    }
-
-    public function hasDefaultChanged(): bool
-    {
-        $oldDefault = $this->oldColumn->getDefault();
-        $newDefault = $this->newColumn->getDefault();
-
-        // Null values need to be checked additionally as they tell whether to create or drop a default value.
-        // null != 0, null != false, null != '' etc. This affects platform's table alteration SQL generation.
-        if (($newDefault === null) xor ($oldDefault === null)) {
-            return true;
+    /**
+     * @param string   $oldColumnName
+     * @param string[] $changedProperties
+     */
+    public function __construct(
+        $oldColumnName,
+        Column $column,
+        array $changedProperties = [],
+        ?Column $fromColumn = null
+    ) {
+        if ($fromColumn === null) {
+            Deprecation::triggerIfCalledFromOutside(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/pull/4785',
+                'Not passing the $fromColumn to %s is deprecated.',
+                __METHOD__
+            );
         }
 
-        return $newDefault != $oldDefault;
+        $this->oldColumnName     = $oldColumnName;
+        $this->column            = $column;
+        $this->changedProperties = $changedProperties;
+        $this->fromColumn        = $fromColumn;
     }
 
-    public function hasAutoIncrementChanged(): bool
+    /**
+     * @param string $propertyName
+     *
+     * @return bool
+     */
+    public function hasChanged($propertyName)
     {
-        return $this->hasPropertyChanged(static function (Column $column): bool {
-            return $column->getAutoincrement();
-        });
+        return in_array($propertyName, $this->changedProperties, true);
     }
 
-    public function hasCommentChanged(): bool
+    /**
+     * @return Identifier
+     */
+    public function getOldColumnName()
     {
-        return $this->hasPropertyChanged(static function (Column $column): string {
-            return $column->getComment();
-        });
-    }
+        $quote = $this->fromColumn !== null && $this->fromColumn->isQuoted();
 
-    private function hasPropertyChanged(callable $property): bool
-    {
-        return $property($this->newColumn) !== $property($this->oldColumn);
+        return new Identifier($this->oldColumnName, $quote);
     }
 }

@@ -1,109 +1,173 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Schema;
 
-use function array_filter;
-use function count;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+
+use function array_merge;
 
 /**
  * Differences between two schemas.
+ *
+ * The object contains the operations to change the schema stored in $fromSchema
+ * to a target schema.
  */
 class SchemaDiff
 {
-    /** @var array<TableDiff> */
-    private readonly array $alteredTables;
+    /** @var Schema|null */
+    public $fromSchema;
+
+    /**
+     * All added namespaces.
+     *
+     * @var string[]
+     */
+    public $newNamespaces = [];
+
+    /**
+     * All removed namespaces.
+     *
+     * @var string[]
+     */
+    public $removedNamespaces = [];
+
+    /**
+     * All added tables.
+     *
+     * @var Table[]
+     */
+    public $newTables = [];
+
+    /**
+     * All changed tables.
+     *
+     * @var TableDiff[]
+     */
+    public $changedTables = [];
+
+    /**
+     * All removed tables.
+     *
+     * @var Table[]
+     */
+    public $removedTables = [];
+
+    /** @var Sequence[] */
+    public $newSequences = [];
+
+    /** @var Sequence[] */
+    public $changedSequences = [];
+
+    /** @var Sequence[] */
+    public $removedSequences = [];
+
+    /** @var ForeignKeyConstraint[] */
+    public $orphanedForeignKeys = [];
 
     /**
      * Constructs an SchemaDiff object.
      *
-     * @internal The diff can be only instantiated by a {@see Comparator}.
-     *
-     * @param array<string>    $createdSchemas
-     * @param array<string>    $droppedSchemas
-     * @param array<Table>     $createdTables
-     * @param array<TableDiff> $alteredTables
-     * @param array<Table>     $droppedTables
-     * @param array<Sequence>  $createdSequences
-     * @param array<Sequence>  $alteredSequences
-     * @param array<Sequence>  $droppedSequences
+     * @param Table[]     $newTables
+     * @param TableDiff[] $changedTables
+     * @param Table[]     $removedTables
      */
-    public function __construct(
-        private readonly array $createdSchemas,
-        private readonly array $droppedSchemas,
-        private readonly array $createdTables,
-        array $alteredTables,
-        private readonly array $droppedTables,
-        private readonly array $createdSequences,
-        private readonly array $alteredSequences,
-        private readonly array $droppedSequences,
-    ) {
-        $this->alteredTables = array_filter($alteredTables, static function (TableDiff $diff): bool {
-            return ! $diff->isEmpty();
-        });
-    }
-
-    /** @return array<string> */
-    public function getCreatedSchemas(): array
+    public function __construct($newTables = [], $changedTables = [], $removedTables = [], ?Schema $fromSchema = null)
     {
-        return $this->createdSchemas;
-    }
-
-    /** @return array<string> */
-    public function getDroppedSchemas(): array
-    {
-        return $this->droppedSchemas;
-    }
-
-    /** @return array<Table> */
-    public function getCreatedTables(): array
-    {
-        return $this->createdTables;
-    }
-
-    /** @return array<TableDiff> */
-    public function getAlteredTables(): array
-    {
-        return $this->alteredTables;
-    }
-
-    /** @return array<Table> */
-    public function getDroppedTables(): array
-    {
-        return $this->droppedTables;
-    }
-
-    /** @return array<Sequence> */
-    public function getCreatedSequences(): array
-    {
-        return $this->createdSequences;
-    }
-
-    /** @return array<Sequence> */
-    public function getAlteredSequences(): array
-    {
-        return $this->alteredSequences;
-    }
-
-    /** @return array<Sequence> */
-    public function getDroppedSequences(): array
-    {
-        return $this->droppedSequences;
+        $this->newTables     = $newTables;
+        $this->changedTables = $changedTables;
+        $this->removedTables = $removedTables;
+        $this->fromSchema    = $fromSchema;
     }
 
     /**
-     * Returns whether the diff is empty (contains no changes).
+     * The to save sql mode ensures that the following things don't happen:
+     *
+     * 1. Tables are deleted
+     * 2. Sequences are deleted
+     * 3. Foreign Keys which reference tables that would otherwise be deleted.
+     *
+     * This way it is ensured that assets are deleted which might not be relevant to the metadata schema at all.
+     *
+     * @return string[]
      */
-    public function isEmpty(): bool
+    public function toSaveSql(AbstractPlatform $platform)
     {
-        return count($this->createdSchemas) === 0
-            && count($this->droppedSchemas) === 0
-            && count($this->createdTables) === 0
-            && count($this->alteredTables) === 0
-            && count($this->droppedTables) === 0
-            && count($this->createdSequences) === 0
-            && count($this->alteredSequences) === 0
-            && count($this->droppedSequences) === 0;
+        return $this->_toSql($platform, true);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function toSql(AbstractPlatform $platform)
+    {
+        return $this->_toSql($platform, false);
+    }
+
+    /**
+     * @param bool $saveMode
+     *
+     * @return string[]
+     */
+    protected function _toSql(AbstractPlatform $platform, $saveMode = false)
+    {
+        $sql = [];
+
+        if ($platform->supportsSchemas()) {
+            foreach ($this->newNamespaces as $newNamespace) {
+                $sql[] = $platform->getCreateSchemaSQL($newNamespace);
+            }
+        }
+
+        if ($platform->supportsForeignKeyConstraints() && $saveMode === false) {
+            foreach ($this->orphanedForeignKeys as $orphanedForeignKey) {
+                $sql[] = $platform->getDropForeignKeySQL($orphanedForeignKey, $orphanedForeignKey->getLocalTable());
+            }
+        }
+
+        if ($platform->supportsSequences() === true) {
+            foreach ($this->changedSequences as $sequence) {
+                $sql[] = $platform->getAlterSequenceSQL($sequence);
+            }
+
+            if ($saveMode === false) {
+                foreach ($this->removedSequences as $sequence) {
+                    $sql[] = $platform->getDropSequenceSQL($sequence);
+                }
+            }
+
+            foreach ($this->newSequences as $sequence) {
+                $sql[] = $platform->getCreateSequenceSQL($sequence);
+            }
+        }
+
+        $foreignKeySql = [];
+        foreach ($this->newTables as $table) {
+            $sql = array_merge(
+                $sql,
+                $platform->getCreateTableSQL($table, AbstractPlatform::CREATE_INDEXES)
+            );
+
+            if (! $platform->supportsForeignKeyConstraints()) {
+                continue;
+            }
+
+            foreach ($table->getForeignKeys() as $foreignKey) {
+                $foreignKeySql[] = $platform->getCreateForeignKeySQL($foreignKey, $table);
+            }
+        }
+
+        $sql = array_merge($sql, $foreignKeySql);
+
+        if ($saveMode === false) {
+            foreach ($this->removedTables as $table) {
+                $sql[] = $platform->getDropTableSQL($table);
+            }
+        }
+
+        foreach ($this->changedTables as $tableDiff) {
+            $sql = array_merge($sql, $platform->getAlterTableSQL($tableDiff));
+        }
+
+        return $sql;
     }
 }

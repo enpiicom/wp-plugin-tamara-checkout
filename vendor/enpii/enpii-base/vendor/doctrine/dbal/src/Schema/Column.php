@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Schema;
 
 use Doctrine\DBAL\Schema\Exception\UnknownColumnOption;
 use Doctrine\DBAL\Types\Type;
 
 use function array_merge;
+use function is_numeric;
 use function method_exists;
 
 /**
@@ -15,45 +14,68 @@ use function method_exists;
  */
 class Column extends AbstractAsset
 {
-    protected Type $_type;
+    /** @var Type */
+    protected $_type;
 
-    protected ?int $_length = null;
+    /** @var int|null */
+    protected $_length;
 
-    protected ?int $_precision = null;
+    /** @var int */
+    protected $_precision = 10;
 
-    protected int $_scale = 0;
+    /** @var int */
+    protected $_scale = 0;
 
-    protected bool $_unsigned = false;
+    /** @var bool */
+    protected $_unsigned = false;
 
-    protected bool $_fixed = false;
+    /** @var bool */
+    protected $_fixed = false;
 
-    protected bool $_notnull = true;
+    /** @var bool */
+    protected $_notnull = true;
 
-    protected mixed $_default = null;
+    /** @var string|null */
+    protected $_default;
 
-    protected bool $_autoincrement = false;
+    /** @var bool */
+    protected $_autoincrement = false;
 
-    /** @var array<string, mixed> */
-    protected array $_platformOptions = [];
+    /** @var mixed[] */
+    protected $_platformOptions = [];
 
-    protected ?string $_columnDefinition = null;
+    /** @var string|null */
+    protected $_columnDefinition;
 
-    protected string $_comment = '';
+    /** @var string|null */
+    protected $_comment;
+
+    /** @var mixed[] */
+    protected $_customSchemaOptions = [];
 
     /**
      * Creates a new Column.
      *
-     * @param array<string, mixed> $options
+     * @param string  $name
+     * @param mixed[] $options
+     *
+     * @throws SchemaException
      */
-    public function __construct(string $name, Type $type, array $options = [])
+    public function __construct($name, Type $type, array $options = [])
     {
         $this->_setName($name);
         $this->setType($type);
         $this->setOptions($options);
     }
 
-    /** @param array<string, mixed> $options */
-    public function setOptions(array $options): self
+    /**
+     * @param mixed[] $options
+     *
+     * @return Column
+     *
+     * @throws SchemaException
+     */
+    public function setOptions(array $options)
     {
         foreach ($options as $name => $value) {
             $method = 'set' . $name;
@@ -68,171 +90,346 @@ class Column extends AbstractAsset
         return $this;
     }
 
-    public function setType(Type $type): self
+    /**
+     * @return Column
+     */
+    public function setType(Type $type)
     {
         $this->_type = $type;
 
         return $this;
     }
 
-    public function setLength(?int $length): self
+    /**
+     * @param int|null $length
+     *
+     * @return Column
+     */
+    public function setLength($length)
     {
-        $this->_length = $length;
+        if ($length !== null) {
+            $this->_length = (int) $length;
+        } else {
+            $this->_length = null;
+        }
 
         return $this;
     }
 
-    public function setPrecision(?int $precision): self
+    /**
+     * @param int $precision
+     *
+     * @return Column
+     */
+    public function setPrecision($precision)
     {
-        $this->_precision = $precision;
+        if (! is_numeric($precision)) {
+            $precision = 10; // defaults to 10 when no valid precision is given.
+        }
+
+        $this->_precision = (int) $precision;
 
         return $this;
     }
 
-    public function setScale(int $scale): self
+    /**
+     * @param int $scale
+     *
+     * @return Column
+     */
+    public function setScale($scale)
     {
-        $this->_scale = $scale;
+        if (! is_numeric($scale)) {
+            $scale = 0;
+        }
+
+        $this->_scale = (int) $scale;
 
         return $this;
     }
 
-    public function setUnsigned(bool $unsigned): self
+    /**
+     * @param bool $unsigned
+     *
+     * @return Column
+     */
+    public function setUnsigned($unsigned)
     {
-        $this->_unsigned = $unsigned;
+        $this->_unsigned = (bool) $unsigned;
 
         return $this;
     }
 
-    public function setFixed(bool $fixed): self
+    /**
+     * @param bool $fixed
+     *
+     * @return Column
+     */
+    public function setFixed($fixed)
     {
-        $this->_fixed = $fixed;
+        $this->_fixed = (bool) $fixed;
 
         return $this;
     }
 
-    public function setNotnull(bool $notnull): self
+    /**
+     * @param bool $notnull
+     *
+     * @return Column
+     */
+    public function setNotnull($notnull)
     {
-        $this->_notnull = $notnull;
+        $this->_notnull = (bool) $notnull;
 
         return $this;
     }
 
-    public function setDefault(mixed $default): self
+    /**
+     * @param mixed $default
+     *
+     * @return Column
+     */
+    public function setDefault($default)
     {
         $this->_default = $default;
 
         return $this;
     }
 
-    /** @param array<string, mixed> $platformOptions */
-    public function setPlatformOptions(array $platformOptions): self
+    /**
+     * @param mixed[] $platformOptions
+     *
+     * @return Column
+     */
+    public function setPlatformOptions(array $platformOptions)
     {
         $this->_platformOptions = $platformOptions;
 
         return $this;
     }
 
-    public function setPlatformOption(string $name, mixed $value): self
+    /**
+     * @param string $name
+     * @param mixed  $value
+     *
+     * @return Column
+     */
+    public function setPlatformOption($name, $value)
     {
         $this->_platformOptions[$name] = $value;
 
         return $this;
     }
 
-    public function setColumnDefinition(?string $value): self
+    /**
+     * @param string $value
+     *
+     * @return Column
+     */
+    public function setColumnDefinition($value)
     {
         $this->_columnDefinition = $value;
 
         return $this;
     }
 
-    public function getType(): Type
+    /**
+     * @return Type
+     */
+    public function getType()
     {
         return $this->_type;
     }
 
-    public function getLength(): ?int
+    /**
+     * @return int|null
+     */
+    public function getLength()
     {
         return $this->_length;
     }
 
-    public function getPrecision(): ?int
+    /**
+     * @return int
+     */
+    public function getPrecision()
     {
         return $this->_precision;
     }
 
-    public function getScale(): int
+    /**
+     * @return int
+     */
+    public function getScale()
     {
         return $this->_scale;
     }
 
-    public function getUnsigned(): bool
+    /**
+     * @return bool
+     */
+    public function getUnsigned()
     {
         return $this->_unsigned;
     }
 
-    public function getFixed(): bool
+    /**
+     * @return bool
+     */
+    public function getFixed()
     {
         return $this->_fixed;
     }
 
-    public function getNotnull(): bool
+    /**
+     * @return bool
+     */
+    public function getNotnull()
     {
         return $this->_notnull;
     }
 
-    public function getDefault(): mixed
+    /**
+     * @return string|null
+     */
+    public function getDefault()
     {
         return $this->_default;
     }
 
-    /** @return array<string, mixed> */
-    public function getPlatformOptions(): array
+    /**
+     * @return mixed[]
+     */
+    public function getPlatformOptions()
     {
         return $this->_platformOptions;
     }
 
-    public function hasPlatformOption(string $name): bool
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasPlatformOption($name)
     {
         return isset($this->_platformOptions[$name]);
     }
 
-    public function getPlatformOption(string $name): mixed
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getPlatformOption($name)
     {
         return $this->_platformOptions[$name];
     }
 
-    public function getColumnDefinition(): ?string
+    /**
+     * @return string|null
+     */
+    public function getColumnDefinition()
     {
         return $this->_columnDefinition;
     }
 
-    public function getAutoincrement(): bool
+    /**
+     * @return bool
+     */
+    public function getAutoincrement()
     {
         return $this->_autoincrement;
     }
 
-    public function setAutoincrement(bool $flag): self
+    /**
+     * @param bool $flag
+     *
+     * @return Column
+     */
+    public function setAutoincrement($flag)
     {
         $this->_autoincrement = $flag;
 
         return $this;
     }
 
-    public function setComment(string $comment): self
+    /**
+     * @param string|null $comment
+     *
+     * @return Column
+     */
+    public function setComment($comment)
     {
         $this->_comment = $comment;
 
         return $this;
     }
 
-    public function getComment(): string
+    /**
+     * @return string|null
+     */
+    public function getComment()
     {
         return $this->_comment;
     }
 
-    /** @return array<string, mixed> */
-    public function toArray(): array
+    /**
+     * @param string $name
+     * @param mixed  $value
+     *
+     * @return Column
+     */
+    public function setCustomSchemaOption($name, $value)
+    {
+        $this->_customSchemaOptions[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasCustomSchemaOption($name)
+    {
+        return isset($this->_customSchemaOptions[$name]);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function getCustomSchemaOption($name)
+    {
+        return $this->_customSchemaOptions[$name];
+    }
+
+    /**
+     * @param mixed[] $customSchemaOptions
+     *
+     * @return Column
+     */
+    public function setCustomSchemaOptions(array $customSchemaOptions)
+    {
+        $this->_customSchemaOptions = $customSchemaOptions;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getCustomSchemaOptions()
+    {
+        return $this->_customSchemaOptions;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function toArray()
     {
         return array_merge([
             'name'          => $this->_name,
@@ -247,6 +444,6 @@ class Column extends AbstractAsset
             'autoincrement' => $this->_autoincrement,
             'columnDefinition' => $this->_columnDefinition,
             'comment' => $this->_comment,
-        ], $this->_platformOptions);
+        ], $this->_platformOptions, $this->_customSchemaOptions);
     }
 }

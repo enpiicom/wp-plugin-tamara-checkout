@@ -1,13 +1,16 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Platforms\Keywords;
 
 class MariaDBKeywords extends MySQLKeywords
 {
+    public function getName(): string
+    {
+        return 'MariaDB';
+    }
+
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     protected function getKeywords(): array
     {

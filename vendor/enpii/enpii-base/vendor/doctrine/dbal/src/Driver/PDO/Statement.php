@@ -1,58 +1,104 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\PDO;
 
 use Doctrine\DBAL\Driver\Exception as ExceptionInterface;
+use Doctrine\DBAL\Driver\Exception\UnknownParameterType;
+use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\Deprecations\Deprecation;
 use PDO;
 use PDOException;
 use PDOStatement;
 
+use function array_slice;
+use function func_get_args;
+use function func_num_args;
+
 final class Statement implements StatementInterface
 {
-    /** @internal The statement can be only instantiated by its driver connection. */
-    public function __construct(private readonly PDOStatement $stmt)
+    private const PARAM_TYPE_MAP = [
+        ParameterType::NULL => PDO::PARAM_NULL,
+        ParameterType::INTEGER => PDO::PARAM_INT,
+        ParameterType::STRING => PDO::PARAM_STR,
+        ParameterType::ASCII => PDO::PARAM_STR,
+        ParameterType::BINARY => PDO::PARAM_LOB,
+        ParameterType::LARGE_OBJECT => PDO::PARAM_LOB,
+        ParameterType::BOOLEAN => PDO::PARAM_BOOL,
+    ];
+
+    /** @var PDOStatement */
+    private $stmt;
+
+    /**
+     * @internal The statement can be only instantiated by its driver connection.
+     */
+    public function __construct(PDOStatement $stmt)
     {
+        $this->stmt = $stmt;
     }
 
-    public function bindValue(int|string $param, mixed $value, ParameterType $type): void
+    /**
+     * {@inheritdoc}
+     */
+    public function bindValue($param, $value, $type = ParameterType::STRING)
     {
-        $pdoType = $this->convertParamType($type);
+        $type = $this->convertParamType($type);
 
         try {
-            $this->stmt->bindValue($param, $value, $pdoType);
+            return $this->stmt->bindValue($param, $value, $type);
         } catch (PDOException $exception) {
             throw Exception::new($exception);
         }
     }
 
     /**
-     * @internal Driver options can be only specified by a PDO-based driver.
+     * {@inheritDoc}
      *
-     * @throws ExceptionInterface
+     * @param mixed    $param
+     * @param mixed    $variable
+     * @param int      $type
+     * @param int|null $length
+     * @param mixed    $driverOptions The usage of the argument is deprecated.
      */
-    public function bindParamWithDriverOptions(
-        string|int $param,
-        mixed &$variable,
-        ParameterType $type,
-        mixed $driverOptions,
-    ): void {
-        $pdoType = $this->convertParamType($type);
+    public function bindParam(
+        $param,
+        &$variable,
+        $type = ParameterType::STRING,
+        $length = null,
+        $driverOptions = null
+    ): bool {
+        if (func_num_args() > 4) {
+            Deprecation::triggerIfCalledFromOutside(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/4533',
+                'The $driverOptions argument of Statement::bindParam() is deprecated.'
+            );
+        }
+
+        $type = $this->convertParamType($type);
 
         try {
-            $this->stmt->bindParam($param, $variable, $pdoType, 0, $driverOptions);
+            return $this->stmt->bindParam(
+                $param,
+                $variable,
+                $type,
+                $length ?? 0,
+                ...array_slice(func_get_args(), 4)
+            );
         } catch (PDOException $exception) {
             throw Exception::new($exception);
         }
     }
 
-    public function execute(): Result
+    /**
+     * {@inheritdoc}
+     */
+    public function execute($params = null): ResultInterface
     {
         try {
-            $this->stmt->execute();
+            $this->stmt->execute($params);
         } catch (PDOException $exception) {
             throw Exception::new($exception);
         }
@@ -63,18 +109,16 @@ final class Statement implements StatementInterface
     /**
      * Converts DBAL parameter type to PDO parameter type
      *
-     * @psalm-return PDO::PARAM_*
+     * @param int $type Parameter type
+     *
+     * @throws ExceptionInterface
      */
-    private function convertParamType(ParameterType $type): int
+    private function convertParamType(int $type): int
     {
-        return match ($type) {
-            ParameterType::NULL => PDO::PARAM_NULL,
-            ParameterType::INTEGER => PDO::PARAM_INT,
-            ParameterType::STRING,
-            ParameterType::ASCII => PDO::PARAM_STR,
-            ParameterType::BINARY,
-            ParameterType::LARGE_OBJECT => PDO::PARAM_LOB,
-            ParameterType::BOOLEAN => PDO::PARAM_BOOL,
-        };
+        if (! isset(self::PARAM_TYPE_MAP[$type])) {
+            throw UnknownParameterType::new($type);
+        }
+
+        return self::PARAM_TYPE_MAP[$type];
     }
 }

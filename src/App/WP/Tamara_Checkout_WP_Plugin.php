@@ -10,8 +10,12 @@ use Enpii_Base\App\WP\WP_Application;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
 use RuntimeException;
+use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Cancel_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Capture_Tamara_Order_If_Possible_Job;
+use Tamara_Checkout\App\Jobs\Process_Tamara_Cancel_Url;
+use Tamara_Checkout\App\Jobs\Process_Tamara_Failure_Url;
+use Tamara_Checkout\App\Jobs\Process_Tamara_Success_Url;
 use Tamara_Checkout\App\Jobs\Refund_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Custom_Order_Statuses;
 use Tamara_Checkout\App\Jobs\Register_Tamara_Webhook_Job;
@@ -28,9 +32,11 @@ use Tamara_Checkout\App\Services\Tamara_Notification;
 use Tamara_Checkout\App\Services\Tamara_Widget;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_Block_Support_WC_Payment_Method;
 use Tamara_Checkout\App\WP\Payment_Gateways\Tamara_WC_Payment_Gateway;
 use Tamara_Checkout\Deps\Tamara\Model\Money;
+use WC_Order;
 
 /**
  * @inheritDoc
@@ -137,6 +143,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 				10,
 				2
 			);
+
+			add_action( 'woocommerce_cancelled_order', [ $this, 'process_cancelled_failed_order' ], 10, 1 );
 
 			if ( $this->get_tamara_gateway_service()->get_settings_vo()->force_checkout_phone ) {
 				add_filter(
@@ -282,6 +290,8 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 	}
 
 	public function fetch_tamara_order_received_note( $order_note, $wc_order ) {
+		Process_Tamara_Success_Url::execute_now( $wc_order );
+
 		return $this->get_tamara_widget_service()->fetch_tamara_order_received_note( $order_note, $wc_order );
 	}
 
@@ -603,6 +613,18 @@ class Tamara_Checkout_WP_Plugin extends WP_Plugin {
 		$mofile = $locale . '.mo';
 		$text_domain = 'tamara';
 		load_textdomain( $text_domain, $this->get_base_path() . '/languages/' . $text_domain . '-' . $mofile );
+	}
+
+	public function process_cancelled_failed_order( $wc_order_id ) {
+		/** @var \Enpii_Base\App\Http\Request $wp_app_request */
+		$wp_app_request = wp_app_request();
+		$tamara_payment_status = $wp_app_request->get( 'tamara_payment_status' ) ? $wp_app_request->get( 'paymentStatus' ) : null;
+
+		if ( (string) $tamara_payment_status === Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_DECLINED ) {
+			Process_Tamara_Failure_Url::execute_now( wc_get_order( $wc_order_id ) );
+		} else {
+			Process_Tamara_Cancel_Url::execute_now( wc_get_order( $wc_order_id ) );
+		}
 	}
 
 	/**

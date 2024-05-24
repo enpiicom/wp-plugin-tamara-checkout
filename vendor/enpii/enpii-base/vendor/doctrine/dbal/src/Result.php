@@ -7,17 +7,27 @@ namespace Doctrine\DBAL;
 use Doctrine\DBAL\Driver\Exception as DriverException;
 use Doctrine\DBAL\Driver\Result as DriverResult;
 use Doctrine\DBAL\Exception\NoKeyValue;
+use LogicException;
 use Traversable;
 
 use function array_shift;
-use function assert;
-use function count;
+use function func_num_args;
 
 class Result
 {
-    /** @internal The result can be only instantiated by {@see Connection} or {@see Statement}. */
-    public function __construct(private readonly DriverResult $result, private readonly Connection $connection)
+    /** @var DriverResult */
+    private $result;
+
+    /** @var Connection */
+    private $connection;
+
+    /**
+     * @internal The result can be only instantiated by {@see Connection} or {@see Statement}.
+     */
+    public function __construct(DriverResult $result, Connection $connection)
     {
+        $this->result     = $result;
+        $this->connection = $connection;
     }
 
     /**
@@ -27,7 +37,7 @@ class Result
      *
      * @throws Exception
      */
-    public function fetchNumeric(): array|false
+    public function fetchNumeric()
     {
         try {
             return $this->result->fetchNumeric();
@@ -43,7 +53,7 @@ class Result
      *
      * @throws Exception
      */
-    public function fetchAssociative(): array|false
+    public function fetchAssociative()
     {
         try {
             return $this->result->fetchAssociative();
@@ -55,9 +65,11 @@ class Result
     /**
      * Returns the first value of the next row of the result or FALSE if there are no more rows.
      *
+     * @return mixed|false
+     *
      * @throws Exception
      */
-    public function fetchOne(): mixed
+    public function fetchOne()
     {
         try {
             return $this->result->fetchOne();
@@ -111,10 +123,8 @@ class Result
 
         $data = [];
 
-        foreach ($this->fetchAllNumeric() as $row) {
-            assert(count($row) >= 2);
-            [$key, $value] = $row;
-            $data[$key]    = $value;
+        foreach ($this->fetchAllNumeric() as [$key, $value]) {
+            $data[$key] = $value;
         }
 
         return $data;
@@ -178,7 +188,7 @@ class Result
     }
 
     /**
-     * @return Traversable<mixed,mixed>
+     * {@inheritDoc}
      *
      * @throws Exception
      */
@@ -186,10 +196,7 @@ class Result
     {
         $this->ensureHasKeyValue();
 
-        foreach ($this->iterateNumeric() as $row) {
-            assert(count($row) >= 2);
-            [$key, $value] = $row;
-
+        foreach ($this->iterateNumeric() as [$key, $value]) {
             yield $key => $value;
         }
     }
@@ -222,19 +229,9 @@ class Result
     }
 
     /**
-     * Returns the number of rows affected by the DELETE, INSERT, or UPDATE statement that produced the result.
-     *
-     * If the statement executed a SELECT query or a similar platform-specific SQL (e.g. DESCRIBE, SHOW, etc.),
-     * some database drivers may return the number of rows returned by that query. However, this behaviour
-     * is not guaranteed for all drivers and should not be relied on in portable applications.
-     *
-     * If the number of rows exceeds {@see PHP_INT_MAX}, it might be returned as string if the driver supports it.
-     *
-     * @return int|numeric-string
-     *
      * @throws Exception
      */
-    public function rowCount(): int|string
+    public function rowCount(): int
     {
         try {
             return $this->result->rowCount();
@@ -243,7 +240,9 @@ class Result
         }
     }
 
-    /** @throws Exception */
+    /**
+     * @throws Exception
+     */
     public function columnCount(): int
     {
         try {
@@ -258,7 +257,9 @@ class Result
         $this->result->free();
     }
 
-    /** @throws Exception */
+    /**
+     * @throws Exception
+     */
     private function ensureHasKeyValue(): void
     {
         $columnCount = $this->columnCount();
@@ -266,5 +267,65 @@ class Result
         if ($columnCount < 2) {
             throw NoKeyValue::fromColumnCount($columnCount);
         }
+    }
+
+    /**
+     * BC layer for a wide-spread use-case of old DBAL APIs
+     *
+     * @deprecated This API is deprecated and will be removed after 2022
+     *
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function fetch(int $mode = FetchMode::ASSOCIATIVE)
+    {
+        if (func_num_args() > 1) {
+            throw new LogicException('Only invocations with one argument are still supported by this legacy API.');
+        }
+
+        if ($mode === FetchMode::ASSOCIATIVE) {
+            return $this->fetchAssociative();
+        }
+
+        if ($mode === FetchMode::NUMERIC) {
+            return $this->fetchNumeric();
+        }
+
+        if ($mode === FetchMode::COLUMN) {
+            return $this->fetchOne();
+        }
+
+        throw new LogicException('Only fetch modes declared on Doctrine\DBAL\FetchMode are supported by legacy API.');
+    }
+
+    /**
+     * BC layer for a wide-spread use-case of old DBAL APIs
+     *
+     * @deprecated This API is deprecated and will be removed after 2022
+     *
+     * @return list<mixed>
+     *
+     * @throws Exception
+     */
+    public function fetchAll(int $mode = FetchMode::ASSOCIATIVE): array
+    {
+        if (func_num_args() > 1) {
+            throw new LogicException('Only invocations with one argument are still supported by this legacy API.');
+        }
+
+        if ($mode === FetchMode::ASSOCIATIVE) {
+            return $this->fetchAllAssociative();
+        }
+
+        if ($mode === FetchMode::NUMERIC) {
+            return $this->fetchAllNumeric();
+        }
+
+        if ($mode === FetchMode::COLUMN) {
+            return $this->fetchFirstColumn();
+        }
+
+        throw new LogicException('Only fetch modes declared on Doctrine\DBAL\FetchMode are supported by legacy API.');
     }
 }

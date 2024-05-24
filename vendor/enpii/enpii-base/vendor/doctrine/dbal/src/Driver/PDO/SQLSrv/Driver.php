@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\PDO\SQLSrv;
 
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
@@ -10,7 +8,6 @@ use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\Driver\PDO\Connection as PDOConnection;
 use Doctrine\DBAL\Driver\PDO\Exception as PDOException;
 use PDO;
-use SensitiveParameter;
 
 use function is_int;
 use function sprintf;
@@ -18,12 +15,12 @@ use function sprintf;
 final class Driver extends AbstractSQLServerDriver
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     *
+     * @return Connection
      */
-    public function connect(
-        #[SensitiveParameter]
-        array $params,
-    ): Connection {
+    public function connect(array $params)
+    {
         $driverOptions = $dsnOptions = [];
 
         if (isset($params['driverOptions'])) {
@@ -40,15 +37,12 @@ final class Driver extends AbstractSQLServerDriver
             $driverOptions[PDO::ATTR_PERSISTENT] = true;
         }
 
-        $safeParams = $params;
-        unset($safeParams['password']);
-
         try {
             $pdo = new PDO(
-                $this->constructDsn($safeParams, $dsnOptions),
+                $this->constructDsn($params, $dsnOptions),
                 $params['user'] ?? '',
                 $params['password'] ?? '',
-                $driverOptions,
+                $driverOptions
             );
         } catch (\PDOException $exception) {
             throw PDOException::new($exception);

@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Platforms\MySQL;
 
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Comparator as BaseComparator;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Schema\TableDiff;
 
 use function array_diff_assoc;
+use function array_intersect_key;
 
 /**
  * Compares schemas in the context of MySQL platform.
@@ -20,42 +18,36 @@ use function array_diff_assoc;
  */
 class Comparator extends BaseComparator
 {
-    /** @internal The comparator can be only instantiated by a schema manager. */
-    public function __construct(
-        AbstractMySQLPlatform $platform,
-        private readonly CharsetMetadataProvider $charsetMetadataProvider,
-        private readonly CollationMetadataProvider $collationMetadataProvider,
-        private readonly DefaultTableOptions $defaultTableOptions,
-    ) {
+    /** @var CollationMetadataProvider */
+    private $collationMetadataProvider;
+
+    /**
+     * @internal The comparator can be only instantiated by a schema manager.
+     */
+    public function __construct(AbstractMySQLPlatform $platform, CollationMetadataProvider $collationMetadataProvider)
+    {
         parent::__construct($platform);
+
+        $this->collationMetadataProvider = $collationMetadataProvider;
     }
 
-    public function compareTables(Table $oldTable, Table $newTable): TableDiff
+    /**
+     * {@inheritDoc}
+     */
+    public function diffTable(Table $fromTable, Table $toTable)
     {
-        return parent::compareTables(
-            $this->normalizeTable($oldTable),
-            $this->normalizeTable($newTable),
+        return parent::diffTable(
+            $this->normalizeColumns($fromTable),
+            $this->normalizeColumns($toTable)
         );
     }
 
-    private function normalizeTable(Table $table): Table
+    private function normalizeColumns(Table $table): Table
     {
-        $charset   = $table->getOption('charset');
-        $collation = $table->getOption('collation');
-
-        if ($charset === null && $collation !== null) {
-            $charset = $this->collationMetadataProvider->getCollationCharset($collation);
-        } elseif ($charset !== null && $collation === null) {
-            $collation = $this->charsetMetadataProvider->getDefaultCharsetCollation($charset);
-        } elseif ($charset === null && $collation === null) {
-            $charset   = $this->defaultTableOptions->getCharset();
-            $collation = $this->defaultTableOptions->getCollation();
-        }
-
-        $tableOptions = [
-            'charset'   => $charset,
-            'collation' => $collation,
-        ];
+        $tableOptions = array_intersect_key($table->getOptions(), [
+            'charset'   => null,
+            'collation' => null,
+        ]);
 
         $table = clone $table;
 
@@ -78,14 +70,16 @@ class Comparator extends BaseComparator
     /**
      * @param array<string,string> $options
      *
-     * @return array<string,string|null>
+     * @return array<string,string>
      */
     private function normalizeOptions(array $options): array
     {
-        if (isset($options['charset']) && ! isset($options['collation'])) {
-            $options['collation'] = $this->charsetMetadataProvider->getDefaultCharsetCollation($options['charset']);
-        } elseif (isset($options['collation']) && ! isset($options['charset'])) {
-            $options['charset'] = $this->collationMetadataProvider->getCollationCharset($options['collation']);
+        if (isset($options['collation']) && ! isset($options['charset'])) {
+            $charset = $this->collationMetadataProvider->getCollationCharset($options['collation']);
+
+            if ($charset !== null) {
+                $options['charset'] = $charset;
+            }
         }
 
         return $options;

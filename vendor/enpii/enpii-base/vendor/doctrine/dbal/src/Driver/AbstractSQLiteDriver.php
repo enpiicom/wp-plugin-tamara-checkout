@@ -1,27 +1,42 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Driver\API\ExceptionConverter as ExceptionConverterInterface;
-use Doctrine\DBAL\Driver\API\SQLite\ExceptionConverter;
-use Doctrine\DBAL\Platforms\SQLitePlatform;
-use Doctrine\DBAL\ServerVersionProvider;
+use Doctrine\DBAL\Driver\API\ExceptionConverter;
+use Doctrine\DBAL\Driver\API\SQLite;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Schema\SqliteSchemaManager;
+
+use function assert;
 
 /**
- * Abstract base implementation of the {@see Driver} interface for SQLite based drivers.
+ * Abstract base implementation of the {@see Doctrine\DBAL\Driver} interface for SQLite based drivers.
  */
 abstract class AbstractSQLiteDriver implements Driver
 {
-    public function getDatabasePlatform(ServerVersionProvider $versionProvider): SQLitePlatform
+    /**
+     * {@inheritdoc}
+     */
+    public function getDatabasePlatform()
     {
-        return new SQLitePlatform();
+        return new SqlitePlatform();
     }
 
-    public function getExceptionConverter(): ExceptionConverterInterface
+    /**
+     * {@inheritdoc}
+     */
+    public function getSchemaManager(Connection $conn, AbstractPlatform $platform)
     {
-        return new ExceptionConverter();
+        assert($platform instanceof SqlitePlatform);
+
+        return new SqliteSchemaManager($conn, $platform);
+    }
+
+    public function getExceptionConverter(): ExceptionConverter
+    {
+        return new SQLite\ExceptionConverter();
     }
 }

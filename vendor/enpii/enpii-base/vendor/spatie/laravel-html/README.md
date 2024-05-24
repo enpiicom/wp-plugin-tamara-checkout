@@ -1,7 +1,9 @@
-# Painless HTML generation
+# Painless html generation
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/laravel-html.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-html)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+![Test Status](https://img.shields.io/github/workflow/status/spatie/laravel-html/run-tests?label=tests)
+![Code Style Status](https://img.shields.io/github/workflow/status/spatie/laravel-html/Check%20&%20fix%20styling?label=code%20style)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/laravel-html.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-html)
 
 This package helps you generate HTML using a clean, simple and easy to read API. All elements can be dynamically generated and put together. The HTML builder helps you generate dynamically assigned form elements based on your selected model, the session or a default value.
@@ -28,6 +30,16 @@ You can install the package via composer:
 
 ``` bash
 composer require spatie/laravel-html
+```
+
+Next, you must install the service provider:
+
+```php
+// config/app.php
+'providers' => [
+    ...
+    Spatie\Html\HtmlServiceProvider::class,
+];
 ```
 
 And optionally register an alias for the facade.
@@ -94,11 +106,11 @@ $ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 
-If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
+If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
 
 ## Credits
 

@@ -50,12 +50,6 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 				],
 				[ 'enpii-base-assets', 'laravel-assets' ]
 			);
-			$this->publishes(
-				[
-					$this->get_base_path() . '/public-assets/src/vendor' => wp_app_public_path( 'vendor' ),
-				],
-				[ 'enpii-base-assets', 'laravel-assets' ]
-			);
 
 			// Publish stubs
 			$this->publishes(

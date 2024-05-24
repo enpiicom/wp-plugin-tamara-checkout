@@ -11,6 +11,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Validation\ValidatesWhenResolvedTrait;
+use Illuminate\Validation\ValidationException;
 
 class FormRequest extends Request implements ValidatesWhenResolved
 {
@@ -95,13 +96,6 @@ class FormRequest extends Request implements ValidatesWhenResolved
             $this->withValidator($validator);
         }
 
-        if (method_exists($this, 'after')) {
-            $validator->after($this->container->call(
-                $this->after(...),
-                ['validator' => $validator]
-            ));
-        }
-
         $this->setValidator($validator);
 
         return $this->validator;
@@ -115,20 +109,10 @@ class FormRequest extends Request implements ValidatesWhenResolved
      */
     protected function createDefaultValidator(ValidationFactory $factory)
     {
-        $rules = method_exists($this, 'rules') ? $this->container->call([$this, 'rules']) : [];
-
-        $validator = $factory->make(
-            $this->validationData(), $rules,
+        return $factory->make(
+            $this->validationData(), $this->container->call([$this, 'rules']),
             $this->messages(), $this->attributes()
         )->stopOnFirstFailure($this->stopOnFirstFailure);
-
-        if ($this->isPrecognitive()) {
-            $validator->setRules(
-                $this->filterPrecognitiveRules($validator->getRulesWithoutPlaceholders())
-            );
-        }
-
-        return $validator;
     }
 
     /**
@@ -151,9 +135,7 @@ class FormRequest extends Request implements ValidatesWhenResolved
      */
     protected function failedValidation(Validator $validator)
     {
-        $exception = $validator->getException();
-
-        throw (new $exception($validator))
+        throw (new ValidationException($validator))
                     ->errorBag($this->errorBag)
                     ->redirectTo($this->getRedirectUrl());
     }
@@ -224,13 +206,11 @@ class FormRequest extends Request implements ValidatesWhenResolved
     /**
      * Get the validated data from the request.
      *
-     * @param  array|int|string|null  $key
-     * @param  mixed  $default
-     * @return mixed
+     * @return array
      */
-    public function validated($key = null, $default = null)
+    public function validated()
     {
-        return data_get($this->validator->validated(), $key, $default);
+        return $this->validator->validated();
     }
 
     /**

@@ -12,9 +12,15 @@ use function mysqli_options;
 
 final class Options implements Initializer
 {
-    /** @param array<int,mixed> $options */
-    public function __construct(private readonly array $options)
+    /** @var array<int,mixed> */
+    private $options;
+
+    /**
+     * @param array<int,mixed> $options
+     */
+    public function __construct(array $options)
     {
+        $this->options = $options;
     }
 
     public function initialize(mysqli $connection): void

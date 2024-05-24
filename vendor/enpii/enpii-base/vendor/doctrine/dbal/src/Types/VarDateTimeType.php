@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Types;
 
 use DateTime;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
-use Exception;
+
+use function date_create;
 
 /**
- * Variable DateTime Type using DateTime::__construct() instead of DateTime::createFromFormat().
+ * Variable DateTime Type using date_create() instead of DateTime::createFromFormat().
  *
  * This type has performance implications as it runs twice as long as the regular
  * {@see DateTimeType}, however in certain PostgreSQL configurations with
@@ -19,24 +17,19 @@ use Exception;
 class VarDateTimeType extends DateTimeType
 {
     /**
-     * @param T $value
-     *
-     * @return (T is null ? null : DateTime)
-     *
-     * @template T
+     * {@inheritdoc}
      */
-    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?DateTime
+    public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if ($value === null || $value instanceof DateTime) {
             return $value;
         }
 
-        try {
-            $dateTime = new DateTime($value);
-        } catch (Exception $e) {
-            throw ValueNotConvertible::new($value, DateTime::class, $e->getMessage(), $e);
+        $val = date_create($value);
+        if ($val === false) {
+            throw ConversionException::conversionFailed($value, $this->getName());
         }
 
-        return $dateTime;
+        return $val;
     }
 }

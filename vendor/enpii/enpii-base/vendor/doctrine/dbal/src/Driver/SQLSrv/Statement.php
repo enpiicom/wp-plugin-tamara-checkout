@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\SQLSrv;
 
 use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\SQLSrv\Exception\Error;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
@@ -25,6 +24,20 @@ use const SQLSRV_PARAM_IN;
 final class Statement implements StatementInterface
 {
     /**
+     * The SQLSRV Resource.
+     *
+     * @var resource
+     */
+    private $conn;
+
+    /**
+     * The SQL statement to execute.
+     *
+     * @var string
+     */
+    private $sql;
+
+    /**
      * The SQLSRV statement resource.
      *
      * @var resource|null
@@ -36,14 +49,14 @@ final class Statement implements StatementInterface
      *
      * @var array<int, mixed>
      */
-    private array $variables = [];
+    private $variables = [];
 
     /**
      * Bound parameter types.
      *
-     * @var array<int, ParameterType>
+     * @var array<int, int>
      */
-    private array $types = [];
+    private $types = [];
 
     /**
      * Append to any INSERT query to retrieve the last insert id.
@@ -54,11 +67,13 @@ final class Statement implements StatementInterface
      * @internal The statement can be only instantiated by its driver connection.
      *
      * @param resource $conn
+     * @param string   $sql
      */
-    public function __construct(
-        private readonly mixed $conn,
-        private string $sql,
-    ) {
+    public function __construct($conn, $sql)
+    {
+        $this->conn = $conn;
+        $this->sql  = $sql;
+
         if (stripos($sql, 'INSERT INTO ') !== 0) {
             return;
         }
@@ -66,17 +81,53 @@ final class Statement implements StatementInterface
         $this->sql .= self::LAST_INSERT_ID_SQL;
     }
 
-    public function bindValue(int|string $param, mixed $value, ParameterType $type): void
+    /**
+     * {@inheritdoc}
+     */
+    public function bindValue($param, $value, $type = ParameterType::STRING): bool
     {
         assert(is_int($param));
 
         $this->variables[$param] = $value;
         $this->types[$param]     = $type;
+
+        return true;
     }
 
-    public function execute(): Result
+    /**
+     * {@inheritdoc}
+     */
+    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null): bool
     {
-        $this->stmt ??= $this->prepare();
+        assert(is_int($param));
+
+        $this->variables[$param] =& $variable;
+        $this->types[$param]     = $type;
+
+        // unset the statement resource if it exists as the new one will need to be bound to the new variable
+        $this->stmt = null;
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function execute($params = null): ResultInterface
+    {
+        if ($params !== null) {
+            foreach ($params as $key => $val) {
+                if (is_int($key)) {
+                    $this->bindValue($key + 1, $val);
+                } else {
+                    $this->bindValue($key, $val);
+                }
+            }
+        }
+
+        if ($this->stmt === null) {
+            $this->stmt = $this->prepare();
+        }
 
         if (! sqlsrv_execute($this->stmt)) {
             throw Error::new();

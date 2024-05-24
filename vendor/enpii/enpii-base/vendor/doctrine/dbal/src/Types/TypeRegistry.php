@@ -5,32 +5,25 @@ declare(strict_types=1);
 namespace Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Types\Exception\TypeAlreadyRegistered;
-use Doctrine\DBAL\Types\Exception\TypeNotFound;
-use Doctrine\DBAL\Types\Exception\TypeNotRegistered;
-use Doctrine\DBAL\Types\Exception\TypesAlreadyExists;
-use Doctrine\DBAL\Types\Exception\UnknownColumnType;
 
-use function spl_object_id;
+use function array_search;
+use function in_array;
 
 /**
  * The type registry is responsible for holding a map of all known DBAL types.
+ * The types are stored using the flyweight pattern so that one type only exists as exactly one instance.
  */
 final class TypeRegistry
 {
     /** @var array<string, Type> Map of type names and their corresponding flyweight objects. */
-    private array $instances;
-    /** @var array<int, string> */
-    private array $instancesReverseIndex;
+    private $instances;
 
-    /** @param array<string, Type> $instances */
+    /**
+     * @param array<string, Type> $instances
+     */
     public function __construct(array $instances = [])
     {
-        $this->instances             = [];
-        $this->instancesReverseIndex = [];
-        foreach ($instances as $name => $type) {
-            $this->register($name, $type);
-        }
+        $this->instances = $instances;
     }
 
     /**
@@ -40,12 +33,11 @@ final class TypeRegistry
      */
     public function get(string $name): Type
     {
-        $type = $this->instances[$name] ?? null;
-        if ($type === null) {
-            throw UnknownColumnType::new($name);
+        if (! isset($this->instances[$name])) {
+            throw Exception::unknownColumnType($name);
         }
 
-        return $type;
+        return $this->instances[$name];
     }
 
     /**
@@ -58,7 +50,7 @@ final class TypeRegistry
         $name = $this->findTypeName($type);
 
         if ($name === null) {
-            throw TypeNotRegistered::new($type);
+            throw Exception::typeNotRegistered($type);
         }
 
         return $name;
@@ -80,15 +72,14 @@ final class TypeRegistry
     public function register(string $name, Type $type): void
     {
         if (isset($this->instances[$name])) {
-            throw TypesAlreadyExists::new($name);
+            throw Exception::typeExists($name);
         }
 
         if ($this->findTypeName($type) !== null) {
-            throw TypeAlreadyRegistered::new($type);
+            throw Exception::typeAlreadyRegistered($type);
         }
 
-        $this->instances[$name]                            = $type;
-        $this->instancesReverseIndex[spl_object_id($type)] = $name;
+        $this->instances[$name] = $type;
     }
 
     /**
@@ -98,18 +89,15 @@ final class TypeRegistry
      */
     public function override(string $name, Type $type): void
     {
-        $origType = $this->instances[$name] ?? null;
-        if ($origType === null) {
-            throw TypeNotFound::new($name);
+        if (! isset($this->instances[$name])) {
+            throw Exception::typeNotFound($name);
         }
 
-        if (($this->findTypeName($type) ?? $name) !== $name) {
-            throw TypeAlreadyRegistered::new($type);
+        if (! in_array($this->findTypeName($type), [$name, null], true)) {
+            throw Exception::typeAlreadyRegistered($type);
         }
 
-        unset($this->instancesReverseIndex[spl_object_id($origType)]);
-        $this->instances[$name]                            = $type;
-        $this->instancesReverseIndex[spl_object_id($type)] = $name;
+        $this->instances[$name] = $type;
     }
 
     /**
@@ -126,6 +114,12 @@ final class TypeRegistry
 
     private function findTypeName(Type $type): ?string
     {
-        return $this->instancesReverseIndex[spl_object_id($type)] ?? null;
+        $name = array_search($type, $this->instances, true);
+
+        if ($name === false) {
+            return null;
+        }
+
+        return $name;
     }
 }

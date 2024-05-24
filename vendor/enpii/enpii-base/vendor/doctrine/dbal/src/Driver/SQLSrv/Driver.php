@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Driver\SQLSrv;
 
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver;
 use Doctrine\DBAL\Driver\AbstractSQLServerDriver\Exception\PortWithoutHost;
 use Doctrine\DBAL\Driver\SQLSrv\Exception\Error;
-use SensitiveParameter;
 
 use function sqlsrv_configure;
 use function sqlsrv_connect;
@@ -18,12 +15,12 @@ use function sqlsrv_connect;
 final class Driver extends AbstractSQLServerDriver
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     *
+     * @return Connection
      */
-    public function connect(
-        #[SensitiveParameter]
-        array $params,
-    ): Connection {
+    public function connect(array $params)
+    {
         $serverName = '';
 
         if (isset($params['host'])) {

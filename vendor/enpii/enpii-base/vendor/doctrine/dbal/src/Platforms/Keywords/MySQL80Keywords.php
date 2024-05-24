@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Doctrine\DBAL\Platforms\Keywords;
 
 use function array_merge;
@@ -9,14 +7,22 @@ use function array_merge;
 /**
  * MySQL 8.0 reserved keywords list.
  */
-class MySQL80Keywords extends MySQLKeywords
+class MySQL80Keywords extends MySQL57Keywords
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     */
+    public function getName()
+    {
+        return 'MySQL80';
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @link https://dev.mysql.com/doc/refman/8.0/en/keywords.html
      */
-    protected function getKeywords(): array
+    protected function getKeywords()
     {
         $keywords = parent::getKeywords();
 
