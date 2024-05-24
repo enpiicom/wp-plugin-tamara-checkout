@@ -7,6 +7,7 @@ namespace Tamara_Checkout\App\Support\Traits;
 trait Tamara_Trans_Trait {
 	// phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 	public function __( $untranslated_text ) {
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 		return __( $untranslated_text, 'tamara' );
 	}
 

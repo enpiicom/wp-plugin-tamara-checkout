@@ -8,10 +8,8 @@ use DateTimeImmutable;
 use Exception;
 use Tamara_Checkout\App\DTOs\WC_Order_Tamara_Meta_DTO;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
-use Tamara_Checkout\App\Queries\Build_Tamara_Cancel_Url;
-use Tamara_Checkout\App\Queries\Build_Tamara_Failure_Url;
+use Tamara_Checkout\App\Queries\Build_Tamara_Merchant_Url;
 use Tamara_Checkout\App\Queries\Build_Tamara_Order_Risk_Assessment;
-use Tamara_Checkout\App\Queries\Build_Tamara_Success_Url;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
@@ -435,23 +433,7 @@ class Tamara_WC_Order {
 	 * @throws \Exception
 	 */
 	public function build_tamara_merchant_url( string $payment_type ): MerchantUrl {
-		$wc_order = $this->wc_order;
-		$params = [
-			'redirect_from' => 'tamara',
-			'wc_order_id' => $wc_order->get_id(),
-			'order_id' => $wc_order->get_id(),
-			'order' => $wc_order->get_order_key(),
-			'payment_type' => $payment_type,
-			'locale' => determine_locale(),
-		];
-
-		$merchant_url = new MerchantUrl();
-		$merchant_url->setSuccessUrl( Build_Tamara_Success_Url::execute_now( $wc_order, $params) );
-		$merchant_url->setCancelUrl(Build_Tamara_Cancel_Url::execute_now( $wc_order, $params) );
-		$merchant_url->setFailureUrl(Build_Tamara_Failure_Url::execute_now( $wc_order, $params));
-		$merchant_url->setNotificationUrl( wp_app_route_wp_url( 'wp-api::tamara-ipn', $params ) );
-
-		return $merchant_url;
+		return Build_Tamara_Merchant_Url::execute_now( $this->wc_order, $payment_type );
 	}
 
 	/**

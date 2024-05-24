@@ -23,14 +23,12 @@ class Build_Tamara_Success_Url {
 	}
 
 	public function handle() {
-		$custom_success_url = $this->tamara_settings()->success_url;
-		$success_url = ! empty( $this->wc_order ) ?
-			esc_url_raw( $this->wc_order->get_checkout_order_received_url() ) :
-			home_url();
-
+		// We want to use get_checkout_order_received_url() for the success_url
+		//  then we use a hook for that order_received url to process the needed actions
+		//  and redirect to custom url if needed
 		return add_query_arg(
 			array_merge( $this->params, [] ),
-			$custom_success_url ? : $success_url
+			esc_url_raw( $this->wc_order->get_checkout_order_received_url() )
 		);
 	}
 }
