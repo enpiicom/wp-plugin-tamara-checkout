@@ -22,7 +22,7 @@ if ( ! function_exists( 'devd' ) ) {
 		echo "=== start of dump ===\n";
 		dump( ...$vars );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . ': ' . "\n";
+		echo ( ! empty( $dev_trace[1] ) ) ? $dev_trace[1]['file'] . ':' . $dev_trace[1]['line'] . ': ' . "\n" : '';
 		// We want to put the file name and the 7 steps trace to know where
 		//  where the dump is produced
 		if ( ! enpii_base_is_console_mode() && defined( 'DEV_LOG_TRACE' ) ) {
@@ -59,7 +59,8 @@ if ( ! function_exists( 'dev_error_log' ) ) {
 		$dev_trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 0 );
 
 		$log_message = '';
-		$log_message .= 'Debugging dev_error_log, url (' . Enpii_Base_Helper::get_current_url() . ") \n======= Dev logging start here \n" . $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . " \n";
+		$log_message .= ! empty( $dev_trace[1] ) ? 'Debugging dev_error_log, url (' . Enpii_Base_Helper::get_current_url() . ") \n======= Dev logging start here \n" . $dev_trace[1]['file'] . ':' . $dev_trace[1]['line'] . " \n" : '';
+		unset( $dev_trace[0] );
 		unset( $dev_trace[0] );
 
 		foreach ( $vars as $index => $var ) {
@@ -94,7 +95,8 @@ if ( ! function_exists( 'dev_logger' ) ) {
 		$logger = wp_app_logger()->channel( 'single' );
 
 		$log_message = '';
-		$log_message .= 'Debugging dev_error_log, url (' . Enpii_Base_Helper::get_current_url() . ") \n======= Dev logging start here \n" . $dev_trace[0]['file'] . ':' . $dev_trace[0]['line'] . " \n";
+		$log_message .= ! empty( $dev_trace[1] ) ? 'Debugging dev_error_log, url (' . Enpii_Base_Helper::get_current_url() . ") \n======= Dev logging start here \n" . $dev_trace[1]['file'] . ':' . $dev_trace[1]['line'] . " \n" : '';
+		unset( $dev_trace[0] );
 		unset( $dev_trace[0] );
 		foreach ( $vars as $index => $var ) {
 			$dump_content = null;

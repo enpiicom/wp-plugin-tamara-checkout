@@ -25,7 +25,7 @@ class Register_Base_WP_App_Routes {
 		// For Logged in User and redirect to login if not logged in
 		Route::group(
 			[
-				'prefix' => '/wp-admin',
+				'prefix' => '/dashboard',
 				'middleware' => [
 					'auth',
 				],
@@ -40,7 +40,7 @@ class Register_Base_WP_App_Routes {
 			[
 				'prefix' => '/admin',
 				'middleware' => [
-					'authenticate_is_wp_user_admin',
+					'wp_user_can_and:administrator',
 				],
 			],
 			function () {

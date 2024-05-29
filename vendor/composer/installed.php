@@ -3,17 +3,17 @@
         'name' => 'tamara/tamara-checkout',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'd5981f1487a13a2c251d741586914aa3c7862479',
+        'reference' => '504d5863038d5d78822dc907be3828dd10d6c973',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'enpii/enpii-base' => array(
             'pretty_version' => 'dev-wp-release',
             'version' => 'dev-wp-release',
-            'reference' => '386ee16c56e3c1938a5dd8a2dddc5e17b3ee5ed2',
+            'reference' => 'c7a3889ee10daf49814206b3e30778788baf8aa4',
             'type' => 'wordpress-muplugin',
             'install_path' => __DIR__ . '/../enpii/enpii-base',
             'aliases' => array(),
@@ -28,10 +28,34 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'symfony/console' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '5.4.39',
+            ),
+        ),
+        'symfony/service-contracts' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '2.5.3',
+            ),
+        ),
+        'symfony/var-dumper' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '5.4.39',
+            ),
+        ),
+        'symfony/yaml' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => '5.4.39',
+            ),
+        ),
         'tamara/tamara-checkout' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'd5981f1487a13a2c251d741586914aa3c7862479',
+            'reference' => '504d5863038d5d78822dc907be3828dd10d6c973',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

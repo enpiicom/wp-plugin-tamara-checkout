@@ -99,6 +99,8 @@ class Kernel extends HttpKernel {
 		'signed' => \Enpii_Base\App\Http\Middleware\Validate_Signature::class,
 		'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
 		'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+		'wp_user_can_and' => \Enpii_Base\App\Http\Middleware\WP_User_Can_And::class,
+		'wp_user_can_or' => \Enpii_Base\App\Http\Middleware\WP_User_Can_Or::class,
 	];
 
 	/**
@@ -109,9 +111,10 @@ class Kernel extends HttpKernel {
 	 * @var array
 	 */
 	protected $routeMiddleware = [
-		'authenticate_is_wp_user_admin' => \Enpii_Base\App\Http\Middleware\Authenticate_Is_WP_User_Administrator::class,
 		'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
 		'auth' => \Enpii_Base\App\Http\Middleware\Authenticate::class,
+		'wp_user_can_and' => \Enpii_Base\App\Http\Middleware\WP_User_Can_And::class,
+		'wp_user_can_or' => \Enpii_Base\App\Http\Middleware\WP_User_Can_Or::class,
 	];
 
 	public function send_request_through_middleware( Request $request, array $middleware, Closure $closure ) {

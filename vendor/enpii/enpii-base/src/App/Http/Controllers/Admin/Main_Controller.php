@@ -6,6 +6,7 @@ namespace Enpii_Base\App\Http\Controllers\Admin;
 
 use Enpii_Base\App\Http\Request;
 use Enpii_Base\App\Jobs\Mark_Setup_WP_App_Done;
+use Enpii_Base\App\Jobs\Mark_Setup_WP_App_Failed;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\WP\Enpii_Base_WP_Plugin;
 use Enpii_Base\Foundation\Http\Base_Controller;
@@ -45,6 +46,8 @@ class Main_Controller extends Base_Controller {
 			$message .= 'Complete Setup. Redirecting back to the Previous URL...' . "\n";
 			$message .= sprintf( 'Click %s if you are not redirected automatically', '<a href="' . $return_url . '">' . $return_url . '</a>' ) . '<br />';
 		} else {
+			Mark_Setup_WP_App_Failed::execute_now( $e->getMessage() );
+
 			$message .= 'Please resolve the following errors then refresh this page' . "\n";
 			$message .= $e->getMessage() . "\n";
 

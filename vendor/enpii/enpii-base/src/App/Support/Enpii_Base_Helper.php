@@ -6,6 +6,7 @@ namespace Enpii_Base\App\Support;
 
 class Enpii_Base_Helper {
 	public static $version_option;
+	public static $setup_info;
 
 	public static function get_current_url(): string {
 		if ( empty( $_SERVER['SERVER_NAME'] ) && empty( $_SERVER['HTTP_HOST'] ) ) {
@@ -56,9 +57,9 @@ class Enpii_Base_Helper {
 
 	public static function at_setup_app_url(): bool {
 		$current_url = static::get_current_url();
-		$redirect_uri = static::get_setup_app_uri();
+		$setup_app_uri = static::get_setup_app_uri();
 
-		return ( strpos( $current_url, $redirect_uri ) !== false );
+		return ( strpos( $current_url, $setup_app_uri ) !== false );
 	}
 
 	public static function at_admin_setup_app_url(): bool {
@@ -119,8 +120,64 @@ class Enpii_Base_Helper {
 		return static::$version_option;
 	}
 
+	public static function get_setup_info() {
+		if ( empty( static::$setup_info ) ) {
+			static::$setup_info = (string) get_option( App_Const::OPTION_SETUP_INFO );
+		}
+
+		return static::$setup_info;
+	}
+
 	public static function is_setup_app_completed() {
 		// We have migration for session with db from '0.7.0'
-		return version_compare( static::get_version_option(), '0.7.0', '>=' );
+		return apply_filters( 'enpii_base_is_setup_app_completed', version_compare( static::get_version_option(), '0.7.0', '>=' ) );
+	}
+
+	public static function is_setup_app_failed() {
+		return static::get_setup_info() === 'failed';
+	}
+
+	/**
+	 * We want to check if the wp_app setup has been done correctly
+	 *  If the setup process failed, we should return false and raise the notice in the Admin
+	 */
+	public static function perform_wp_app_check(): bool {
+		if ( ! isset( $GLOBALS['wp_app_setup_errors'] ) ) {
+			$GLOBALS['wp_app_setup_errors'] = [];
+		}
+
+		// We only want to check if it's not in the setup url
+		if ( static::is_setup_app_failed() && ! static::at_setup_app_url() && ! static::at_admin_setup_app_url() ) {
+			$error_message = sprintf(
+				// translators: %1$s is replaced by a string, url
+				__( 'The setup has not been done correctly. Please go to this URL <a href="%1$s">%1$s</a> to complete the setup', 'enpii' ),
+				static::get_admin_setup_app_uri( true )
+			);
+			if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
+				$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
+			}
+		}
+
+		if ( ! empty( $GLOBALS['wp_app_setup_errors'] ) ) {
+			add_action(
+				'admin_notices',
+				function () {
+					$error_content = '';
+					foreach ( (array) $GLOBALS['wp_app_setup_errors'] as $error_message => $displayed ) {
+						if ( ! $displayed && $error_message ) {
+							$error_content .= '<p>' . $error_message . '</p>';
+							$GLOBALS['wp_app_setup_errors'][ $error_message ] = true;
+						}
+					}
+					if ( $error_content ) {
+						echo '<div class="notice notice-error">' . wp_kses_post( $error_content ) . '</div>';
+					}
+				}
+			);
+
+			return apply_filters( App_Const::FILTER_WP_APP_CHECK, false );
+		}
+
+		return apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
 	}
 }

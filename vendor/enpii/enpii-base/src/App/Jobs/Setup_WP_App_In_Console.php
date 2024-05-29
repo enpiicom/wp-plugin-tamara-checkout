@@ -5,6 +5,7 @@ namespace Enpii_Base\App\Jobs;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Artisan;
 use InvalidArgumentException;
 
 class Setup_WP_App_In_Console {
@@ -29,6 +30,26 @@ class Setup_WP_App_In_Console {
 
 		/** @var \Illuminate\Console\Command $console_command */
 		$console_command = $this->console_command;
+
+		// We need to publish Laravel assets and Migrations latest
+		//  to be able to override other assets
+		$console_command->comment( 'Publishing Laravel Migrations...' );
+		$console_command->call(
+			'vendor:publish',
+			[
+				'--tag' => 'laravel-migrations',
+				'--force' => true,
+			]
+		);
+
+		$console_command->comment( 'Publishing Laravel Assets...' );
+		$console_command->call(
+			'vendor:publish',
+			[
+				'--tag' => 'laravel-assets',
+				'--force' => true,
+			]
+		);
 
 		// We need to publish Enpii Base assets and Migrations latest
 		//  to be able to override other assets
@@ -57,7 +78,7 @@ class Setup_WP_App_In_Console {
 			[
 				'--no-interaction' => true,
 				'--force' => true,
-				'--quiet' => true,
+				'--step' => true,
 			]
 		);
 

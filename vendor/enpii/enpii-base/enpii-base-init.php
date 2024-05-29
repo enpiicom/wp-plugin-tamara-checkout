@@ -3,10 +3,12 @@
 //  When we use the composer to load the plugin, this file may be loaded
 //  with the composer autoload before the WP loaded
 
+use Enpii_Base\App\Support\Enpii_Base_Helper;
+
 if ( defined( 'WP_CONTENT_DIR' ) ) {
 	add_action( 'cli_init', 'enpii_base_prepare' );
 
-	if ( ! enpii_base_wp_app_check() ) {
+	if ( ! Enpii_Base_Helper::perform_wp_app_check() ) {
 		// We do nothing but still keep the plugin enabled
 		return;
 	}
@@ -16,6 +18,14 @@ if ( defined( 'WP_CONTENT_DIR' ) ) {
 		add_action( ENPII_BASE_SETUP_HOOK_NAME, 'enpii_base_maybe_redirect_to_setup_app', -200 );
 	}
 
+	// We init wp_app() here
+	add_action(
+		ENPII_BASE_SETUP_HOOK_NAME,
+		[ \Enpii_Base\App\WP\WP_Application::class, 'load_instance' ],
+		-100
+	);
+
+	// We init the Enpii Base plugin only when the WP App is loaded correctly
 	add_action(
 		\Enpii_Base\App\Support\App_Const::ACTION_WP_APP_LOADED,
 		function () {
@@ -25,13 +35,5 @@ if ( defined( 'WP_CONTENT_DIR' ) ) {
 				plugin_dir_url( __FILE__ )
 			);
 		}
-	);
-
-	// We init wp_app() here
-	//  then initialization in `enpii-base-init.php` file is for non-plugin mode
-	add_action(
-		ENPII_BASE_SETUP_HOOK_NAME,
-		[ \Enpii_Base\App\WP\WP_Application::class, 'load_instance' ],
-		-100
 	);
 }

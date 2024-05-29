@@ -16,9 +16,7 @@ class Perform_Setup_WP_App {
 			[]
 		);
 
-		if ( wp_app_config( 'app.debug' ) ) {
-			$output = Artisan::output();
-			echo( esc_html( $output ) );
-		}
+		$output = Artisan::output();
+		echo( esc_html( $output ) );
 	}
 }

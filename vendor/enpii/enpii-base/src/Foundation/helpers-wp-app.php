@@ -124,6 +124,10 @@ if ( ! function_exists( 'wp_app' ) ) {
 	 * @return mixed|\Enpii_Base\App\WP\WP_Application
 	 */
 	function wp_app( $abstract_alias = null, array $parameters = [] ) {
+		if ( ! WP_Application::isset() ) {
+			throw new Exception( 'The WP_Application instance is not loaded correctly. Please re-check whether the WP App is setup correctly and ensure the WP_Application::load_instance() called before this wp_app() method.' );
+		}
+
 		if ( is_null( $abstract_alias ) ) {
 			return WP_Application::getInstance();
 		}

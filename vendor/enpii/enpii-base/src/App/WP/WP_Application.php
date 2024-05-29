@@ -121,9 +121,10 @@ class WP_Application extends Application {
 	/**
 	 * @inheritDoc
 	 */
-	public function runningInConsole(): ?bool {
+	public function runningInConsole() {
 		if ( $this->isRunningInConsole === null ) {
 			if (
+				( strpos( wp_app_request()->getPathInfo(), '/setup-app' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ) ||
 				( strpos( wp_app_request()->getPathInfo(), '/admin' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ) ||
 				( strpos( wp_app_request()->getPathInfo(), '/web-worker' ) !== false && wp_app_request()->get( 'force_app_running_in_console' ) ) ||
 				Enpii_Base_Helper::at_setup_app_url()
@@ -247,7 +248,7 @@ class WP_Application extends Application {
 		$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( $_SERVER['REQUEST_URI'] ) : '/';
 		$base_url_path = Enpii_Base_Helper::get_base_url_path();
 
-		return ( strpos( $uri, $base_url_path . '/' . $wp_app_prefix . '/' ) === 0 || $uri === '/' . $wp_app_prefix );
+		return ( strpos( $uri, $base_url_path . '/' . $wp_app_prefix . '/' ) === 0 || $uri === '/' . $wp_app_prefix || $uri === '/' . $wp_app_prefix . '/' );
 	}
 
 	/**
@@ -261,7 +262,7 @@ class WP_Application extends Application {
 		$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( $_SERVER['REQUEST_URI'] ) : '/';
 		$base_url_path = Enpii_Base_Helper::get_base_url_path();
 
-		return ( strpos( $uri, $base_url_path . '/' . $wp_api_prefix . '/' ) === 0 || $uri === '/' . $wp_api_prefix );
+		return ( strpos( $uri, $base_url_path . '/' . $wp_api_prefix . '/' ) === 0 || $uri === '/' . $wp_api_prefix || $uri === '/' . $wp_api_prefix . '/' );
 	}
 
 	public function get_laravel_major_version(): int {

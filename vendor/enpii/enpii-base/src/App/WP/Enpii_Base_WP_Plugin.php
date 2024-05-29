@@ -13,6 +13,7 @@ use Enpii_Base\App\Jobs\Perform_Setup_WP_App;
 use Enpii_Base\App\Jobs\Perform_Web_Worker;
 use Enpii_Base\App\Jobs\Process_WP_Api_Request;
 use Enpii_Base\App\Jobs\Process_WP_App_Request;
+use Enpii_Base\App\Jobs\Put_Setup_Error_Message_To_Log_File;
 use Enpii_Base\App\Jobs\Register_Base_WP_Api_Routes;
 use Enpii_Base\App\Jobs\Register_Base_WP_App_Routes;
 use Enpii_Base\App\Jobs\Schedule_Run_Backup;
@@ -118,8 +119,9 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 		add_action( App_Const::ACTION_WP_APP_SCHEDULE_RUN, [ $this, 'schedule_run_backup' ] );
 		add_action( App_Const::ACTION_WP_APP_WEB_WORKER, [ $this, 'web_worker' ] );
 
-		// We want to use the priority 100 to let this run at the end for running migration
+		// We want to use the priority 1000 to let this run at the end for running migration
 		add_action( App_Const::ACTION_WP_APP_SETUP_APP, [ $this, 'setup_app' ], 1000 );
+		add_action( App_Const::ACTION_WP_APP_MARK_SETUP_APP_FAILED, [ $this, 'put_error_message_to_log_file' ] );
 
 		add_filter( App_Const::FILTER_WP_APP_MAIN_SERVICE_PROVIDERS, [ $this, 'register_more_providers' ] );
 
@@ -171,6 +173,10 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 
 	public function setup_app(): void {
 		Perform_Setup_WP_App::execute_now();
+	}
+
+	public function put_error_message_to_log_file( $message ): void {
+		Put_Setup_Error_Message_To_Log_File::execute_now( $message );
 	}
 
 	public function bootstrap_wp_app(): void {
