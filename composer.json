@@ -34,15 +34,7 @@
   "require-dev": {
     "automattic/vipwpcs": "~3.0.0",
     "phpcompatibility/php-compatibility": "~9.3.5",
-    "dealerdirect/phpcodesniffer-composer-installer": "~1.0.0",
-    "phpunit/phpunit": "~9.6",
-    "mockery/mockery": "~1.6",
-    "phpspec/prophecy": "~1.19.0",
-    "brain/monkey": "~2.6.0",
-    "10up/wp_mock": "~1.0.0",
-    "codeception/codeception": "~5.0.0",
-    "codeception/module-asserts": "~3.0",
-    "codeception/module-phpbrowser": "~3.0"
+    "dealerdirect/phpcodesniffer-composer-installer": "~1.0.0"
   },
   "replace": {
     "symfony/service-contracts": "2.5.3",

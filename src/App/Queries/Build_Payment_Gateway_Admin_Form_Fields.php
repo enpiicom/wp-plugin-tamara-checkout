@@ -301,12 +301,11 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 					'<table class="tamara-debug-info-table"><tr><td>' . sprintf( '<strong>PHP Version:</strong> %s', PHP_VERSION ) . '</td></tr>'
 					. '<tr><td>' . sprintf( '<strong>' . $this->__( 'PHP loaded extensions' ) . ':</strong> %s', implode( ', ', get_loaded_extensions() ) ) . '</td></tr>'
 					. '<tr><td><h4>Default Merchant URLs:</h4></td></tr>'
-					. '<tr><td><ul><li>' . $this->__( 'Tamara Success URL: ' ) . $this->get_tamara_success_url() . '</li>'
-					. '<li>' . $this->__( 'Tamara Cancel URL: ' ) . ( $this->get_tamara_cancel_url() ? $this->get_tamara_cancel_url() : 'N/A' ) . '</li>'
-					. '<li>' . $this->__( 'Tamara Failure URL: ' ) . ( $this->get_tamara_failure_url() ? $this->get_tamara_failure_url() : 'N/A' ) . '</li>'
+					. '<tr><td><ul>'
 					. '<li>' . $this->__( 'Tamara Notification URL: ' ) . ( $this->get_tamara_ipn_url() ? $this->get_tamara_ipn_url() : 'N/A' ) . '</li>'
 					. '<li>' . $this->__( 'Tamara Webhook Id: ' ) . ( $this->get_tamara_webhook_id() ? $this->get_tamara_webhook_id() : 'N/A' ) . '</li>'
-					. '<li>' . $this->__( 'Tamara Webhook URL: ' ) . ( $this->get_tamara_webhook_url() ? $this->get_tamara_webhook_url() : 'N/A' ) . '</li></ul></td></tr></table>',
+					. '<li>' . $this->__( 'Tamara Webhook URL: ' ) . ( $this->get_tamara_webhook_url() ? $this->get_tamara_webhook_url() : 'N/A' ) . '</li>'
+					. '</ul></td></tr></table>',
 			],
 			'custom_log_message_enabled' => [
 				'title' => $this->__( 'Enable Tamara Custom Log Message' ),
@@ -388,7 +387,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 	}
 
 	protected function get_tamara_webhook_id(): string {
-		return ! empty( $this->current_settings->tamara_webhook_id ) ? $this->current_settings->tamara_webhook_id : '';
+		return (string) $this->current_settings->tamara_webhook_id;
 	}
 
 	protected function get_tamara_ipn_url(): string {

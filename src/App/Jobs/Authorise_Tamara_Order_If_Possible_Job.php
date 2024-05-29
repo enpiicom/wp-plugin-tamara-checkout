@@ -131,6 +131,13 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		//  to have refreshed meta data
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
 
+		// We don't want to proceed if the order is processed with Tamara API
+		//  based on meta in our database
+		$tamara_payment_status = $this->tamara_wc_order->get_tamara_meta( 'tamara_payment_status' );
+		if ( ! empty( $tamara_payment_status ) && ( $tamara_payment_status !== Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED ) ) {
+			return;
+		}
+
 		// Use the default Payment Gateway for the order after all
 		$this->tamara_wc_order->get_wc_order()->set_payment_method( $this->default_payment_gateway_id() );
 		$this->tamara_wc_order->get_wc_order()->save();
