@@ -5,8 +5,8 @@
   "license": "MIT",
   "require": {
     "composer/installers": "~2.2.0",
-    "mcaskill/composer-exclude-files": "~3.0.0",
-    "enpii/enpii-base": "dev-wp-release",
+    "mcaskill/composer-exclude-files": "~4.0.0",
+    "enpii/enpii-base": "dev-develop",
     "php": "^7.3|^8.0"
   },
   "require-dev": {
@@ -65,6 +65,9 @@
     }
   },
   "config": {
+    "platform": {
+      "php": "8.1.0"
+    },
     "platform-check": false,
     "allow-plugins": {
       "composer/installers": true,
@@ -77,6 +80,8 @@
       "enpii/enpii-base/src/Foundation/Support/helpers-utils.php",
       "enpii/enpii-base/src/Foundation/helpers-wp-app.php",
       "enpii/enpii-base/src/Foundation/helpers-overrides.php",
+      "enpii/enpii-base/enpii-base-bootstrap.php",
+      "enpii/enpii-base/enpii-base-init.php",
       "laravel/framework/src/Illuminate/Foundation/helpers.php"
     ],
     "mozart": {

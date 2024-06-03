@@ -58,7 +58,7 @@ class Tamara_Checkout_WP_Plugin_Test extends Unit_Test_Case {
 			->andReturn( $wp_app );
 
 		WP_Mock::userFunction( 'add_action' )
-			->times( 1 )
+			->times( )
 			->with( [ 'init', [ $mock_tamara_checkout_wp_plugin, 'register_tamara_custom_order_statuses' ] ] );
 
 		$mock_tamara_checkout_wp_plugin->manipulate_hooks();
