@@ -557,6 +557,11 @@ class Tamara_WC_Order {
 		update_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, 1 );
 	}
 
+	public function is_authorise_checked() {
+		dev_error_log( 'get_post_meta ' . Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, get_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, true ) );
+		return ! empty( get_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, true ) );
+	}
+
 	protected function build_tamara_order_item_from_object( WC_Order_Item_Product $wc_order_item, $currency, $item_id ): OrderItem {
 		$order_item = new OrderItem();
 		$wc_order_item_product = $wc_order_item->get_product();

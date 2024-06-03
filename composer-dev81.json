@@ -54,7 +54,13 @@
   "autoload": {
     "psr-4": {
       "Tamara_Checkout\\": "src",
-      "Tamara_Checkout\\Deps\\": "src-deps",
+      "Tamara_Checkout\\Deps\\": "src-deps"
+    }
+  },
+  "autoload-dev": {
+    "files": [
+    ],
+    "psr-4": {
       "Tamara_Checkout\\Tests\\": "tests"
     }
   },
@@ -67,6 +73,12 @@
     }
   },
   "extra": {
+    "exclude-from-files": [
+      "enpii/enpii-base/src/Foundation/Support/helpers-utils.php",
+      "enpii/enpii-base/src/Foundation/helpers-wp-app.php",
+      "enpii/enpii-base/src/Foundation/helpers-overrides.php",
+      "laravel/framework/src/Illuminate/Foundation/helpers.php"
+    ],
     "mozart": {
       "dep_namespace": "Tamara_Checkout\\Deps\\",
       "dep_directory": "/src-deps/",

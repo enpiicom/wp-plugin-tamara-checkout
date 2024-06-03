@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0e4249fb32ffe573b06dd56e3a31a7d0",
+    "content-hash": "282b744e5ac458acbfc951b55879913b",
     "packages": [
         {
             "name": "enpii/enpii-base",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "c7a3889ee10daf49814206b3e30778788baf8aa4"
+                "reference": "3cac29b1a8f79d7f7cdd6c72d16cba925a652193"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/c7a3889ee10daf49814206b3e30778788baf8aa4",
-                "reference": "c7a3889ee10daf49814206b3e30778788baf8aa4",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/3cac29b1a8f79d7f7cdd6c72d16cba925a652193",
+                "reference": "3cac29b1a8f79d7f7cdd6c72d16cba925a652193",
                 "shasum": ""
             },
             "require": {

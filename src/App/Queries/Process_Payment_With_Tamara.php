@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Queries;
 
+use Enpii_Base\App\Support\Traits\Queue_Trait;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use InvalidArgumentException;
 use Exception;
 use Tamara_Checkout\App\Exceptions\Tamara_Exception;
+use Tamara_Checkout\App\Jobs\Authorise_Tamara_Order_If_Possible_Job;
 use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
@@ -17,6 +19,7 @@ use WC_Order;
 
 class Process_Payment_With_Tamara {
 	use Executable_Trait;
+	use Queue_Trait;
 
 	/**
 	 * @var WC_Order
@@ -82,6 +85,16 @@ class Process_Payment_With_Tamara {
 			$this->payment_type,
 			$this->instalments
 		);
+
+		// We want to enqueue a job to authorise the order 49 minutes later
+		//	in case no notification or webhook sent by Tamara
+		$this->enqueue_job(
+			Authorise_Tamara_Order_If_Possible_Job::dispatch(
+				[
+					'wc_order_id' => $this->wc_order->get_id(),
+				]
+			)
+		)->delay( now()->addMinutes( 49 ) );
 
 		return [
 			'result' => 'success',

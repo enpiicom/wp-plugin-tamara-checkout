@@ -36,26 +36,20 @@
     "phpcompatibility/php-compatibility": "~9.3.5",
     "dealerdirect/phpcodesniffer-composer-installer": "~1.0.0"
   },
-  "replace": {
-    "symfony/service-contracts": "2.5.3",
-    "symfony/console": "5.4.39",
-    "symfony/yaml": "5.4.39",
-    "symfony/var-dumper": "5.4.39"
-  },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
       "Tamara_Checkout\\": "src",
-      "Tamara_Checkout\\Deps\\": "src-deps",
-      "Tamara_Checkout\\Tests\\": "tests"
+      "Tamara_Checkout\\Deps\\": "src-deps"
     }
   },
   "config": {
     "platform-check": false,
     "allow-plugins": {
       "mcaskill/composer-exclude-files": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
     }
   },
   "extra": {

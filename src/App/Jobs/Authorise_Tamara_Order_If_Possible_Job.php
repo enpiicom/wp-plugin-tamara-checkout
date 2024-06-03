@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tamara_Checkout\App\Jobs;
 
+use DateTime;
 use Enpii_Base\Foundation\Shared\Base_Job;
 use Enpii_Base\Foundation\Shared\Traits\Config_Trait;
 use Exception;
@@ -93,7 +94,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$tamara_client_response = $this->tamara_client()->authorise_order( new AuthoriseOrderRequest( $this->tamara_order_id ) );
 
-		$this->tamara_wc_order->set_authorise_checked();
+		dev_error_log( 'tamara_client_response', $this->wc_order_id, $tamara_client_response );
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
@@ -112,6 +113,10 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			return;
 		}
 
+		// We want to re-build a new Tamara_WC_Order here
+		//  to have refreshed meta data
+		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
+
 		$wc_order = wc_get_order( $this->wc_order_id );
 		$settings = $this->tamara_settings();
 
@@ -119,6 +124,14 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		$update_order_status_note = 'Tamara - ';
 		$update_order_status_note .= $this->__( 'Order authorisation process failed.' );
 		$wc_order->update_status( $new_order_status, $update_order_status_note );
+
+		// We mark Authorise checked if the order has been created more than 3 days
+		$current_datetime = new DateTime();
+		$order_datetime = new DateTime( $this->tamara_wc_order->get_wc_order()->get_date_created() );
+		if ( $current_datetime->diff( $order_datetime, true ) > 3 * 24 * 3600 ) {
+			$this->tamara_wc_order->set_authorise_checked();
+		}
+
 
 		throw new Tamara_Exception( wp_kses_post( $this->__( 'Order authorised failed.' ) ) );
 	}
@@ -133,10 +146,11 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		// We don't want to proceed if the order is processed with Tamara API
 		//  based on meta in our database
-		$tamara_payment_status = $this->tamara_wc_order->get_tamara_meta( 'tamara_payment_status' );
-		if ( ! empty( $tamara_payment_status ) && ( $tamara_payment_status !== Tamara_Checkout_Helper::TAMARA_EVENT_TYPE_ORDER_APPROVED ) ) {
+		if ( $this->tamara_wc_order->is_authorise_checked() ) {
 			return;
 		}
+
+		dev_error_log( 'tamara_wc_order', $this->tamara_wc_order );
 
 		// Use the default Payment Gateway for the order after all
 		$this->tamara_wc_order->get_wc_order()->set_payment_method( $this->default_payment_gateway_id() );
@@ -160,6 +174,8 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			);
 		}
 		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note, false );
+
+		$this->tamara_wc_order->set_authorise_checked();
 	}
 
 	/**

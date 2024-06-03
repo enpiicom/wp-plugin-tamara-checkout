@@ -6,7 +6,7 @@ namespace Tamara_Checkout\Tests\App\WP;
 
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\Tests\Support\Helpers\Test_Utils_Trait;
-use Tamara_Checkout\Tests\Support\Helpers\Unit_Test_Case;
+use Tamara_Checkout\Tests\Support\Unit\Libs\Unit_Test_Case;
 
 class Tamara_Checkout_Helper_Test extends Unit_Test_Case {
 	use Test_Utils_Trait;

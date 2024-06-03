@@ -7,14 +7,15 @@
          beStrictAboutTodoAnnotatedTests="true"
          colors="true"
          verbose="true"
-         cacheResultFile="tests/_output/.phpunit.cache/test-results">
+         cacheResultFile="tests/_output/.phpunit.cache/test-results"
+>
     <testsuites>
         <testsuite name="unit">
             <directory>tests/Unit</directory>
         </testsuite>
     </testsuites>
 
-    <coverage cacheDirectory=".phpunit.cache/code-coverage"
+    <coverage cacheDirectory="tests/_output/.phpunit.cache/code-coverage"
               processUncoveredFiles="true">
         <include>
             <directory suffix=".php">src</directory>
@@ -23,5 +24,10 @@
 
     <php>
         <ini name="serialize_precision" value="14"/>
+		<env name="WP_TESTS_DIR" value="./tests/Unit" />
+        <env name="WP_CORE_DIR" value="./dev-docker/wordpress" />
+        <env name="WP_DEBUG" value="true" />
+        <env name="WP_CONTENT_DIR" value="./dev-docker/wordpress/wp-content" />
+        <env name="WP_PLUGIN_DIR" value="./dev-docker/wordpress/wp-content/plugins" />
     </php>
 </phpunit>

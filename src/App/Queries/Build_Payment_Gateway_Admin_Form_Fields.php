@@ -341,7 +341,7 @@ class Build_Payment_Gateway_Admin_Form_Fields {
 					<ul>
 						<li><span class="tamara-highlight">' . $this->__( 'If there is any issue with your API URL, API Token, Notification Key or Public Key please contact Tamara Team for support at <a href="mailto:merchant.support@tamara.co">merchant.support@tamara.co</a>' ) . '</span></li>
 						<li><span class="tamara-highlight">' . $this->__( "Tamara doesn't work with block-based checkout, so you need to use the SHORTCODE [woocommmece_checkout] for your checkout page." ) . '</span></li>
-						<li><span class="tamara-highlight">' . $this->__( "Tamara only works with qualified customers at the checkout step, so some of your customers may not see Tamara at the checkout step." ) . '</span></li>
+						<li><span class="tamara-highlight">' . $this->__( 'Tamara only works with qualified customers at the checkout step, so some of your customers may not see Tamara at the checkout step.' ) . '</span></li>
 					</ul>
 				</div>' .
 				'<div class="tamara-settings-help-texts">
