@@ -256,7 +256,7 @@ class Tamara_WC_Order {
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
-			throw new Tamara_Exception( wp_kses_post( $tamara_client_response->getMessage() ) );
+			throw new Tamara_Exception( wp_kses_post( $tamara_client_response->message ) );
 		}
 
 		return $tamara_client_response;
