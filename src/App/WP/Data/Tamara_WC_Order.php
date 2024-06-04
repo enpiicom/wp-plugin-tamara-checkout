@@ -256,7 +256,7 @@ class Tamara_WC_Order {
 		$tamara_client_response = Tamara_Checkout_WP_Plugin::wp_app_instance()->get_tamara_client_service()->get_order_by_reference_id( $get_order_by_reference_id_request );
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
-			throw new Tamara_Exception( wp_kses_post( $tamara_client_response->getMessage() ) );
+			throw new Tamara_Exception( wp_kses_post( $tamara_client_response->message ) );
 		}
 
 		return $tamara_client_response;
@@ -558,7 +558,6 @@ class Tamara_WC_Order {
 	}
 
 	public function is_authorise_checked() {
-		dev_error_log( 'get_post_meta ' . Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, get_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, true ) );
 		return ! empty( get_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, true ) );
 	}
 

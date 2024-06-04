@@ -120,6 +120,6 @@
             "install-path": "../mcaskill/composer-exclude-files"
         }
     ],
-    "dev": false,
+    "dev": true,
     "dev-package-names": []
 }
