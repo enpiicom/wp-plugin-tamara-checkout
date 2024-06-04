@@ -21,8 +21,8 @@ class Enpii_Base_Helper {
 			$http_protocol = isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 		}
 
-		$current_url = $http_protocol;
-		$current_url .= '://';
+		$current_url = $http_protocol ?? '';
+		$current_url .= $current_url ? '://' : '//';
 
 		if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
 			$current_url .= sanitize_text_field( $_SERVER['HTTP_HOST'] ) . ( isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '' );
@@ -101,12 +101,12 @@ class Enpii_Base_Helper {
 		$network_site_url = network_site_url();
 
 		if ( $site_url === $network_site_url ) {
-			return false;
+			return null;
 		}
 
 		$reverse_pos = strpos( strrev( $site_url ), strrev( $network_site_url ) );
 		if ( $reverse_pos === false ) {
-			return false;
+			return null;
 		}
 
 		return trim( substr( $site_url, $reverse_pos * ( -1 ) ), '/' );
@@ -159,25 +159,29 @@ class Enpii_Base_Helper {
 		}
 
 		if ( ! empty( $GLOBALS['wp_app_setup_errors'] ) ) {
-			add_action(
-				'admin_notices',
-				function () {
-					$error_content = '';
-					foreach ( (array) $GLOBALS['wp_app_setup_errors'] as $error_message => $displayed ) {
-						if ( ! $displayed && $error_message ) {
-							$error_content .= '<p>' . $error_message . '</p>';
-							$GLOBALS['wp_app_setup_errors'][ $error_message ] = true;
-						}
-					}
-					if ( $error_content ) {
-						echo '<div class="notice notice-error">' . wp_kses_post( $error_content ) . '</div>';
-					}
-				}
-			);
+			static::put_messages_to_wp_admin_notice( $GLOBALS['wp_app_setup_errors'] );
 
 			return apply_filters( App_Const::FILTER_WP_APP_CHECK, false );
 		}
 
 		return apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
+	}
+
+	public static function put_messages_to_wp_admin_notice( array &$error_messages ): void {
+		add_action(
+			'admin_notices',
+			function () use ( $error_messages ) {
+				$error_content = '';
+				foreach ( $error_messages as $error_message => $displayed ) {
+					if ( ! $displayed && $error_message ) {
+						$error_content .= '<p>' . $error_message . '</p>';
+						$error_messages[ $error_message ] = true;
+					}
+				}
+				if ( $error_content ) {
+					echo '<div class="notice notice-error">' . wp_kses_post( $error_content ) . '</div>';
+				}
+			}
+		);
 	}
 }

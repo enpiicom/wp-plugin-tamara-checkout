@@ -65,9 +65,10 @@ class Capture_Tamara_Stuck_Authorised_Orders_Job extends Base_Job implements Sho
 		$wc_status_processing = 'wc-processing';
 		$wc_status_payment_captured_failed = $this->tamara_gateway()->get_settings_vo()->order_status_when_tamara_capture_fails;
 
+		// We only want to get orders that has been created at least 7 days before
 		$args = [
 			'type' => 'shop_order',
-			'date_created' => now()->subDays( 90 )->startOfDay()->timestamp . '...' . now()->subMinutes( 30 )->timestamp,
+			'date_created' => now()->subDays( 90 )->startOfDay()->timestamp . '...' . now()->subDays( 7 )->timestamp,
 			'payment_method' => Tamara_Checkout_Helper::get_possible_tamara_gateway_ids(),
 			'status' => [
 				$wc_status_processing,

@@ -34,15 +34,15 @@
   "autoload": {
     "psr-4": {
       "Tamara_Checkout\\": "src",
-      "Tamara_Checkout\\Deps\\": "src-deps",
-      "Tamara_Checkout\\Tests\\": "tests"
+      "Tamara_Checkout\\Deps\\": "src-deps"
     }
   },
   "config": {
     "platform-check": false,
     "allow-plugins": {
       "mcaskill/composer-exclude-files": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
     }
   },
   "extra": {

@@ -119,8 +119,6 @@ class Authorise_Tamara_Stuck_Approved_Orders_Job extends Base_Job implements Sho
 			}
 			foreach ( $wc_orders as $wc_order_id ) {
 				try {
-					$tamara_wc_order = new Tamara_WC_Order( wc_get_order( $wc_order_id ) );
-					$tamara_wc_order->set_authorise_checked();
 					Authorise_Tamara_Order_If_Possible_Job::dispatchSync(
 						[
 							'wc_order_id' => $wc_order_id,

@@ -15,8 +15,8 @@
     },
     "require-dev": {
         "composer/composer": "^2.3",
-        "symfony/phpunit-bridge": "^6.0",
-        "phpstan/phpstan": "^1.7"
+        "phpstan/phpstan": "^1.7",
+        "symfony/phpunit-bridge": "^6.0"
     },
     "autoload": {
         "psr-4": {
@@ -30,7 +30,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "3.x-dev"
+            "dev-main": "4.x-dev"
         },
         "class": "McAskill\\Composer\\ExcludeFilePlugin"
     },
@@ -53,7 +53,5 @@
     "scripts-descriptions": {
         "lint:phpstan": "Run static code analysis with PHPStan",
         "test:phpunit": "Run all tests with PHPUnit"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }

@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow
+
 name: "Test"
 
 #
@@ -19,6 +21,16 @@ on:
       - 'docs/**'
     tags-ignore:
       - '**'
+  schedule:
+    # Twice monthly on 1st and 15th at 14:00 UTC.
+    #
+    #        ┌───────────────── minute           (0 - 59)
+    #        │   ┌───────────── hour             (0 - 23)
+    #        │   │   ┌───────── day of the month (1 - 31)
+    #        │   │   │    ┌──── month            (1 - 12 or JAN-DEC)
+    #        │   │   │    │  ┌─ day of the week  (0 - 6 or SUN-SAT)
+    #        │   │   │    │  │
+    - cron: '0  15  1,15  *  *'
 
 env:
   COMPOSER_FLAGS: "--ansi --no-interaction --no-progress --prefer-dist"
@@ -29,7 +41,7 @@ permissions:
 
 jobs:
   tests:
-    name: "Test"
+    name: "PHP ${{ matrix.php-version }} / Composer ${{ matrix.composer-version }} / ${{ matrix.os }}"
 
     strategy:
       matrix:
@@ -40,43 +52,38 @@ jobs:
           - "8.0"
           - "8.1"
           - "8.2"
+          - "8.3"
         composer-version:
-          - "v2"
-        dependencies:
-          - "locked"
+          - "2.5"
+          - "2.6"
+          - "2.7"
         os:
           - "ubuntu-latest"
         experimental:
           - false
         include:
-          - php-version: "8.1"
+          - php-version: "8.2"
+            composer-version: "2.3"
+            os: "ubuntu-latest"
+            experimental: false
+          - php-version: "8.2"
+            composer-version: "2.4"
+            os: "ubuntu-latest"
+            experimental: false
+          - php-version: "8.2"
+            composer-version: "preview"
+            os: "ubuntu-latest"
+            experimental: true
+          - php-version: "8.2"
+            composer-version: "snapshot"
+            os: "ubuntu-latest"
+            experimental: true
+          - php-version: "8.2"
             composer-version: "v2"
-            dependencies: "locked"
             os: "windows-latest"
             experimental: false
-          - php-version: "8.1"
+          - php-version: "8.4"
             composer-version: "v2"
-            dependencies: "locked"
-            os: "macos-latest"
-            experimental: false
-          - php-version: "8.1"
-            composer-version: "preview"
-            dependencies: "locked"
-            os: "ubuntu-latest"
-            experimental: true
-          - php-version: "8.1"
-            composer-version: "snapshot"
-            dependencies: "locked"
-            os: "ubuntu-latest"
-            experimental: true
-          - php-version: "8.3"
-            composer-version: "v2"
-            dependencies: "lowest-ignore"
-            os: "ubuntu-latest"
-            experimental: true
-          - php-version: "8.3"
-            composer-version: "v2"
-            dependencies: "highest-ignore"
             os: "ubuntu-latest"
             experimental: true
 
@@ -85,7 +92,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v3"
+        uses: "actions/checkout@v4"
 
       - name: "Setup PHP"
         uses: "shivammathur/setup-php@v2"
@@ -95,57 +102,42 @@ jobs:
           ini-values: "memory_limit=-1, phar.readonly=0, error_reporting=E_ALL, display_errors=On"
           php-version: "${{ matrix.php-version }}"
           tools: "composer:${{ matrix.composer-version }}"
+        env:
+          fail-fast: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Handle lowest dependencies update"
-        if: "contains(matrix.dependencies, 'lowest')"
-        run: "echo \"COMPOSER_UPDATE_FLAGS=$COMPOSER_UPDATE_FLAGS --prefer-lowest\" >> $GITHUB_ENV"
+      - name: Retrieve Composer cache directory
+        id: composer-cache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: "Handle ignore-platform-reqs dependencies update"
-        if: "contains(matrix.dependencies, 'ignore')"
-        run: "echo \"COMPOSER_FLAGS=$COMPOSER_FLAGS --ignore-platform-req=php\" >> $GITHUB_ENV"
+      - name: "Cache dependencies installed with Composer"
+        uses: actions/cache@v4
+        with:
+          path: "${{ steps.composer-cache.outputs.dir }}"
+          key: ${{ runner.os }}-composer-${{ matrix.composer-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-${{ matrix.composer-version }}-
 
-      - name: "Remove platform config to get latest dependencies for current PHP version when build is not locked"
-        if: "contains(matrix.dependencies, 'highest') || contains(matrix.dependencies, 'lowest')"
-        run: "composer config platform --unset"
-
-      - name: "Allow alpha releases for latest-deps builds to catch problems earlier"
-        if: "contains(matrix.dependencies, 'highest')"
-        run: "composer config minimum-stability alpha"
-
-      - name: "Update dependencies from composer.json"
-        if: "contains(matrix.dependencies, 'highest') || contains(matrix.dependencies, 'lowest')"
-        run: "composer update ${{ env.COMPOSER_UPDATE_FLAGS }} ${{ env.COMPOSER_FLAGS }}"
-
-      - name: "Install dependencies from composer.lock"
-        if: "matrix.dependencies == 'locked'"
-        run: "composer install ${{ env.COMPOSER_FLAGS }}"
+      - name: Install Composer dependencies
+        shell: bash
+        run: |
+          # Resolve dependencies according to Composer: ${{ matrix.composer-version }}
+          if [ "${{ matrix.composer-version }}" == "snapshot" ]; then
+            composer config platform --unset
+            composer config minimum-stability dev
+            composer require ${{ env.COMPOSER_FLAGS }} --update-with-dependencies composer/composer="dev-main"
+          elif [ "${{ matrix.composer-version }}" == "preview" ]; then
+            composer config platform --unset
+            composer config minimum-stability alpha
+            composer require ${{ env.COMPOSER_FLAGS }} --update-with-dependencies composer/composer
+          elif [ "${{ matrix.composer-version }}" == "v2" ]; then
+            composer install ${{ env.COMPOSER_FLAGS }}
+          else
+            composer require ${{ env.COMPOSER_FLAGS }} --update-with-dependencies composer/composer="~${{ matrix.composer-version }}.0"
+          fi
 
       - name: "Prepare git environment"
         run: "git config --global user.name composer && git config --global user.email composer@example.com"
 
       - name: "Run tests"
         run: "vendor/bin/simple-phpunit --verbose"
-
-  validation:
-    name: "Validation"
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v3"
-
-      - name: "Setup PHP"
-        uses: "shivammathur/setup-php@v2"
-        with:
-          coverage: "none"
-          extensions: "intl, zip"
-          ini-values: "memory_limit=-1, phar.readonly=0, error_reporting=E_ALL, display_errors=On"
-          php-version: "7.4"
-          tools: composer
-
-      - name: "Install dependencies from composer.lock"
-        run: "composer install ${{ env.COMPOSER_FLAGS }}"
-
-      - name: "Validate composer.json"
-        run: "composer validate --strict"

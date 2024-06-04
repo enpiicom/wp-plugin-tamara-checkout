@@ -7,17 +7,16 @@ namespace Composer\Autoload;
 class ComposerStaticInitada6cac7f6cdf3f9d2d4d459daab5ed6
 {
     public static $files = array (
-        '05606250504f1174fd702cad64105781' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/Support/helpers-utils.php',
-        '7d5f78e8cb8025ac305683f3d838a3fc' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/helpers-wp-app.php',
-        'ab9c87db46218bf6a8d5a29aea0ad298' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/helpers-overrides.php',
-        '0f59fad7c9b61fab8c403fdbffb776bb' => __DIR__ . '/..' . '/enpii/enpii-base/enpii-base-bootstrap.php',
-        'd784741bc6b753c2977bb46f2ba02513' => __DIR__ . '/..' . '/enpii/enpii-base/enpii-base-init.php',
+        '0a04fd8b6cb0d1ef5b4816cca310de45' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/Support/helpers-utils.php',
+        '1a9d4c5b6fdccdf53758bb42093f047e' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/helpers-wp-app.php',
+        'd52cbd35db56d8db88f4e6d99ac7ba97' => __DIR__ . '/..' . '/enpii/enpii-base/src/Foundation/helpers-overrides.php',
+        'd87cfd2ed7cce067b66b8a69d0d19e97' => __DIR__ . '/..' . '/enpii/enpii-base/enpii-base-bootstrap.php',
+        '1e97b44e360a44a4786951dfe5cec916' => __DIR__ . '/..' . '/enpii/enpii-base/enpii-base-init.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
-            'Tamara_Checkout\\Tests\\' => 22,
             'Tamara_Checkout\\Deps\\' => 21,
             'Tamara_Checkout\\' => 16,
         ),
@@ -33,10 +32,6 @@ class ComposerStaticInitada6cac7f6cdf3f9d2d4d459daab5ed6
     );
 
     public static $prefixDirsPsr4 = array (
-        'Tamara_Checkout\\Tests\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/tests',
-        ),
         'Tamara_Checkout\\Deps\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src-deps',

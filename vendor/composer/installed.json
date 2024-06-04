@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "c7a3889ee10daf49814206b3e30778788baf8aa4"
+                "reference": "308cb8aed9cf5f38e53d49f57aa40401a9b9557b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/c7a3889ee10daf49814206b3e30778788baf8aa4",
-                "reference": "c7a3889ee10daf49814206b3e30778788baf8aa4",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/308cb8aed9cf5f38e53d49f57aa40401a9b9557b",
+                "reference": "308cb8aed9cf5f38e53d49f57aa40401a9b9557b",
                 "shasum": ""
             },
             "require": {
@@ -28,11 +28,11 @@
             "installation-source": "dist",
             "autoload": {
                 "files": [
-                    "./src/Foundation/Support/helpers-utils.php",
-                    "./src/Foundation/helpers-wp-app.php",
-                    "./src/Foundation/helpers-overrides.php",
-                    "./enpii-base-bootstrap.php",
-                    "./enpii-base-init.php"
+                    "src/Foundation/Support/helpers-utils.php",
+                    "src/Foundation/helpers-wp-app.php",
+                    "src/Foundation/helpers-overrides.php",
+                    "enpii-base-bootstrap.php",
+                    "enpii-base-init.php"
                 ],
                 "psr-4": {
                     "Enpii_Base\\": "src",
@@ -66,17 +66,17 @@
         },
         {
             "name": "mcaskill/composer-exclude-files",
-            "version": "v3.0.1",
-            "version_normalized": "3.0.1.0",
+            "version": "v4.0.0",
+            "version_normalized": "4.0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mcaskill/composer-plugin-exclude-files.git",
-                "reference": "f7dd8dbb0b1bf9b0269db07e05460f81066cf22b"
+                "reference": "d053829d49ff3b0ba0ba3896f36b27b866b839e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/f7dd8dbb0b1bf9b0269db07e05460f81066cf22b",
-                "reference": "f7dd8dbb0b1bf9b0269db07e05460f81066cf22b",
+                "url": "https://api.github.com/repos/mcaskill/composer-plugin-exclude-files/zipball/d053829d49ff3b0ba0ba3896f36b27b866b839e8",
+                "reference": "d053829d49ff3b0ba0ba3896f36b27b866b839e8",
                 "shasum": ""
             },
             "require": {
@@ -88,11 +88,11 @@
                 "phpstan/phpstan": "^1.7",
                 "symfony/phpunit-bridge": "^6.0"
             },
-            "time": "2023-05-24T17:29:24+00:00",
+            "time": "2024-05-19T18:19:20+00:00",
             "type": "composer-plugin",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "3.x-dev"
+                    "dev-main": "4.x-dev"
                 },
                 "class": "McAskill\\Composer\\ExcludeFilePlugin"
             },
@@ -115,7 +115,7 @@
             "description": "Exclude files from autoload_files.php",
             "support": {
                 "issues": "https://github.com/mcaskill/composer-plugin-exclude-files/issues",
-                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v3.0.1"
+                "source": "https://github.com/mcaskill/composer-plugin-exclude-files/tree/v4.0.0"
             },
             "install-path": "../mcaskill/composer-exclude-files"
         }

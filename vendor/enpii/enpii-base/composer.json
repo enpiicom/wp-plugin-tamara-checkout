@@ -36,11 +36,11 @@
   ],
   "autoload": {
     "files": [
-      "./src/Foundation/Support/helpers-utils.php",
-      "./src/Foundation/helpers-wp-app.php",
-      "./src/Foundation/helpers-overrides.php",
-      "./enpii-base-bootstrap.php",
-      "./enpii-base-init.php"
+      "src/Foundation/Support/helpers-utils.php",
+      "src/Foundation/helpers-wp-app.php",
+      "src/Foundation/helpers-overrides.php",
+      "enpii-base-bootstrap.php",
+      "enpii-base-init.php"
     ],
     "psr-4": {
       "Enpii_Base\\Deps\\": "src-deps",

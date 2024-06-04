@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Enpii_Base\App\Jobs\Mark_Setup_WP_App_Done;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Enpii_Base_Helper;
 
@@ -110,88 +109,17 @@ if ( ! function_exists( 'enpii_base_maybe_redirect_to_setup_app' ) ) {
 	function enpii_base_maybe_redirect_to_setup_app(): void {
 		if ( ! Enpii_Base_Helper::is_setup_app_completed() ) {
 			// We only want to redirect if the setup did not fail previously
-			if ( ! enpii_base_wp_app_setup_failed() ) {
+			if ( ! Enpii_Base_Helper::is_setup_app_failed() ) {
 				Enpii_Base_Helper::redirect_to_setup_url();
 			}
 		}
 	}
 }
 
-if ( ! function_exists( 'enpii_base_wp_app_check' ) ) {
-	/**
-	 * Check the mandatory prerequisites for the WP App
-	 * @return bool
-	 */
-	function enpii_base_wp_app_check(): bool {
-		if ( ! isset( $GLOBALS['wp_app_setup_errors'] ) ) {
-			$GLOBALS['wp_app_setup_errors'] = [];
-		}
-		$wp_app_base_path = enpii_base_wp_app_get_base_path();
-		if ( ! file_exists( $wp_app_base_path ) ) {
-			enpii_base_wp_app_prepare_folders();
-
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_is_writable
-			if ( ! is_writable( dirname( $wp_app_base_path ) ) ) {
-				$error_message = sprintf(
-					// translators: %s is replaced by a string, pathname
-					__( 'Folder <strong>%s</strong> must be writable, please make it 0777.', 'enpii' ),
-					dirname( $wp_app_base_path )
-				);
-				if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
-					$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
-				}
-			}
-		}
-
-		if ( enpii_base_wp_app_setup_failed() && ! Enpii_Base_Helper::at_setup_app_url() && ! Enpii_Base_Helper::at_admin_setup_app_url() ) {
-			$error_message = sprintf(
-				// translators: %1$s is replaced by a string, url
-				__( 'The setup has not been done correctly. Please go to this URL <a href="%1$s">%1$s</a> to complete the setup', 'enpii' ),
-				Enpii_Base_Helper::get_admin_setup_app_uri( true )
-			);
-			if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
-				$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
-			}
-		}
-
-		if ( ! empty( $GLOBALS['wp_app_setup_errors'] ) ) {
-			add_action(
-				'admin_notices',
-				function () {
-					$error_content = '';
-					foreach ( (array) $GLOBALS['wp_app_setup_errors'] as $error_message => $displayed ) {
-						if ( ! $displayed && $error_message ) {
-							$error_content .= '<p>' . $error_message . '</p>';
-							$GLOBALS['wp_app_setup_errors'][ $error_message ] = true;
-						}
-					}
-					if ( $error_content ) {
-						echo '<div class="notice notice-error">' . wp_kses_post( $error_content ) . '</div>';
-					}
-				}
-			);
-
-			return apply_filters( App_Const::FILTER_WP_APP_CHECK, false );
-		}
-
-		return apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
-	}
-}
-
-if ( ! function_exists( 'enpii_base_wp_app_setup_failed' ) ) {
-	/**
-	 * Check the mandatory prerequisites for the WP App
-	 * @return bool
-	 */
-	function enpii_base_wp_app_setup_failed(): bool {
-		return (string) get_option( App_Const::OPTION_SETUP_INFO ) === 'failed';
-	}
-}
-
 if ( ! function_exists( 'enpii_base_wp_app_get_timezone' ) ) {
 	/**
 	 * Get the correct timezone value for WP App (from WordPress and map to the date_default_timezone_set ids)
-	 * @return string
+	 * @return stringß
 	 */
 	function enpii_base_wp_app_get_timezone(): string {
 		$current_offset = (int) get_option( 'gmt_offset' );
