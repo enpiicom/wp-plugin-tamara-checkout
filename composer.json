@@ -27,7 +27,7 @@
     }
   ],
   "require": {
-    "mcaskill/composer-exclude-files": "~3.0.0",
+    "mcaskill/composer-exclude-files": "~4.0.0",
     "enpii/enpii-base": "dev-wp-release",
     "php": "^7.3|^8.0"
   },

@@ -23,6 +23,7 @@ use Tamara_Checkout\App\VOs\Tamara_Api_Error_VO;
 use Tamara_Checkout\App\WP\Data\Tamara_WC_Order;
 use Tamara_Checkout\Deps\Tamara\Request\Order\AuthoriseOrderRequest;
 use Tamara_Checkout\Deps\Tamara\Request\Order\GetOrderByReferenceIdRequest;
+use Tamara_Checkout\Deps\Tamara\Response\ClientResponse;
 
 class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQueue {
 	use Dispatchable;
@@ -194,12 +195,16 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$tamara_client_response = $this->tamara_client()->get_order_by_reference_id( new GetOrderByReferenceIdRequest( (string) $this->wc_order_id ) );
 
-		if (
-			$tamara_client_response instanceof Tamara_Api_Error_VO ||
-			( $tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
-			$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED )
-		) {
-			throw new Tamara_Exception( wp_kses_post( $this->__( 'Error! Incorrect Order. WC Order ID: ' . $this->wc_order_id . ', Tamara order Status: ' . $tamara_client_response->getStatus() ) ) );
+		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
+			$error_status = $tamara_client_response->status_code;
+		} elseif ( $tamara_client_response instanceof ClientResponse &&
+		$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
+		$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED ) {
+			$error_status = $tamara_client_response->getStatus();
+		}
+
+		if ( ! empty( $error_status ) ) {
+			throw new Tamara_Exception( wp_kses_post( $this->__( 'Error! Incorrect Order. WC Order ID: ' . $this->wc_order_id . ', Tamara order Status: ' . $error_status ) ) );
 		}
 
 		$tamara_meta_dto = new WC_Order_Tamara_Meta_DTO();
