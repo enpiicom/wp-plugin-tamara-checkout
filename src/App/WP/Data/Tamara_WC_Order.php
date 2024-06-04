@@ -558,7 +558,6 @@ class Tamara_WC_Order {
 	}
 
 	public function is_authorise_checked() {
-		dev_error_log( 'get_post_meta ' . Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, get_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, true ) );
 		return ! empty( get_post_meta( $this->get_id(), Tamara_Checkout_Helper::POST_META_AUTHORISE_CHECKED, true ) );
 	}
 

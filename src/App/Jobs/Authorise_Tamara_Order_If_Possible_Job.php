@@ -95,8 +95,6 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		$tamara_client_response = $this->tamara_client()->authorise_order( new AuthoriseOrderRequest( $this->tamara_order_id ) );
 
-		dev_error_log( 'tamara_client_response', $this->wc_order_id, $tamara_client_response );
-
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$this->process_failed_action( $tamara_client_response );
 
@@ -150,8 +148,6 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 		if ( $this->tamara_wc_order->is_authorise_checked() ) {
 			return;
 		}
-
-		dev_error_log( 'tamara_wc_order', $this->tamara_wc_order );
 
 		// Use the default Payment Gateway for the order after all
 		$this->tamara_wc_order->get_wc_order()->set_payment_method( $this->default_payment_gateway_id() );
