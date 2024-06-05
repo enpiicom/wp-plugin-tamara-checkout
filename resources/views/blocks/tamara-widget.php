@@ -1,1 +1,1 @@
-<tamara-widget type="tamara-summary" inline-type="<?php echo esc_attr( $widget_inline_type ); ?>" amount="{{ $widget_amount }}"></tamara-widget>
+<tamara-widget type="<?php echo ! empty( $widget_type ) ? $widget_type : 'tamara-summary'; ?>" inline-type="<?php echo esc_attr( $widget_inline_type ); ?>" amount="{{ $widget_amount }}"></tamara-widget>
