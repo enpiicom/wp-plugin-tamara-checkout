@@ -78,5 +78,5 @@ html[dir='rtl'] body {
   }
 }
 
-.wc_payment_method label[for="payment_method_tamara-gateway-pay-now"]::before { display: inline-block; min-width: 96px; min-height: 24px; background: no-repeat url('../../img/tamara-grad-en.svg') 100% 0; }
-html[lang="ar"] .wc_payment_method label[for="payment_method_tamara-gateway-pay-now"]::before { background-image: url('../../img/tamara-grad-ar.svg'); background-position: 0 0; min-width: 98px; min-height: 32px;}
+.wc_payment_method label[for="payment_method_tamara-gateway-pay-now"]:before { display: inline-block; min-width: 76px; min-height: 24px; background: no-repeat url('../../img/tamara-grad-en.svg') 0 0; content: " "; background-size: contain; }
+html[lang="ar"] .wc_payment_method label[for="payment_method_tamara-gateway-pay-now"]::before { background-image: url('../../img/tamara-grad-ar.svg'); background-position: 100% 0; min-width: 83px; min-height: 32px;}
