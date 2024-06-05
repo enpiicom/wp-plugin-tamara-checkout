@@ -6,7 +6,7 @@ echo wp_kses_post( Tamara_Checkout_WP_Plugin::wp_app_instance()->__( 'Thank you 
 ?>
 <div class="tamara-view-and-pay-button">
 	<div class="tamara-view-and-pay-button__text">
-		<a href="{{ $view_and_pay_url }}"
+		<a href="<?php echo $view_and_pay_url; ?>"
 			class="tamara-view-and-pay-button__link"
 			target="_blank"><?php echo wp_kses_post( Tamara_Checkout_WP_Plugin::wp_app_instance()->__( 'Go to Tamara and pay' ) ); ?>
 		</a>

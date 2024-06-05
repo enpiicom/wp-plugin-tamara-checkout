@@ -93,3 +93,14 @@ add_action(
 	},
 	-111
 );
+
+$plugin_id = plugin_basename( __FILE__ );
+add_action(
+	'after_plugin_row_' . $plugin_id,
+	[
+		Tamara_Checkout_Helper::class,
+		'show_plugin_messages',
+	],
+	10,
+	3 
+);

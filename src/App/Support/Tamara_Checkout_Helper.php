@@ -322,4 +322,20 @@ class Tamara_Checkout_Helper {
 			'tamara-gateway-single-checkout',
 		];
 	}
+
+	public static function show_plugin_messages( string $plugin_file, array $plugin_data, string $status ) {
+		$messages_str = '';
+		$wp_app_setup_errors = isset( $GLOBALS['wp_app_setup_errors'] ) ? (array) $GLOBALS['wp_app_setup_errors'] : [];
+		foreach ( $wp_app_setup_errors as $error_message => $displayed ) {
+			$messages_str .= $error_message . '<br />';
+		}
+
+		if ( $messages_str ) {
+			echo '<tr class="plugin-update-tr installer-plugin-update-tr"><td colspan="3" class="plugin-update colspanchange">
+			<div class="update-message inline notice notice-error notice-alt">
+				<p>' . $messages_str . '</p>
+			</div>
+	</td></tr>';
+		}
+	}
 }

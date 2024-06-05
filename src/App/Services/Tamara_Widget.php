@@ -9,6 +9,7 @@ use Tamara_Checkout\App\Queries\Get_Cart_Products;
 use Tamara_Checkout\App\Support\Tamara_Checkout_Helper;
 use Tamara_Checkout\App\Support\Traits\Tamara_Checkout_Trait;
 use Tamara_Checkout\App\Support\Traits\Tamara_Trans_Trait;
+use Tamara_Checkout\App\WP\Payment_Gateways\Pay_Now_WC_Payment_Gateway;
 use Tamara_Checkout\App\WP\Tamara_Checkout_WP_Plugin;
 
 class Tamara_Widget {
@@ -158,6 +159,7 @@ JS_SCRIPT;
 	public function fetch_tamara_checkout_widget( $description, $id ): string {
 		if ( Tamara_Checkout_Helper::is_tamara_payment_option( $id ) ) {
 			$widget_inline_type = 3;
+			$widget_type = ( $id === 'tamara-gateway-pay-now' ) ? 'tamara-card-snippet' : 'tamara-summary';
 			$cart_amount = Tamara_Checkout_Helper::define_total_amount_to_calculate( WC()->cart->total );
 			$description = $this->populate_default_description_text_on_checkout();
 			$description .= Tamara_Checkout_WP_Plugin::wp_app_instance()->view(
@@ -165,6 +167,7 @@ JS_SCRIPT;
 				[
 					'widget_inline_type' => $widget_inline_type,
 					'widget_amount' => $cart_amount,
+					'widget_type' => $widget_type,
 				]
 			);
 		}

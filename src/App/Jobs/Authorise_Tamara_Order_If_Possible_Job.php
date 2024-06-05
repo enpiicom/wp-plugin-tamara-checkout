@@ -131,7 +131,6 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			$this->tamara_wc_order->set_authorise_checked();
 		}
 
-
 		throw new Tamara_Exception( wp_kses_post( $this->__( 'Order authorised failed.' ) ) );
 	}
 
