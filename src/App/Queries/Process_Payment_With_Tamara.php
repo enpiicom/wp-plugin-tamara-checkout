@@ -86,8 +86,16 @@ class Process_Payment_With_Tamara {
 			$this->instalments
 		);
 
-		// We want to enqueue a job to authorise the order 49 minutes later
+		// We want to enqueue a job to authorise the order 14 and 49 minutes later
 		//	in case no notification or webhook sent by Tamara
+		$this->enqueue_job(
+			Authorise_Tamara_Order_If_Possible_Job::dispatch(
+				[
+					'wc_order_id' => $this->wc_order->get_id(),
+				]
+			)
+		)->delay( now()->addMinutes( 14 ) );
+
 		$this->enqueue_job(
 			Authorise_Tamara_Order_If_Possible_Job::dispatch(
 				[
