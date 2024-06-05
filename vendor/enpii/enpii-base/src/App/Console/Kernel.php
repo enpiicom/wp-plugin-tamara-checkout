@@ -6,6 +6,7 @@ namespace Enpii_Base\App\Console;
 
 use Enpii_Base\App\Console\Commands\WP_App_Setup_Command;
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Enpii_Base\App\Support\Traits\Enpii_Base_Trans_Trait;
 use Enpii_Base\App\WP\Enpii_Base_WP_Plugin;
 use Illuminate\Console\Scheduling\Schedule;
@@ -80,11 +81,17 @@ class Kernel extends ConsoleKernel {
 	 */
 	protected function bootstrappers() {
 		$bootstrappers = $this->bootstrappers;
-		$script_name = ! empty( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( $_SERVER['SCRIPT_NAME'] ) : '';
-		if ( strpos( $script_name, '/wp-admin/customize.php' ) !== false ) {
-			// We need to exclude the HandleException bootstrapper
-			//  provided that, it's at the index 0
+
+		// We want to control the HandleException bootstrapper here
+		if ( ! Enpii_Base_Helper::use_enpii_base_error_handler() ) {
 			array_shift( $bootstrappers );
+		} else {
+			$script_name = ! empty( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( $_SERVER['SCRIPT_NAME'] ) : '';
+			if ( strpos( $script_name, '/wp-admin/customize.php' ) !== false ) {
+				// We need to exclude the HandleException bootstrapper
+				//  provided that, it's at the index 0
+				array_shift( $bootstrappers );
+			}
 		}
 
 		return $bootstrappers;

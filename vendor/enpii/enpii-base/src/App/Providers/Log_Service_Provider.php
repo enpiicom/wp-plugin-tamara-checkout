@@ -57,7 +57,7 @@ class Log_Service_Provider extends LogServiceProvider {
 			*/
 
 			'deprecations' => [
-				'channel' => env( 'LOG_DEPRECATIONS_CHANNEL', 'null' ),
+				'channel' => env( 'LOG_DEPRECATIONS_CHANNEL', 'deprecations' ),
 				'trace' => false,
 			],
 
@@ -147,6 +147,11 @@ class Log_Service_Provider extends LogServiceProvider {
 				'null' => [
 					'driver' => 'monolog',
 					'handler' => NullHandler::class,
+				],
+
+				'deprecations' => [
+					'driver' => 'single',
+					'path' => storage_path( 'logs/php-deprecation-warnings.log' ),
 				],
 
 				'emergency' => [

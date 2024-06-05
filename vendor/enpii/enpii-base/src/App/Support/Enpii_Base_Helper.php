@@ -216,7 +216,20 @@ class Enpii_Base_Helper {
 			$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
 		}
 	}
+
 	public static function get_wp_app_setup_errors() {
 		return isset( $GLOBALS['wp_app_setup_errors'] ) ? (array) $GLOBALS['wp_app_setup_errors'] : [];
+	}
+
+	public static function use_enpii_base_error_handler() {
+		$use_error_handler = defined( 'ENPII_BASE_USE_ERROR_HANDLER' ) && (bool) ENPII_BASE_USE_ERROR_HANDLER ? true : false;
+
+		return apply_filters( 'enpii_base_use_error_handler', $use_error_handler );
+	}
+
+	public static function use_blade_for_wp_template() {
+		$blade_for_template = defined( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) && (bool) ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE ? true : false;
+
+		return apply_filters( 'enpii_base_use_blade_for_wp_template', $blade_for_template );
 	}
 }

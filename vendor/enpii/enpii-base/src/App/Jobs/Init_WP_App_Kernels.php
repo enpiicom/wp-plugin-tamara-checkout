@@ -2,6 +2,7 @@
 
 namespace Enpii_Base\App\Jobs;
 
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 
 class Init_WP_App_Kernels {
@@ -26,9 +27,11 @@ class Init_WP_App_Kernels {
 			\Enpii_Base\App\Console\Kernel::class
 		);
 
-		$wp_app->singleton(
-			\Illuminate\Contracts\Debug\ExceptionHandler::class,
-			\Enpii_Base\App\Exceptions\Handler::class
-		);
+		if ( Enpii_Base_Helper::use_enpii_base_error_handler() ) {
+			$wp_app->singleton(
+				\Illuminate\Contracts\Debug\ExceptionHandler::class,
+				\Enpii_Base\App\Exceptions\Handler::class
+			);
+		}
 	}
 }

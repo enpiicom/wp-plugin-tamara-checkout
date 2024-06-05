@@ -22,6 +22,7 @@ use Enpii_Base\App\Jobs\Write_Setup_Client_Script;
 use Enpii_Base\App\Jobs\Write_Web_Worker_Script;
 use Enpii_Base\App\Queries\Add_More_Providers;
 use Enpii_Base\App\Support\App_Const;
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Enpii_Base\App\Support\Traits\Enpii_Base_Trans_Trait;
 use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
@@ -472,10 +473,6 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	private function is_blade_for_template_available(): bool {
-		// We only want to use Blade for templa files when being allowed
-		$blade_for_template = defined( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) && (bool) ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE ? true : false;
-		$blade_for_template = $blade_for_template && ( ! wp_app()->is_wp_app_mode() );
-
-		return apply_filters( 'enpii_base_use_blade_for_wp_template', $blade_for_template );
+		return Enpii_Base_Helper::use_blade_for_wp_template() && ( ! wp_app()->is_wp_app_mode() );
 	}
 }
