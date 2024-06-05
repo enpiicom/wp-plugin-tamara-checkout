@@ -472,7 +472,10 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 	}
 
 	private function is_blade_for_template_available(): bool {
-		// We only want to use Blade
-		return ! wp_app()->is_wp_app_mode();
+		// We only want to use Blade for templa files when being allowed
+		$blade_for_template = defined( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) && (bool) ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE ? true : false;
+		$blade_for_template = $blade_for_template && ( ! wp_app()->is_wp_app_mode() );
+
+		return apply_filters( 'enpii_base_use_blade_for_wp_template', $blade_for_template );
 	}
 }

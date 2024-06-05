@@ -4,14 +4,14 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterUsersTableAddRememberTokenColumn extends Migration {
+return new class() extends Migration {
 	/**
 	 * Run the migrations.
 	 *
 	 * @return void
 	 */
 	public function up() {
-		if ( Schema::hasTable( 'users' ) && Schema::hasColumn('users', 'user_registered') ) {
+		if ( Schema::hasTable( 'users' ) && Schema::hasColumn( 'users', 'user_registered' ) ) {
 			Schema::table(
 				'users',
 				function ( Blueprint $table ) {
@@ -39,4 +39,4 @@ class AlterUsersTableAddRememberTokenColumn extends Migration {
 			}
 		);
 	}
-}
+};

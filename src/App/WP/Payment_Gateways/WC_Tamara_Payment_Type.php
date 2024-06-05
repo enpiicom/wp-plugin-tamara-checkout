@@ -46,4 +46,8 @@ class WC_Tamara_Payment_Type extends \WC_Payment_Gateway {
 			$this->instalment
 		);
 	}
+
+	public function get_checkout_widget_type() {
+		return 'tamara-summary';
+	}
 }

@@ -7,6 +7,7 @@ namespace Enpii_Base\App\Support;
 class Enpii_Base_Helper {
 	public static $version_option;
 	public static $setup_info;
+	public static $wp_app_check = null;
 
 	public static function get_current_url(): string {
 		if ( empty( $_SERVER['SERVER_NAME'] ) && empty( $_SERVER['HTTP_HOST'] ) ) {
@@ -142,27 +143,44 @@ class Enpii_Base_Helper {
 	 *  If the setup process failed, we should return false and raise the notice in the Admin
 	 */
 	public static function perform_wp_app_check(): bool {
-		if ( ! isset( $GLOBALS['wp_app_setup_errors'] ) ) {
-			$GLOBALS['wp_app_setup_errors'] = [];
+		// We only want to perform the checking once
+		if ( static::$wp_app_check !== null ) {
+			return (bool) static::$wp_app_check;
+		}
+
+		if ( ! extension_loaded( 'pdo_mysql' ) ) {
+			$error_message = sprintf(
+				// translators: %1$s is replaced by a string, extension name
+				__( 'Error with PHP extention %1$s. Please enable PHP extension %1$s via your hosting Control Panel or contact your hosting Admin for that.', 'enpii' ),
+				'PDO MySQL'
+			);
+			static::add_wp_app_setup_errors( $error_message );
+		}
+
+		if ( empty( static::get_wp_app_setup_errors() ) && ( static::is_console_mode() || static::is_setup_app_completed() ) ) {
+			static::$wp_app_check = apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
+
+			return static::$wp_app_check;
 		}
 
 		// We only want to check if it's not in the setup url
-		if ( static::is_setup_app_failed() && ! static::at_setup_app_url() && ! static::at_admin_setup_app_url() ) {
+		if ( ! static::at_setup_app_url() && ! static::at_admin_setup_app_url() && static::is_setup_app_failed() ) {
 			$error_message = sprintf(
 				// translators: %1$s is replaced by a string, url
 				__( 'The setup has not been done correctly. Please go to this URL <a href="%1$s">%1$s</a> to complete the setup', 'enpii' ),
 				static::get_admin_setup_app_uri( true )
 			);
-			if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
-				$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
-			}
+			static::add_wp_app_setup_errors( $error_message );
 		}
 
 		if ( ! empty( $GLOBALS['wp_app_setup_errors'] ) ) {
 			static::put_messages_to_wp_admin_notice( $GLOBALS['wp_app_setup_errors'] );
+			static::$wp_app_check = apply_filters( App_Const::FILTER_WP_APP_CHECK, false );
 
-			return apply_filters( App_Const::FILTER_WP_APP_CHECK, false );
+			return static::$wp_app_check;
 		}
+
+		static::$wp_app_check = apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
 
 		return apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
 	}
@@ -183,5 +201,22 @@ class Enpii_Base_Helper {
 				}
 			}
 		);
+	}
+
+	public static function is_console_mode() {
+		return ( \PHP_SAPI === 'cli' || \PHP_SAPI === 'phpdbg' );
+	}
+
+	public static function add_wp_app_setup_errors( $error_message ) {
+		if ( ! isset( $GLOBALS['wp_app_setup_errors'] ) ) {
+			$GLOBALS['wp_app_setup_errors'] = [];
+		}
+
+		if ( ! isset( $GLOBALS['wp_app_setup_errors'][ $error_message ] ) ) {
+			$GLOBALS['wp_app_setup_errors'][ $error_message ] = false;
+		}
+	}
+	public static function get_wp_app_setup_errors() {
+		return isset( $GLOBALS['wp_app_setup_errors'] ) ? (array) $GLOBALS['wp_app_setup_errors'] : [];
 	}
 }
