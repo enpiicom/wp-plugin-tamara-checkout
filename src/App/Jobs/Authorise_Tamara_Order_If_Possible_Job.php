@@ -188,10 +188,7 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			return false;
 		}
 
-		// We remove the Job out of the queue if the authorise process completed successfully
 		if ( $tamara_wc_order->is_authorise_checked() ) {
-			$this->delete();
-
 			return false;
 		}
 
