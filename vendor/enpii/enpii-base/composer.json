@@ -20,7 +20,7 @@
     }
   ],
   "require": {
-   "php": "^7.3|^8.0"
+    "php": "^7.3|^8.0"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -43,6 +43,7 @@
       "enpii-base-init.php"
     ],
     "psr-4": {
+      "Carbon\\Traits\\Creator\\": "src/Foundation/Support/Carbon/Traits/Creator.php",
       "Enpii_Base\\Deps\\": "src-deps",
       "Enpii_Base\\": "src"
     }
@@ -73,6 +74,14 @@
     ]
   },
   "scripts": {
+    "post-install-cmd": [
+      "@php -r \"copy('src-override/nesbot/carbon/src/Carbon/Traits/Creator.php', 'vendor/nesbot/carbon/src/Carbon/Traits/Creator.php');\"",
+      "@php -r \"copy('src-override/nesbot/carbon/src/Carbon/Traits/Timestamp.php', 'vendor/nesbot/carbon/src/Carbon/Traits/Timestamp.php');\""
+    ],
+    "post-update-cmd": [
+      "@php -r \"copy('src-override/nesbot/carbon/src/Carbon/Traits/Creator.php', 'vendor/nesbot/carbon/src/Carbon/Traits/Creator.php');\"",
+      "@php -r \"copy('src-override/nesbot/carbon/src/Carbon/Traits/Timestamp.php', 'vendor/nesbot/carbon/src/Carbon/Traits/Timestamp.php');\""
+    ],
     "phpcs": [
       "./vendor/bin/phpcs"
     ],

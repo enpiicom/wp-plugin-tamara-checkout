@@ -188,6 +188,10 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			return false;
 		}
 
+		if ( $tamara_wc_order->is_authorise_checked() ) {
+			return false;
+		}
+
 		$tamara_client_response = $this->tamara_client()->get_order_by_reference_id( new GetOrderByReferenceIdRequest( (string) $this->wc_order_id ) );
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {

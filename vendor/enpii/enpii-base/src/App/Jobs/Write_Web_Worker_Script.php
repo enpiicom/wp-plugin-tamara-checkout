@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\Jobs;
 
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Enpii_Base\Foundation\Support\Executable_Trait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -21,6 +22,10 @@ class Write_Web_Worker_Script {
 	 * @throws Exception
 	 */
 	public function handle(): void {
+		if ( Enpii_Base_Helper::disable_web_worker() ) {
+			return;
+		}
+
 		// We want to add the trailing slash to avoid the redirect in WP webserver rule
 		$web_worker_url = esc_js( wp_app_route_wp_url( 'wp-api::web-worker' ) );
 

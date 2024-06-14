@@ -27,11 +27,9 @@ class Init_WP_App_Kernels {
 			\Enpii_Base\App\Console\Kernel::class
 		);
 
-		if ( Enpii_Base_Helper::use_enpii_base_error_handler() ) {
-			$wp_app->singleton(
-				\Illuminate\Contracts\Debug\ExceptionHandler::class,
-				\Enpii_Base\App\Exceptions\Handler::class
-			);
-		}
+		$wp_app->singleton(
+			\Illuminate\Contracts\Debug\ExceptionHandler::class,
+			\Enpii_Base\App\Exceptions\Handler::class
+		);
 	}
 }

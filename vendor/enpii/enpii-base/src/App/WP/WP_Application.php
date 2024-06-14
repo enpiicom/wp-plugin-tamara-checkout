@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\WP;
 
-use Enpii_Base\App\Jobs\Bootstrap_WP_App;
 use Enpii_Base\App\Jobs\Init_WP_App_Kernels;
 use Enpii_Base\App\Support\App_Const;
 use Enpii_Base\App\Support\Enpii_Base_Helper;
@@ -51,7 +50,7 @@ class WP_Application extends Application {
 		/**
 		| Create a wp_app() instance to be used in the whole application
 		*/
-		$wp_app_base_path = enpii_base_wp_app_get_base_path();
+		$wp_app_base_path = Enpii_Base_Helper::get_wp_app_base_path();
 		$config = apply_filters(
 			App_Const::FILTER_WP_APP_PREPARE_CONFIG,
 			[

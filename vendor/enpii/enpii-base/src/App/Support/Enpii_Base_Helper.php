@@ -157,7 +157,7 @@ class Enpii_Base_Helper {
 			static::add_wp_app_setup_errors( $error_message );
 		}
 
-		if ( empty( static::get_wp_app_setup_errors() ) && ( static::is_console_mode() || static::is_setup_app_completed() ) ) {
+		if ( empty( static::get_wp_app_setup_errors() ) && static::is_setup_app_completed() ) {
 			static::$wp_app_check = apply_filters( App_Const::FILTER_WP_APP_CHECK, true );
 
 			return static::$wp_app_check;
@@ -204,7 +204,7 @@ class Enpii_Base_Helper {
 	}
 
 	public static function is_console_mode() {
-		return ( \PHP_SAPI === 'cli' || \PHP_SAPI === 'phpdbg' );
+		return ( (string) php_sapi_name() === 'cli' || (string) php_sapi_name() === 'phpdbg' || (string) php_sapi_name() === 'cli-server' );
 	}
 
 	public static function add_wp_app_setup_errors( $error_message ) {
@@ -222,14 +222,82 @@ class Enpii_Base_Helper {
 	}
 
 	public static function use_enpii_base_error_handler() {
-		$use_error_handler = defined( 'ENPII_BASE_USE_ERROR_HANDLER' ) && (bool) ENPII_BASE_USE_ERROR_HANDLER ? true : false;
+		$use_error_handler = defined( 'ENPII_BASE_USE_ERROR_HANDLER' ) ? (bool) ENPII_BASE_USE_ERROR_HANDLER : ( getenv( 'ENPII_BASE_USE_ERROR_HANDLER' ) !== false ? (bool) getenv( 'ENPII_BASE_USE_ERROR_HANDLER' ) : false );
 
 		return apply_filters( 'enpii_base_use_error_handler', $use_error_handler );
 	}
 
 	public static function use_blade_for_wp_template() {
-		$blade_for_template = defined( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) && (bool) ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE ? true : false;
+		$blade_for_template = defined( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) ? (bool) ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE : ( getenv( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) !== false ? (bool) getenv( 'ENPII_BASE_USE_BLADE_FOR_WP_TEMPLATE' ) : false );
 
 		return apply_filters( 'enpii_base_use_blade_for_wp_template', $blade_for_template );
+	}
+
+	public static function disable_web_worker() {
+		$disable_web_worker = defined( 'ENPII_BASE_DISABLE_WEB_WORKER' ) ? (bool) ENPII_BASE_DISABLE_WEB_WORKER : ( getenv( 'ENPII_BASE_DISABLE_WEB_WORKER' ) !== false ? (bool) getenv( 'ENPII_BASE_DISABLE_WEB_WORKER' ) : false );
+
+		return apply_filters( 'enpii_base_disable_web_worker', $disable_web_worker );
+	}
+
+	public static function get_wp_app_base_path() {
+		if ( defined( 'ENPII_BASE_WP_APP_BASE_PATH' ) && ENPII_BASE_WP_APP_BASE_PATH ) {
+			return ENPII_BASE_WP_APP_BASE_PATH;
+		} else {
+			return WP_CONTENT_DIR . DIR_SEP . 'uploads' . DIR_SEP . 'wp-app';
+		}
+	}
+
+	public static function get_wp_app_base_folders_paths( string $wp_app_base_path ) {
+		return [
+			'base_path' => $wp_app_base_path,
+			'config_path' => $wp_app_base_path . DIR_SEP . 'config',
+			'database_path' => $wp_app_base_path . DIR_SEP . 'database',
+			'database_migrations_path' => $wp_app_base_path . DIR_SEP . 'database' . DIR_SEP . 'migrations',
+			'bootstrap_path' => $wp_app_base_path . DIR_SEP . 'bootstrap',
+			'bootstrap_cache_path' => $wp_app_base_path . DIR_SEP . 'bootstrap' . DIR_SEP . 'cache',
+			'lang_path' => $wp_app_base_path . DIR_SEP . 'lang',
+			'resources_path' => $wp_app_base_path . DIR_SEP . 'resources',
+			'storage_path' => $wp_app_base_path . DIR_SEP . 'storage',
+			'storage_logs_path' => $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'logs',
+			'storage_framework_path' => $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework',
+			'storage_framework_views_path' => $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'views',
+			'storage_framework_cache_path' => $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache',
+			'storage_framework_cache_data_path' => $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache' . DIR_SEP . 'data',
+			'storage_framework_sessions_path' => $wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'sessions',
+		];
+	}
+
+	/**
+	 *
+	 * @param string $wp_app_base_path
+	 * @param int $chmod We may want to use `0755` if running this function in console
+	 * @return void
+	 */
+	public static function prepare_wp_app_folders( $chmod = 0777, string $wp_app_base_path = '' ): void {
+		if ( empty( $wp_app_base_path ) ) {
+			$wp_app_base_path = static::get_wp_app_base_path();
+		}
+		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
+		@chmod( dirname( $wp_app_base_path ), $chmod );
+
+		$file_system = new \Illuminate\Filesystem\Filesystem();
+
+		foreach ( static::get_wp_app_base_folders_paths( $wp_app_base_path ) as $filepath ) {
+			$file_system->ensureDirectoryExists( $filepath, $chmod );
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
+			@chmod( $filepath, $chmod );
+		}
+	}
+
+	public static function wp_cli_init(): void {
+		\WP_CLI::add_command(
+			'enpii-base prepare',
+			[ self::class, 'wp_cli_prepare' ]
+		);
+	}
+
+	// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public static function wp_cli_prepare( $args, $assoc_args ): void {
+		static::prepare_wp_app_folders();
 	}
 }

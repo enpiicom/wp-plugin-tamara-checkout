@@ -2,10 +2,11 @@
 
 namespace Enpii_Base\App\Jobs;
 
+use Enpii_Base\App\Support\Enpii_Base_Helper;
 use Enpii_Base\Foundation\Support\Executable_Trait;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Artisan;
 use InvalidArgumentException;
 
 class Setup_WP_App_In_Console {
@@ -26,11 +27,38 @@ class Setup_WP_App_In_Console {
 	 * @return void
 	 */
 	public function handle(): void {
-		enpii_base_wp_app_prepare_folders();
+		Enpii_Base_Helper::prepare_wp_app_folders();
 
 		/** @var \Illuminate\Console\Command $console_command */
 		$console_command = $this->console_command;
 
+		try {
+			$this->perform_setup_actions( $console_command );
+
+			if ( Enpii_Base_Helper::is_console_mode() ) {
+				// If no exception thrown earlier, we can consider the setup script is done
+				Mark_Setup_WP_App_Done::execute_now();
+			}
+		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( Exception $e ) {
+			if ( Enpii_Base_Helper::is_console_mode() ) {
+				Mark_Setup_WP_App_Failed::execute_now( $e->getMessage() );
+			}
+		}
+
+		// We need to cleanup the migrations file in fake base path database folder
+		//  for security reason
+		$console_command->comment( 'Cleanup migrations rule' );
+
+		$filesystem = new Filesystem();
+		$filesystem->cleanDirectory( wp_app()->databasePath( 'migrations' ) );
+	}
+
+	/**
+	 * @param \Illuminate\Console\Command $console_command
+	 * @return void
+	 */
+	protected function perform_setup_actions( $console_command ): void {
 		// We need to publish Laravel assets and Migrations latest
 		//  to be able to override other assets
 		$console_command->comment( 'Publishing Laravel Migrations...' );
@@ -81,11 +109,5 @@ class Setup_WP_App_In_Console {
 				'--step' => true,
 			]
 		);
-
-		// We need to cleanup the migrations file in fake base path database folder
-		//  for security reason
-		$console_command->comment( 'Cleanup migrations rule' );
-		$filesystem = new Filesystem();
-		$filesystem->cleanDirectory( wp_app()->databasePath( 'migrations' ) );
 	}
 }

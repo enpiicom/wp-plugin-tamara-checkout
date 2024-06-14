@@ -1,11 +1,17 @@
 # Changelog
 
+## [4.0.0] — 2024-05-19
+
+* Added support for glob (wildcard) paths to exclude files via new value object classes for paths.
+* Updated tests to support meta-packages and immutable packages.
+* Refactored tests to decouple set-up and tear-down, sort methods by visibility and alphabetically, and improve static analysis.
+
 ## [3.0.1] — 2023-05-24
 
 * Fixed support for changes to metapackages
   in [Composer 2.5.6](https://github.com/composer/composer/releases/tag/2.5.6)
   and [Composer 2.5.7](https://github.com/composer/composer/releases/tag/2.5.7)
-* Update tests
+* Updated tests
 
 ## [3.0.0] — 2022-09-12
 
@@ -53,7 +59,9 @@
 
 * Initial release.
 
-[Unreleased]: https://github.com/mcaskill/composer-plugin-exclude-files/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/mcaskill/composer-plugin-exclude-files/compare/v4.0.0...HEAD
+[4.0.0]:      https://github.com/mcaskill/composer-plugin-exclude-files/compare/v3.0.1...v4.0.0
+[3.0.1]:      https://github.com/mcaskill/composer-plugin-exclude-files/compare/v3.0.0...v3.0.1
 [3.0.0]:      https://github.com/mcaskill/composer-plugin-exclude-files/compare/v2.1.0...v3.0.0
 [2.1.0]:      https://github.com/mcaskill/composer-plugin-exclude-files/compare/v2.0.0...v2.1.0
 [2.0.0]:      https://github.com/mcaskill/composer-plugin-exclude-files/compare/v1.3.0...v2.0.0

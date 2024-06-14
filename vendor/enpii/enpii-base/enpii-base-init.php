@@ -6,16 +6,18 @@
 use Enpii_Base\App\Support\Enpii_Base_Helper;
 
 if ( defined( 'WP_CONTENT_DIR' ) ) {
-	add_action( 'cli_init', 'enpii_base_prepare' );
+	add_action( 'cli_init', [ Enpii_Base_Helper::class, 'wp_cli_init' ] );
 
-	if ( ! Enpii_Base_Helper::perform_wp_app_check() ) {
+	if ( ! Enpii_Base_Helper::is_console_mode() && ! Enpii_Base_Helper::perform_wp_app_check() ) {
 		// We do nothing but still keep the plugin enabled
 		return;
 	}
 
-	if ( ! class_exists( 'WP_CLI' ) ) {
+	if ( ! Enpii_Base_Helper::is_console_mode() ) {
 		// We want to redirect to setup app before the WP App init
 		add_action( ENPII_BASE_SETUP_HOOK_NAME, 'enpii_base_maybe_redirect_to_setup_app', -200 );
+	} elseif ( ! empty( $_SERVER['argv'] ) && ! empty( array_intersect( (array) $_SERVER['argv'], [ 'enpii-base', 'prepare' ] ) ) ) {
+			Enpii_Base_Helper::prepare_wp_app_folders();
 	}
 
 	// We init wp_app() here

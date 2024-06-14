@@ -35,7 +35,6 @@ class Kernel extends HttpKernel {
 	 * @var array
 	 */
 	protected $bootstrappers = [
-		\Illuminate\Foundation\Bootstrap\HandleExceptions::class,
 		\Illuminate\Foundation\Bootstrap\RegisterFacades::class,
 		\Illuminate\Foundation\Bootstrap\RegisterProviders::class,
 		\Illuminate\Foundation\Bootstrap\BootProviders::class,
@@ -147,17 +146,16 @@ class Kernel extends HttpKernel {
 	protected function bootstrappers() {
 		$bootstrappers = $this->bootstrappers;
 
-		// We want to control the HandleException bootstrapper here
-		if ( ! Enpii_Base_Helper::use_enpii_base_error_handler() ) {
-			array_shift( $bootstrappers );
-		} else {
+		// We don't want to handle Exceptions if it is not in wp_app or wp_api mode
+		//  and if it's in Customize or we haven't set the flag to use the Exception Handler
+		if ( ! wp_app()->is_wp_app_mode() && ! wp_app()->is_wp_api_mode() ) {
 			$script_name = ! empty( $_SERVER['SCRIPT_NAME'] ) ? sanitize_text_field( $_SERVER['SCRIPT_NAME'] ) : '';
-			if ( strpos( $script_name, '/wp-admin/customize.php' ) !== false ) {
-				// We need to exclude the HandleException bootstrapper
-				//  provided that, it's at the index 0
-				array_shift( $bootstrappers );
+			if ( ! Enpii_Base_Helper::use_enpii_base_error_handler() || strpos( $script_name, '/wp-admin/customize.php' ) !== false ) {
+				return $bootstrappers;
 			}
 		}
+
+		array_unshift( $bootstrappers, \Illuminate\Foundation\Bootstrap\HandleExceptions::class );
 
 		return $bootstrappers;
 	}

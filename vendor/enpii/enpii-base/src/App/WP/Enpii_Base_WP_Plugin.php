@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Enpii_Base\App\WP;
 
+use Carbon\Carbon;
 use Enpii_Base\App\Console\Commands\WP_App_Make_PHPUnit_Command;
 use Enpii_Base\App\Http\Response;
 use Enpii_Base\App\Jobs\Bootstrap_WP_App;
@@ -28,6 +29,7 @@ use Enpii_Base\Foundation\WP\WP_Plugin;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\ViewException;
 use InvalidArgumentException;
@@ -43,6 +45,8 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 
 	public function boot() {
 		parent::boot();
+
+		Carbon::now();
 
 		if ( $this->app->runningInConsole() ) {
 			// Publish assets
@@ -98,15 +102,17 @@ final class Enpii_Base_WP_Plugin extends WP_Plugin {
 		//  it can't be removed
 		add_action(
 			App_Const::ACTION_WP_APP_BOOTSTRAP,
-			function () {
-				Bootstrap_WP_App::execute_now();
-			},
+			[ $this, 'bootstrap_wp_app' ],
 			5
 		);
 
 		// If running in WP_CLI, we need to skip this
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			add_action( App_Const::ACTION_WP_APP_INIT, [ $this, 'build_wp_app_response_via_middleware' ], 5 );
+			add_action(
+				App_Const::ACTION_WP_APP_INIT,
+				[ $this, 'build_wp_app_response_via_middleware' ],
+				5
+			);
 			add_action( App_Const::ACTION_WP_APP_INIT, [ $this, 'sync_wp_user_to_wp_app_user' ] );
 		}
 

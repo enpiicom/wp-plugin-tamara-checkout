@@ -18,64 +18,13 @@ if ( ! function_exists( 'enpii_base_get_major_version' ) ) {
 	}
 }
 
-if ( ! function_exists( 'enpii_base_wp_app_prepare_folders' ) ) {
-	/**
-	 *
-	 * @param string|null $wp_app_base_path
-	 * @param int $chmod We may want to use `0755` if running this function in console
-	 * @return void
-	 */
-	function enpii_base_wp_app_prepare_folders( $chmod = 0777, string $wp_app_base_path = null ): void {
-		if ( empty( $wp_app_base_path ) ) {
-			$wp_app_base_path = enpii_base_wp_app_get_base_path();
-		}
-		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
-		@chmod( dirname( $wp_app_base_path ), $chmod );
-
-		$file_system = new \Illuminate\Filesystem\Filesystem();
-
-		$filepaths = [
-			$wp_app_base_path,
-			$wp_app_base_path . DIR_SEP . 'config',
-			$wp_app_base_path . DIR_SEP . 'database',
-			$wp_app_base_path . DIR_SEP . 'database' . DIR_SEP . 'migrations',
-			$wp_app_base_path . DIR_SEP . 'bootstrap',
-			$wp_app_base_path . DIR_SEP . 'bootstrap' . DIR_SEP . 'cache',
-			$wp_app_base_path . DIR_SEP . 'lang',
-			$wp_app_base_path . DIR_SEP . 'resources',
-			$wp_app_base_path . DIR_SEP . 'storage',
-			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'logs',
-			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework',
-			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'views',
-			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache',
-			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'cache' . DIR_SEP . 'data',
-			$wp_app_base_path . DIR_SEP . 'storage' . DIR_SEP . 'framework' . DIR_SEP . 'sessions',
-		];
-		foreach ( $filepaths as $filepath ) {
-			$file_system->ensureDirectoryExists( $filepath, $chmod );
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.chmod_chmod, WordPress.PHP.NoSilencedErrors.Discouraged
-			@chmod( $filepath, $chmod );
-		}
-	}
-}
-
-if ( ! function_exists( 'enpii_base_wp_app_get_base_path' ) ) {
-	function enpii_base_wp_app_get_base_path() {
-		if ( defined( 'ENPII_BASE_WP_APP_BASE_PATH' ) && ENPII_BASE_WP_APP_BASE_PATH ) {
-			return ENPII_BASE_WP_APP_BASE_PATH;
-		} else {
-			return WP_CONTENT_DIR . DIR_SEP . 'uploads' . DIR_SEP . 'wp-app';
-		}
-	}
-}
-
 if ( ! function_exists( 'enpii_base_wp_app_get_asset_url' ) ) {
 	function enpii_base_wp_app_get_asset_url( $full_url = false ) {
 		if ( defined( 'ENPII_BASE_WP_APP_ASSET_URL' ) && ENPII_BASE_WP_APP_ASSET_URL ) {
 			return ENPII_BASE_WP_APP_ASSET_URL;
 		}
 
-		$slug_to_wp_app = str_replace( ABSPATH, '', enpii_base_wp_app_get_base_path() );
+		$slug_to_wp_app = str_replace( ABSPATH, '', Enpii_Base_Helper::get_wp_app_base_path() );
 		$slug_to_public_asset = '/' . $slug_to_wp_app . '/public';
 
 		return $full_url ? trim( get_site_url(), '/' ) . $slug_to_public_asset : $slug_to_public_asset;
@@ -90,17 +39,6 @@ if ( ! function_exists( 'enpii_base_wp_app_web_page_title' ) ) {
 	}
 }
 
-if ( ! function_exists( 'enpii_base_prepare' ) ) {
-	function enpii_base_prepare() {
-		WP_CLI::add_command(
-			'enpii-base prepare',
-			function () {
-				enpii_base_wp_app_prepare_folders();
-			}
-		);
-	}
-}
-
 if ( ! function_exists( 'enpii_base_maybe_redirect_to_setup_app' ) ) {
 	/**
 	 * Check the flag in the options to redirect to setup page if needed
@@ -108,6 +46,8 @@ if ( ! function_exists( 'enpii_base_maybe_redirect_to_setup_app' ) ) {
 	 */
 	function enpii_base_maybe_redirect_to_setup_app(): void {
 		if ( ! Enpii_Base_Helper::is_setup_app_completed() ) {
+			Enpii_Base_Helper::prepare_wp_app_folders();
+
 			// We only want to redirect if the setup did not fail previously
 			if ( ! Enpii_Base_Helper::is_setup_app_failed() ) {
 				Enpii_Base_Helper::redirect_to_setup_url();
