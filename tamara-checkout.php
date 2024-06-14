@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Tamara Checkout - Alpha
+ * Plugin Name: Tamara Checkout - Beta
  * Plugin URI:  https://tamara.co/
  * Description: Allow to Buy Now Pay Later with Tamara payment gateway
  * Author:      dev@tamara.co
  * Author URI:  https://tamara.co/
- * Version:     2.0.0-alpha
+ * Version:     2.0.0-beta
  * Text Domain: tamara
  */
 
@@ -102,5 +102,5 @@ add_action(
 		'show_plugin_messages',
 	],
 	10,
-	3 
+	3
 );
