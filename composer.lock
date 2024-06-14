@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/enpiicom/wp-plugin-enpii-base.git",
-                "reference": "7c50195deb8edbc7ac062dda063cb7e8538ef78e"
+                "reference": "8b630170c61f2488b996f82999654d96cf922195"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/7c50195deb8edbc7ac062dda063cb7e8538ef78e",
-                "reference": "7c50195deb8edbc7ac062dda063cb7e8538ef78e",
+                "url": "https://api.github.com/repos/enpiicom/wp-plugin-enpii-base/zipball/8b630170c61f2488b996f82999654d96cf922195",
+                "reference": "8b630170c61f2488b996f82999654d96cf922195",
                 "shasum": ""
             },
             "require": {
@@ -39,7 +39,8 @@
                 ],
                 "psr-4": {
                     "Enpii_Base\\": "src",
-                    "Enpii_Base\\Deps\\": "src-deps"
+                    "Enpii_Base\\Deps\\": "src-deps",
+                    "Carbon\\Traits\\Creator\\": "src/Foundation/Support/Carbon/Traits/Creator.php"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
