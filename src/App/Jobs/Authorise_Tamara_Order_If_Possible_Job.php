@@ -112,17 +112,22 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 			return;
 		}
 
+		if ( $this->tamara_wc_order->is_authorise_checked() ) {
+			return;
+		}
+
 		// We want to re-build a new Tamara_WC_Order here
 		//  to have refreshed meta data
 		$this->tamara_wc_order = $this->build_tamara_wc_order( $this->wc_order_id );
-
-		$wc_order = wc_get_order( $this->wc_order_id );
 		$settings = $this->tamara_settings();
+		if ( $this->tamara_wc_order->get_order_status() === $settings->order_status_on_tamara_authorised ) {
+			return;
+		}
 
 		$new_order_status = $settings->order_status_when_tamara_authorisation_fails;
 		$update_order_status_note = 'Tamara - ';
 		$update_order_status_note .= $this->__( 'Order authorisation process failed.' );
-		$wc_order->update_status( $new_order_status, $update_order_status_note );
+		$this->tamara_wc_order->get_wc_order()->update_status( $new_order_status, $update_order_status_note );
 
 		// We mark Authorise checked if the order has been created more than 3 days
 		$current_datetime = new DateTime();

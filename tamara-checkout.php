@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Tamara Checkout - Beta
  * Plugin URI:  https://tamara.co/
- * Description: Allow to Buy Now Pay Later with Tamara payment gateway
+ * Description: This plugin enables Tamara Buy Now Pay later on your WooCommerce store. With Tamara, you can split your payments – totally interest-free. Accepts payments from Mada, Apple Pay, or Credit Cards.
  * Author:      dev@tamara.co
  * Author URI:  https://tamara.co/
  * Version:     2.0.0-beta
