@@ -201,10 +201,11 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		if ( $tamara_client_response instanceof Tamara_Api_Error_VO ) {
 			$error_status = $tamara_client_response->status_code;
-		} elseif ( $tamara_client_response instanceof ClientResponse &&
-		$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
-		$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED ) {
-			$error_status = $tamara_client_response->getStatus();
+		} elseif ( $tamara_client_response instanceof ClientResponse ) {
+			if ( $tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_APPROVED &&
+			$tamara_client_response->getStatus() !== Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED ) {
+				$error_status = $tamara_client_response->getStatus();
+			}
 		}
 
 		if ( ! empty( $error_status ) ) {
@@ -220,6 +221,13 @@ class Authorise_Tamara_Order_If_Possible_Job extends Base_Job implements ShouldQ
 
 		// We may want to reupdate the meta for tamara_order_id if it is deleted
 		$this->update_tamara_meta_data( (int) $wc_order_id, $tamara_meta_dto );
+
+		if ( $tamara_client_response instanceof ClientResponse &&
+		$tamara_client_response->getStatus() === Tamara_Checkout_Helper::TAMARA_ORDER_STATUS_AUTHORISED ) {
+			$this->process_successful_action();
+
+			return false;
+		}
 
 		return true;
 	}
